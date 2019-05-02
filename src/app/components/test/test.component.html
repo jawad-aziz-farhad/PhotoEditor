@@ -1,3 +1,8 @@
 <app-navbar></app-navbar>
-<img #img src="{{src}}" (load)="afterLoading()" style='display: none;' />
-<canvas #visualization width={{imgWidth}} height={{imgHeight}} style="background:lightgray;"></canvas>
+<div class="popup-win"
+         [ngStyle]="{'top': curY + 'px', 'left': curX + 'px','z-index': curZIndex}"
+          (mousedown)="mousedown($event)">
+
+    <h2>Hello WORLD !!!</h2>
+
+</div>
