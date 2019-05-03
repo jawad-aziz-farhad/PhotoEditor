@@ -16,7 +16,7 @@
 
     <!-- 2nd Column -->
     <div class="col-sm  col-md-6 col-lg-6 col-xl-6 text-center">
-      <canvas #visualization class="img-fluid" height={{imgHeight}} width={{imgWidth}}></canvas>
+      <canvas #visualization class="img-fluid" height={{selectedOptions.canvasSize.width}} width={{selectedOptions.canvasSize.height}}></canvas>      
     </div>
     <!-- /. 2nd Column -->
 
@@ -26,7 +26,7 @@
       <!-- Sizes -->
       <div class="row">
         <div class="col-sm">
-          <button class="btn btn-light" *ngFor="let size of data?.sizes; ">{{ size }}</button>
+          <button class="btn btn-light" *ngFor="let size of data?.sizes;" (click)="onAttributeChange( {target: {value : size.toLowerCase() } }  , 'canvas_size')">{{ size }}</button>
         </div>
       </div>
       <!-- /. Sizes -->
@@ -82,6 +82,9 @@
              <div class="col-sm mt-3">
                <input type="text" [value]="overLayText" (input)="drawText($event.target.value)"  placeholder="Enter some text"/>
              </div>
+
+
+             
           </div>
         </div>
       </div>
