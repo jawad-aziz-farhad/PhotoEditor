@@ -4,9 +4,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HomeComponent } from './home/home.component';
 import { TestComponent } from './test/test.component';
 import { AngularDraggableModule } from 'angular2-draggable';
+import { EditorComponent } from './editor/editor.component';
 
 @NgModule({
-    declarations: [NavbarComponent, HomeComponent , TestComponent
+    declarations: [NavbarComponent, HomeComponent , TestComponent, EditorComponent
     ],
     imports: [
       BrowserModule,

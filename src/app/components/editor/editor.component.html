@@ -1,0 +1,193 @@
+
+<app-navbar></app-navbar>
+
+<div class="canvas-wrapper">
+  <div class="canvas-drawer">
+      <div class="canvas-content resize-able tall">
+        </div>
+    </div>
+    <div class="canvas-controls">
+      <div class="canvas-actions">
+            <div class="row">
+                <div class="col-md-4">
+                    <button class="btn btn-block btn-share btn-action">Share</button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-block btn-done btn-action">Done</button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-block btn-save btn-action">Save</button>
+                </div>
+            </div>
+        </div>
+        <div class="canvas-shapes">
+            <div class="accordion" id="accordionExample">
+              <div class="card c-shapes">
+                <div class="card-header p-0" id="headingOne">
+                    <a href="#" class="btn btn-link coll-exp" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Shape
+                    </a>
+                </div>
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
+                  <div class="card-body">
+                    <div class="row">
+
+                      <div class="col-md-3">
+                        <div class="shape-section tall-view canvas-screen">
+                          <div class="shape-img section-active">
+                              <img src="assets/_images/two-squares-v.svg" alt="">
+                          </div>
+                          <span>Tall</span>
+                        </div>
+                      </div>
+                      
+                        <div class="col-md-3">
+                          <div class="shape-section wide-view canvas-screen">
+                              <div class="shape-img">
+                                  <img src="assets/_images/two-squares-h.svg" alt="">
+                                </div>
+                                <span>Wide</span>
+                            </div>
+                        </div>
+                      <div class="col-md-3">
+                          <div class="shape-section large-view canvas-screen">
+                              <div class="shape-img">
+                                <img src="assets/_images/four-squares.svg" alt="">
+                                </div>
+                                <span>Large</span>
+                            </div>
+                        </div>
+                      <div class="col-md-3">
+                          <div class="shape-section small-view canvas-screen">
+                              <div class="shape-img">
+                                    <img src="assets/_images/one-squares.svg" alt="">
+                                </div>
+                                <span>Small</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+                <div class="card c-effects">
+                  <div class="card-header p-0" id="headingTwo">
+                  <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Filters
+                  </a>
+                  </div>
+                  <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo">
+                    <div class="card-body">
+                      <div class="row">
+                          <div class="col-md-3">
+                              <div class="shape-section filter">
+                                  <div class="shape-img section-active">
+                                      <img src="assets/_images/effect.jpg" alt="">
+                                  </div>
+                                  <span>None</span>
+                              </div>
+                          </div>
+                          <div class="col-md-3">
+                              <div class="shape-section filter">
+                                  <div class="shape-img">
+                                      <img src="assets/assets/_images/effect.jpg" alt="">
+                                  </div>
+                                  <span>B/W</span>
+                              </div>
+                          </div>
+                          <div class="col-md-3">
+                              <div class="shape-section filter">
+                                  <div class="shape-img">
+                                      <img src="assets/assets/_images/effect.jpg" alt="">
+                                  </div>
+                                  <span>1970</span>
+                              </div>
+                          </div>
+                          <div class="col-md-3">
+                              <div class="shape-section filter">
+                                  <div class="shape-img">
+                                      <img src="assets/_images/effect.jpg" alt="">
+                                  </div>
+                                  <span>Bright</span>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card c-options">
+                  <div class="card-header p-0" id="headingThree">
+                      <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Add Text
+                      </a>
+                  </div>
+                  <div id="collapseThree" class="collapse show" aria-labelledby="headingThree">
+                    <div class="card-body">
+                      <div class="form-group">
+                        <select name="" id="" class="form-control">
+                            <option value="" selected disabled hidden>Chosse Font</option>
+                            <option value="" style="font-family: 'Pacifico', cursive;">Option 1</option>
+                            <option value="" style="font-family: 'Roboto', sans-serif;">Option 2</option>
+                            <option value="" style="font-family: 'Just Another Hand', cursive;">Option 3</option>
+                            <option value="" style="font-family: 'Merriweather', serif;">Option 3</option>
+                            <option value="" style="font-family: 'Ubuntu', sans-serif;">Option 3</option>
+                            <option value="" style="font-family: 'Playfair Display', serif;">Option 3</option>
+                            <option value="" style="font-family: 'Anton', sans-serif;">Option 3</option>
+                        </select>
+                      </div>
+                      <div class="row no-gutters">
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img section-active">
+                                      <img src="assets/_images/font.svg" alt="">
+                                  </div>
+                                  <span>Font</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img">
+                                      <img src="assets/_images/color.svg" alt="">
+                                  </div>
+                                  <span>Color</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img">
+                                      <img src="assets/_images/stroke.svg" alt="">
+                                  </div>
+                                  <span>Stroke</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img">
+                                      <img src="assets/_images/shadow.svg" alt="">
+                                  </div>
+                                  <span>Shadow</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img">
+                                      <img src="assets/_images/opacity.svg" alt="">
+                                  </div>
+                                  <span>Opacity</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img">
+                                      <img src="assets/_images/left-alignment.svg" alt="">
+                                  </div>
+                                  <span>Align</span>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

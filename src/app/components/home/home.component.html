@@ -16,7 +16,7 @@
 
     <!-- 2nd Column -->
     <div class="col-sm  col-md-6 col-lg-6 col-xl-6 text-center">
-      <canvas #visualization class="img-fluid" height={{selectedOptions.canvasSize.width}} width={{selectedOptions.canvasSize.height}}></canvas>      
+      <canvas #visualization class="img-fluid"></canvas>      
     </div>
     <!-- /. 2nd Column -->
 
@@ -75,6 +75,17 @@
                 </select>
              </div>
              <!-- /. Font Style -->
+
+             <div class="w-100"></div>
+
+             <!-- Font Weight-->
+             <div class="col-sm">Font Weight</div>
+             <div class="col-sm">
+                <select (change)="onAttributeChange($event , 'font_weight')">
+                  <option *ngFor="let font_weight of data?.font_weights;" [value]="font_weight">{{ font_weight }}</option>
+                </select>
+             </div>
+             <!-- /. Font Weight -->
 
              <div class="w-100"></div>
 
