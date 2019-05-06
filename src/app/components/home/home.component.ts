@@ -112,7 +112,7 @@ wrapText(text) {
     //  this.context.restore();
   }
 
-  onAttributeChange(event , attribute){
+  onAttributeChange(event , attribute) {
     switch(attribute){
       case 'canvas_size':
       this.selectedOptions.canvasSize = event.target.value;

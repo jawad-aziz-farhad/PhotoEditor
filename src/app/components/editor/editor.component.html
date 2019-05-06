@@ -2,10 +2,32 @@
 <app-navbar></app-navbar>
 
 <div class="canvas-wrapper">
-  <div class="canvas-drawer">
-      <div class="canvas-content resize-able tall">
+
+    <div class="canvas-drawer">
+      <!-- <div class="canvas-content resize-able tall">
+      </div> -->
+        <div class="row m-2">
+            <!-- 1st Column -->
+            <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4 text-center">
+              <div class="row" *ngFor="let image of images;let i=index;" (click)="selectedImage = image;">
+                <div class="col">
+                  <img class="img-fluid" [src]="image"/>
+                  <img #img (load)="afterLoading()" [src]="selectedImage" style="display: none;"/>
+                </div>
+              </div>
+            </div>
+            <!-- /. 1st Column -->
+        
+            <!-- 2nd Column -->
+            <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8 text-center">
+              <canvas #visualization class="img-fluid"></canvas>      
+            </div>
+            <!-- /. 2nd Column -->
         </div>
+        
+
     </div>
+
     <div class="canvas-controls">
       <div class="canvas-actions">
             <div class="row">
@@ -32,39 +54,15 @@
                   <div class="card-body">
                     <div class="row">
 
-                      <div class="col-md-3">
+                      <div class="col-md-3" *ngFor="let canvasSize of data?.canvasSizes; let i=index;" (click)="onAttributeChange( {target: { value : canvasSize.title.toLowerCase() } }  , 'canvas_size')">
                         <div class="shape-section tall-view canvas-screen">
-                          <div class="shape-img section-active">
-                              <img src="assets/_images/two-squares-v.svg" alt="">
+                          <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.canvasSize == (canvasSize.title | lowercase) }">
+                              <img [src]="canvasSize.src" alt="{{ canvasSize.title }}">
                           </div>
-                          <span>Tall</span>
+                          <span>{{ canvasSize.title }}</span>
                         </div>
                       </div>
-                      
-                        <div class="col-md-3">
-                          <div class="shape-section wide-view canvas-screen">
-                              <div class="shape-img">
-                                  <img src="assets/_images/two-squares-h.svg" alt="">
-                                </div>
-                                <span>Wide</span>
-                            </div>
-                        </div>
-                      <div class="col-md-3">
-                          <div class="shape-section large-view canvas-screen">
-                              <div class="shape-img">
-                                <img src="assets/_images/four-squares.svg" alt="">
-                                </div>
-                                <span>Large</span>
-                            </div>
-                        </div>
-                      <div class="col-md-3">
-                          <div class="shape-section small-view canvas-screen">
-                              <div class="shape-img">
-                                    <img src="assets/_images/one-squares.svg" alt="">
-                                </div>
-                                <span>Small</span>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
               </div>
@@ -77,38 +75,18 @@
                   <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo">
                     <div class="card-body">
                       <div class="row">
-                          <div class="col-md-3">
-                              <div class="shape-section filter">
-                                  <div class="shape-img section-active">
-                                      <img src="assets/_images/effect.jpg" alt="">
-                                  </div>
-                                  <span>None</span>
-                              </div>
-                          </div>
-                          <div class="col-md-3">
-                              <div class="shape-section filter">
-                                  <div class="shape-img">
-                                      <img src="assets/assets/_images/effect.jpg" alt="">
-                                  </div>
-                                  <span>B/W</span>
-                              </div>
-                          </div>
-                          <div class="col-md-3">
-                              <div class="shape-section filter">
-                                  <div class="shape-img">
-                                      <img src="assets/assets/_images/effect.jpg" alt="">
-                                  </div>
-                                  <span>1970</span>
-                              </div>
-                          </div>
-                          <div class="col-md-3">
-                              <div class="shape-section filter">
-                                  <div class="shape-img">
-                                      <img src="assets/_images/effect.jpg" alt="">
-                                  </div>
-                                  <span>Bright</span>
-                              </div>
-                          </div>
+
+                        <div class="col-md-3" *ngFor="let effect of data?.effects;" (click)="onAttributeChange( { target: { value : effect.effect } }  , 'effect')">
+                            <div class="shape-section filter">
+                                <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.effect == effect.effect }">
+                                    <figure [ngClass]="effect.effect">
+                                        <img [src]="selectedImage">
+                                    </figure>
+                                </div>
+                                <span>{{ effect.title }}</span>
+                            </div>
+                        </div>
+
                       </div>
                     </div>
                   </div>
@@ -122,21 +100,14 @@
                   <div id="collapseThree" class="collapse show" aria-labelledby="headingThree">
                     <div class="card-body">
                       <div class="form-group">
-                        <select name="" id="" class="form-control">
-                            <option value="" selected disabled hidden>Chosse Font</option>
-                            <option value="" style="font-family: 'Pacifico', cursive;">Option 1</option>
-                            <option value="" style="font-family: 'Roboto', sans-serif;">Option 2</option>
-                            <option value="" style="font-family: 'Just Another Hand', cursive;">Option 3</option>
-                            <option value="" style="font-family: 'Merriweather', serif;">Option 3</option>
-                            <option value="" style="font-family: 'Ubuntu', sans-serif;">Option 3</option>
-                            <option value="" style="font-family: 'Playfair Display', serif;">Option 3</option>
-                            <option value="" style="font-family: 'Anton', sans-serif;">Option 3</option>
-                        </select>
+                        <label for="overlayText">Overlay Text</label>
+                        <input type="email" class="form-control" id="overlayText" aria-describedby="overlaytextHelp" placeholder="Enter some text" [value]="overLayText" (input)="drawText($event.target.value)" >
+                        <small id="overlaytextHelp" class="form-text text-muted">This text will be shown over the image.</small>
                       </div>
                       <div class="row no-gutters">
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img section-active">
+                                  <div class="shape-img">
                                       <img src="assets/_images/font.svg" alt="">
                                   </div>
                                   <span>Font</span>
@@ -158,9 +129,10 @@
                                   <span>Stroke</span>
                               </div>
                           </div>
-                          <div class="col-md-2">
+
+                          <div class="col-md-2" (click)="onAttributeChange( { target: { value : 3 } }  , 'text_shadow')">
                               <div class="shape-section typo">
-                                  <div class="shape-img">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.text_shadow == 3 }">
                                       <img src="assets/_images/shadow.svg" alt="">
                                   </div>
                                   <span>Shadow</span>

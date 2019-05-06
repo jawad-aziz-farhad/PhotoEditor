@@ -1,6 +1,9 @@
 export class Data {
 
-    public effects: Array<any>     = ['None' , 'Light gray', 'Dark gray', 'Light blur', 'Heavy blur'];
+    public effects: Array<any>     = [ {title: 'None' , effect : '' } , {title: '1977', effect : 'filter-1977' },  
+                                       {title: 'Brooklyn', effect : 'filter-brooklyn' },  {title: 'Crema', effect : 'filter-crema' },  
+                                       {title: 'Moon', effect : 'filter-moon' } , {title: 'Gingham', effect : 'filter-gingham' } ,
+                                       {title: 'Hudson', effect : 'filter-hudson' } , {title: 'Skyline', effect : 'filter-skyline' } , ];
     public sizes :  Array<any>     = ['Small', 'Large', 'Wide' , 'Tall'];
     public colos:   Array<any>     = ['#fff', , '#000' , '#FF5733', '#B4A817' , '#4259EA' , '#AB5ED5'];
     public fonts:   Array<any>     = ['Arial', 'Georgia' , 'Helvetica', 'Sans Serif']
@@ -35,7 +38,9 @@ export class Data {
                             ];
 
     
-    public sizesImages: Array<any> = ['two-squares-v.svg', 'two-squares-h.svg' ,'four-squares.svg' , 'one-squares.svg'];
-
+    public canvasSizes: Array<any> = [{src: 'assets/_images/two-squares-v.svg' , title: 'Tall'}, {src: 'assets/_images/two-squares-h.svg', title: 'Wide'} ,{src: 'assets/_images/four-squares.svg' , title: 'Large'}, {src: 'assets/_images/one-squares.svg' , title: 'Small'}];
+    
+    public shadowBlurs: Array<any> = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30];
+    
     constructor(){}
 }
