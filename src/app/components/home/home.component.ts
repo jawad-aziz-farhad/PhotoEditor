@@ -15,16 +15,16 @@ export class HomeComponent implements OnInit , AfterViewInit {
   private element: HTMLImageElement;
 
   selectedImage : string;
-  private data: any;
-  private selectedOptions: any;
+  data: any;
+  selectedOptions: any;
 
-  private source : string;
-  private overLayText: any;
+  source : string;
+  overLayText: any;
 
-  private canvas_Width: number;
-  private canvas_Height: number;
+  canvas_Width: number;
+  canvas_Height: number;
 
-  private canvasSizes: any = {small : { width: 500, height : 500 },
+  canvasSizes: any = {small : { width: 500, height : 500 },
                               tall  : { width: 450, height : 900 },
                               wide  : { width: 900, height : 450 },
                               large : { width: 900, height : 900 },

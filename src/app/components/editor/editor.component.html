@@ -107,7 +107,7 @@
                       <div class="row no-gutters">
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Font Family' }" (click)="open(content, 'Font Family')">
                                       <img src="assets/_images/font.svg" alt="">
                                   </div>
                                   <span>Font</span>
@@ -115,7 +115,7 @@
                           </div>
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Colors' }" (click)="open(content, 'Colors')">
                                       <img src="assets/_images/color.svg" alt="">
                                   </div>
                                   <span>Color</span>
@@ -123,7 +123,7 @@
                           </div>
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Stroke Styles' }" (click)="open(content, 'Stroke Styles')">
                                       <img src="assets/_images/stroke.svg" alt="">
                                   </div>
                                   <span>Stroke</span>
@@ -146,9 +146,10 @@
                                   <span>Opacity</span>
                               </div>
                           </div>
+
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Text Align' }" (click)="open(content, 'Text Align')">
                                       <img src="assets/_images/left-alignment.svg" alt="">
                                   </div>
                                   <span>Align</span>
@@ -163,3 +164,27 @@
       </div>
   </div>
 </div>
+
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{ modalOpenedFor }}</h4>
+  </div>
+  <div class="modal-body">
+   
+
+    <div class="custom-control custom-radio" *ngFor="let option of options; let i=index;">
+      <input type="radio" class="custom-control-input" id="selectedOption_{{ i }}" name="{{ modalOpenedFor }}" 
+            [value]="isString(option) ? (option | lowercase) : option" (change)="handlePropertyChange($event)">
+      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ ( modalOpenedFor == 'Colors' || modalOpenedFor == 'Stroke Styles' ) ? data?.colorNames[i] : option }}</label>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark"  aria-label="Close" (click)="modal.dismiss('Cancel')">
+      Cancel
+    </button>
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Apply')">Apply</button>
+  </div>
+</ng-template>
+
+

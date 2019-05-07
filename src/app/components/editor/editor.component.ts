@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Data } from 'src/app/models/data';
+import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-editor',
@@ -14,30 +15,34 @@ export class EditorComponent implements OnInit , AfterViewInit {
   private context: CanvasRenderingContext2D;
   private element: HTMLImageElement;
 
-  private data: any;
-  private selectedOptions: any;
-  private selectedImage: string;
+  data: any;
+  selectedOptions: any;
+  selectedImage: string;
 
-  private overLayText: any;
+  overLayText: any;
 
-  private canvas_Width: number;
-  private canvas_Height: number;
+  canvas_Width: number;
+  canvas_Height: number;
 
-  private canvasSizes: any = {small : { width: 500, height : 500 },
+  private closeResult: string;
+
+  modalOpenedFor: string;
+  canvasSizes: any = {small : { width: 500, height : 500 },
                               tall  : { width: 450, height : 900 },
                               wide  : { width: 900, height : 450 },
                               large : { width: 900, height : 900 },
                               };
 
-  constructor() { }
+  constructor(private modalService: NgbModal) { }
 
   ngOnInit() {
     this.selectedImage = 'assets/images/image-1.jpg';
     this.data = new Data();
     this.overLayText = '';
-    this.selectedOptions =  { effect: '',  font_style: 'normal', font_size: 32 , font_family: 'Arial' , font_weight: 'normal' ,textAlign: 'center' ,color: '#000', canvasSize : 'small' , text_shadow: 0, shadow_color: ''};
+    this.selectedOptions =  { effect: '',  font_style: 'normal', font_size: 32 , font_family: 'Arial' , font_weight: 'normal' , text_align: '' , colors: '#000', stroke_styles : '#000', canvasSize : 'small' , text_shadow: 0, shadow_color: ''};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
+    this.modalOpenedFor = '';
   }
 
   ngAfterViewInit(){ 
@@ -62,6 +67,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     else
       this.context.drawImage(this.element, 0, 0, this.canvas_Width, this.canvas_Height);
     
+    console.log('Options', this.selectedOptions)
   }
 
   drawText(text){
@@ -78,9 +84,9 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
     this.context.font = this.textFont();
     
-    this.context.textAlign = this.selectedOptions.textAlign;
-    this.context.fillStyle = this.selectedOptions.color || '#000'; // fill text
-    this.context.strokeStyle = this.selectedOptions.color || '#000';
+    this.context.textAlign = this.selectedOptions.text_align;
+    this.context.fillStyle = this.selectedOptions.colors || '#000'; // fill text
+    this.context.strokeStyle = this.selectedOptions.stroke_styles || '#000';
     this.context.lineWidth = 2.2;
     
     this.wrapText(text);
@@ -140,7 +146,7 @@ wrapText(text) {
       this.selectedOptions.font_weight = event.target.value;
       break;
       case 'color':
-      this.selectedOptions.color = event.target.value;
+      this.selectedOptions.colors = event.target.value;
       break;
       case 'text_shadow':
       this.selectedOptions.text_shadow = this.selectedOptions.text_shadow == 3 ? 0 : event.target.value;
@@ -179,4 +185,41 @@ wrapText(text) {
 
   }
 
+  open(content, option) {
+    this.modalOpenedFor = option;
+    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
+      this.closeResult = `Closed with: ${result}`;
+      console.log('Close Result', this.selectedOptions)
+      if(this.overLayText)
+        this.drawText(this.overLayText);
+    }, (reason) => {
+      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+    });
+  }
+
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+    } else {
+      return  `with: ${reason}`;
+    }
+  }
+
+  get options() {
+    return this.modalOpenedFor ? this.data[this.modalOpenedFor.toLowerCase().replace(' ', '_')] : [];
+  }
+
+  handlePropertyChange(event){
+    console.log('Event', event.target.value , this.selectedOptions);
+    if(event.target.checked)
+      this.selectedOptions[this.modalOpenedFor.toLowerCase().replace(' ', '_')] = event.target.value;
+
+      console.log('Selected Options', this.selectedOptions);
+  }
+
+  isString(value){ return typeof value == 'string' ? true : false;}
+
+  isSelected(value){ return this.selectedOptions[this.modalOpenedFor.toLowerCase().replace(' ', '_')] = value ? true : false; }
 }
