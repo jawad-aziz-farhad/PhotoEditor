@@ -20,10 +20,12 @@
     "@angular/platform-browser-dynamic": "~7.2.0",
     "@angular/router": "~7.2.0",
     "@ng-bootstrap/ng-bootstrap": "^4.1.2",
+    "@types/fabric": "^2.6.13",
     "angular2-draggable": "^2.2.4",
     "angular4-color-picker": "^1.4.2",
     "bootstrap": "^4.3.1",
     "core-js": "^2.5.4",
+    "fabric": "^2.7.0",
     "jquery": "^3.4.1",
     "popper": "^1.0.1",
     "popper.js": "^1.15.0",
@@ -32,7 +34,7 @@
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^0.13.8",
+    "@angular-devkit/build-angular": "^0.13.9",
     "@angular/cli": "~7.2.1",
     "@angular/compiler-cli": "~7.2.0",
     "@angular/language-service": "~7.2.0",

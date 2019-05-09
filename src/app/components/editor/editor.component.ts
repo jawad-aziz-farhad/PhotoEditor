@@ -120,8 +120,19 @@ wrapText(text) {
     }
     this.context.fillText(line, textX, currentTextY); // fill text
     this.context.strokeText(line, textX, currentTextY); // stroke border
-  
+    
     //  this.context.restore();
+    this.drawRectangle();
+  }
+
+  drawRectangle(){
+    const rectHeight   = this.canvas_Height / 2;
+    const rectWidth    = this.canvas_Width - 100;
+    const centerPoint  = this.canvas_Height - rectHeight;
+    
+    const startPoint   = centerPoint - centerPoint / 2 - 100;
+    console.log(rectWidth, rectHeight,centerPoint , startPoint);
+
   }
 
   onAttributeChange(event , attribute){

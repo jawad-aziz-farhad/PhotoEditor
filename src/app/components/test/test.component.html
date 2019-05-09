@@ -1,9 +1,195 @@
 <app-navbar></app-navbar>
-<div ngDraggable [handle]="DemoHandle" class="container">
+<!-- <div ngDraggable [handle]="DemoHandle" class="container">
     <div #DemoHandle class="border border-gray p-2" [ngStyle]="{'transform': 'rotate(' + rotateAngle + 'deg)' }">
         <div class="">I'm handle. Drag me!</div>
         <div class="card-block">You can't drag this block now!</div>
     </div>
 
     <button class="btn btn-primary btn-block" (click)="rotateText()">Rotate</button>
+</div> -->
+
+<div class="canvas-wrapper">
+
+    <div class="canvas-drawer">
+      <!-- <div class="canvas-content resize-able tall">
+      </div> -->
+        <div class="row m-2">
+            <!-- 1st Column -->
+            <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
+              <div class="row" *ngFor="let image of images;let i=index;" (click)="selectedImage = image;">
+                <div class="col">
+                  <img class="img-fluid" [src]="image"/>
+                  <!-- <img #img (load)="afterLoading()" [src]="selectedImage" style="display: none;"/> -->
+                </div>
+              </div>
+            </div>
+            <!-- /. 1st Column -->
+        
+            <!-- 2nd Column -->
+            <div class="col-sm-12 col-md-9 col-lg-9 col-xl-9 text-center border border-dark" >
+              <canvas #visualization id="canvas" width="600" height="600"></canvas>      
+            </div>
+            <!-- /. 2nd Column -->
+        </div>
+    </div>
+
+    <div class="canvas-controls">
+      <div class="canvas-actions">
+            <div class="row">
+                <div class="col-md-4">
+                    <button class="btn btn-block btn-share btn-action">Share</button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-block btn-done btn-action">Done</button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-block btn-save btn-action">Save</button>
+                </div>
+            </div>
+        </div>
+        <div class="canvas-shapes">
+            <div class="accordion" id="accordionExample">
+              <div class="card c-shapes">
+                <div class="card-header p-0" id="headingOne">
+                    <a href="#" class="btn btn-link coll-exp" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Shape
+                    </a>
+                </div>
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
+                  <div class="card-body">
+                    <div class="row">
+
+                      <div class="col-md-3" *ngFor="let canvasSize of data?.canvasSizes; let i=index;" (click)="onAttributeChange( {target: { value : canvasSize.title.toLowerCase() } }  , 'canvas_size')">
+                        <div class="shape-section tall-view canvas-screen">
+                          <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.canvasSize == (canvasSize.title | lowercase) }">
+                              <img [src]="canvasSize.src" alt="{{ canvasSize.title }}">
+                          </div>
+                          <span>{{ canvasSize.title }}</span>
+                        </div>
+                      </div>
+
+                    </div>
+                </div>
+              </div>
+                <div class="card c-effects">
+                  <div class="card-header p-0" id="headingTwo">
+                  <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Filters
+                  </a>
+                  </div>
+                  <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo">
+                    <div class="card-body">
+                      <div class="row">
+
+                        <div class="col-md-3" *ngFor="let effect of data?.effects;" (click)="onAttributeChange( { target: { value : effect.effect } }  , 'effect')">
+                            <div class="shape-section filter">
+                                <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.effect == effect.effect }">
+                                    <figure [ngClass]="effect.effect">
+                                        <img [src]="selectedImage">
+                                    </figure>
+                                </div>
+                                <span>{{ effect.title }}</span>
+                            </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card c-options">
+                  <div class="card-header p-0" id="headingThree">
+                      <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Add Text
+                      </a>
+                  </div>
+                  <div id="collapseThree" class="collapse show" aria-labelledby="headingThree">
+                    <div class="card-body">
+                      <div class="form-group">
+                        <label for="overlayText">Overlay Text</label>
+                        <input type="email" class="form-control" id="overlayText" aria-describedby="overlaytextHelp" placeholder="Enter some text" [value]="overLayText" (input)="drawText($event.target.value)" >
+                        <small id="overlaytextHelp" class="form-text text-muted">This text will be shown over the image.</small>
+                      </div>
+                      <div class="row no-gutters">
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Font Family' }" (click)="open(content, 'Font Family')">
+                                      <img src="assets/_images/font.svg" alt="">
+                                  </div>
+                                  <span>Font</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Colors' }" (click)="open(content, 'Colors')">
+                                      <img src="assets/_images/color.svg" alt="">
+                                  </div>
+                                  <span>Color</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Stroke Styles' }" (click)="open(content, 'Stroke Styles')">
+                                      <img src="assets/_images/stroke.svg" alt="">
+                                  </div>
+                                  <span>Stroke</span>
+                              </div>
+                          </div>
+
+                          <div class="col-md-2" (click)="onAttributeChange( { target: { value : 3 } }  , 'text_shadow')">
+                              <div class="shape-section typo">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.text_shadow == 3 }">
+                                      <img src="assets/_images/shadow.svg" alt="">
+                                  </div>
+                                  <span>Shadow</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img">
+                                      <img src="assets/_images/opacity.svg" alt="">
+                                  </div>
+                                  <span>Opacity</span>
+                              </div>
+                          </div>
+
+                          <div class="col-md-2">
+                              <div class="shape-section typo">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Text Align' }" (click)="open(content, 'Text Align')">
+                                      <img src="assets/_images/left-alignment.svg" alt="">
+                                  </div>
+                                  <span>Align</span>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+      </div>
+  </div>
 </div>
+
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{ modalOpenedFor }}</h4>
+  </div>
+  <div class="modal-body">
+   
+
+    <div class="custom-control custom-radio" *ngFor="let option of options; let i=index;">
+      <input type="radio" class="custom-control-input" id="selectedOption_{{ i }}" name="{{ modalOpenedFor }}" 
+            [value]="isString(option) ? (option | lowercase) : option" (change)="handlePropertyChange($event)">
+      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ ( modalOpenedFor == 'Colors' || modalOpenedFor == 'Stroke Styles' ) ? data?.colorNames[i] : option }}</label>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark"  aria-label="Close" (click)="modal.dismiss('Cancel')">
+      Cancel
+    </button>
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Apply')">Apply</button>
+  </div>
+</ng-template>
+
+
