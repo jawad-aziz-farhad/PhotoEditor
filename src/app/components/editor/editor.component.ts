@@ -121,6 +121,7 @@ wrapText(text) {
     this.context.fillText(line, textX, currentTextY); // fill text
     this.context.strokeText(line, textX, currentTextY); // stroke border
   
+    
     //  this.context.restore();
   }
 
