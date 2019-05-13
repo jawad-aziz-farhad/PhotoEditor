@@ -7,20 +7,22 @@
       <!-- <div class="canvas-content resize-able tall">
       </div> -->
         <div class="row m-2">
+
             <!-- 1st Column -->
             <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
-              <div class="row" *ngFor="let image of images;let i=index;" (click)="selectedImage = image;">
+              <div class="row" *ngFor="let image of images;let i=index;" (click)="drawWithFabricJS(image)">
                 <div class="col">
                   <img class="img-fluid" [src]="image"/>
-                  <img #img (load)="afterLoading()" [src]="selectedImage" style="display: none;"/>
+                  <!-- <img #img (load)="afterLoading()" [src]="selectedImage" style="display: none;"/> -->
+                  <img #img [src]="selectedImage" style="display: none;"/>
                 </div>
               </div>
             </div>
             <!-- /. 1st Column -->
         
             <!-- 2nd Column -->
-            <div class="col-sm-12 col-md-9 col-lg-9 col-xl-9 text-center border border-dark" >
-              <canvas #visualization class="img-fluid"></canvas>      
+            <div #canvasArea class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border border-dark" >
+                <canvas id="canvas"></canvas>       
             </div>
             <!-- /. 2nd Column -->
         </div>
@@ -74,12 +76,13 @@
                     <div class="card-body">
                       <div class="row">
 
-                        <div class="col-md-3" *ngFor="let effect of data?.effects;" (click)="onAttributeChange( { target: { value : effect.effect } }  , 'effect')">
+                        <div class="col-md-3" #filters *ngFor="let effect of data?.effects;let i=index;" (click)="onAttributeChange( { target: { value : effect.effect } }  , 'effect')">
                             <div class="shape-section filter">
                                 <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.effect == effect.effect }">
-                                    <figure [ngClass]="effect.effect">
-                                        <img [src]="selectedImage">
+                                    <figure>
+                                        <img [src]="selectedImage" id="filter_{{i}}">
                                     </figure>
+                                    <!-- <canvas class="img-fluid" id="filter_canvas_{{i}}"></canvas> -->
                                 </div>
                                 <span>{{ effect.title }}</span>
                             </div>
@@ -92,16 +95,11 @@
                 <div class="card c-options">
                   <div class="card-header p-0" id="headingThree">
                       <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        Add Text
+                        Text Options
                       </a>
                   </div>
                   <div id="collapseThree" class="collapse show" aria-labelledby="headingThree">
                     <div class="card-body">
-                      <div class="form-group">
-                        <label for="overlayText">Overlay Text</label>
-                        <input type="email" class="form-control" id="overlayText" aria-describedby="overlaytextHelp" placeholder="Enter some text" [value]="overLayText" (input)="drawText($event.target.value)" >
-                        <small id="overlaytextHelp" class="form-text text-muted">This text will be shown over the image.</small>
-                      </div>
                       <div class="row no-gutters">
                           <div class="col-md-2">
                               <div class="shape-section typo">
@@ -121,7 +119,7 @@
                           </div>
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Stroke Styles' }" (click)="open(content, 'Stroke Styles')">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.strokeWidth == 1 }" (click)="open(content, 'Stroke Styles')">
                                       <img src="assets/_images/stroke.svg" alt="">
                                   </div>
                                   <span>Stroke</span>

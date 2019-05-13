@@ -1,20 +1,18 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList} from '@angular/core';
 import { Data } from 'src/app/models/data';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { fabric } from 'fabric';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.sass']
 })
-export class EditorComponent implements OnInit , AfterViewInit {
+export class EditorComponent implements OnInit  {
 
-  @ViewChild('visualization') visualization: ElementRef;
-  @ViewChild('img') img: ElementRef;
+  @ViewChild('canvasArea') canvasArea: ElementRef;
 
-  private context: CanvasRenderingContext2D;
-  private element: HTMLImageElement;
-
+  canvas: any
   data: any;
   selectedOptions: any;
   selectedImage: string;
@@ -33,98 +31,58 @@ export class EditorComponent implements OnInit , AfterViewInit {
                               large : { width: 900, height : 900 },
                               };
 
+  @ViewChildren('filters') filters : QueryList<any>;
+
+
   constructor(private modalService: NgbModal) { }
 
   ngOnInit() {
     this.selectedImage = 'assets/images/image-1.jpg';
     this.data = new Data();
     this.overLayText = '';
-    this.selectedOptions =  { effect: '',  font_style: 'normal', font_size: 32 , font_family: 'Arial' , font_weight: 'normal' , text_align: '' , colors: '#000', stroke_styles : '#000', canvasSize : 'small' , text_shadow: 0, shadow_color: ''};
+    this.selectedOptions =  { effect: '', font_style: 'normal', font_size: 32 , font_family: 'Helvetica' , font_weight: 'normal' , text_align: 'center' , colors: '#000', stroke_styles : '', strokeWidth : 0, canvasSize : 'small' , text_shadow: 0, shadow_color: ''};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';
-  }
 
-  ngAfterViewInit(){ 
-    this.context = this.visualization.nativeElement.getContext("2d");
-    this.element = this.img.nativeElement;
+    this.drawWithFabricJS(this.selectedImage);
+  }  
+
+  drawWithFabricJS(selectedImage){
+    this.selectedImage = selectedImage;
+    this.canvas = new fabric.Canvas('canvas');
+    this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
+    this.canvas.clear();
+
+    fabric.Image.fromURL(this.selectedImage, (img) => {
+
+      this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
+      scaleX: this.canvas.getWidth() / img.width,
+      scaleY: this.canvas.getHeight() / img.height
+      });
+
+      var text = new fabric.IText('Enter your text here', {
+        fontSize: this.selectedOptions.font_size,
+        fontFamily: this.selectedOptions.font_family,
+        fill: this.selectedOptions.colors,
+        textAlign: this.selectedOptions.text_align,
+        stroke: this.selectedOptions.stroke_styles,
+        strokeWidth: this.selectedOptions.strokeWidth,
+      });
+      this.canvas.add(text);
+      this.canvas.centerObject(text);
+      this.canvas.setActiveObject(text);
+      this.canvas.bringToFront(text);
+
+      this.canvas.renderAll();
+    });
   }
 
   get images(): Array<any> {
     return ['assets/images/image-1.jpg', 'assets/images/image-2.jpg' , 'assets/images/image-3.jpg' , 'assets/images/image-4.jpg' , 'assets/images/image-5.jpg']
   }
 
-  afterLoading() {
-    this.context.canvas.width = this.canvas_Width;
-    this.context.canvas.height= this.canvas_Height;
-
-    this.context.canvas.className = this.selectedOptions.effect;
-    this.context.filter = getComputedStyle(this.context.canvas).getPropertyValue('filter');
-
-    this.context.clearRect(0, 0, this.canvas_Width, this.canvas_Height);
-    if(this.overLayText)
-      this.drawText(this.overLayText);
-    else
-      this.context.drawImage(this.element, 0, 0, this.canvas_Width, this.canvas_Height);
-    
-    console.log('Options', this.selectedOptions)
-  }
-
-  drawText(text){
-    this.context.drawImage(this.element, 0, 0, this.canvas_Width, this.canvas_Height);
-    
-    this.overLayText = text;
-    //this.context.save();
-    //this.context.translate(100, 100);
-    //this.context.rotate(-Math.PI / 4);
-
-    this.context.shadowBlur = this.selectedOptions.text_shadow;
-
-    
-
-    this.context.font = this.textFont();
-    
-    this.context.textAlign = this.selectedOptions.text_align;
-    this.context.fillStyle = this.selectedOptions.colors || '#000'; // fill text
-    this.context.strokeStyle = this.selectedOptions.stroke_styles || '#000';
-    this.context.lineWidth = 2.2;
-    
-    this.wrapText(text);
-
-    //this.source = this.visualization.nativeElement.toDataURL();
-}
-
-wrapText(text) {
-    const textX = this.canvas_Width/2;
-    const textY = this.canvas_Height/2;
-    const textWrapWidth  = this.canvas_Width - (this.canvas_Height / 9.00);
-    const textWrapHeight = 120;
-    var words = text.split(' ');
-    var line = '';
-    var currentTextY = textY;
-    for(var n = 0; n < words.length; n++) {
-        
-        var testLine  = line + words[n] + ' ';
-        var metrics   = this.context.measureText(testLine);
-        var testWidth = metrics.width;
-
-        if (testWidth > textWrapWidth && n > 0) {
-            this.context.fillText(line, textX, currentTextY); // fill text
-            this.context.strokeText(line, textX, currentTextY); // stroke border
-            line = words[n] + ' ';
-            currentTextY += textWrapHeight;
-        }
-        else {
-          line = testLine;
-        }
-    }
-    this.context.fillText(line, textX, currentTextY); // fill text
-    this.context.strokeText(line, textX, currentTextY); // stroke border
   
-    
-    //  this.context.restore();
-  }
-
   onAttributeChange(event , attribute){
     switch(attribute){
       case 'canvas_size':
@@ -156,10 +114,8 @@ wrapText(text) {
       break;
     }
 
-    if(attribute == 'canvas_size' || attribute == 'effect')
-      this.afterLoading();
-    else
-      this.drawText(this.overLayText);
+    this.drawWithFabricJS(this.selectedImage);
+    
   }
 
   setCanvasSize(size){
@@ -169,16 +125,6 @@ wrapText(text) {
 
   textFont(): string {
     
-    if(this.selectedOptions.text_shadow > 0){
-      this.context.shadowColor = '#aaa';
-      this.context.shadowOffsetX = 10;
-      this.context.shadowOffsetY = 10;
-    }
-    else{
-      this.context.shadowOffsetX = 0;
-      this.context.shadowOffsetY = 0;
-    }
-
     return this.selectedOptions.font_style  + " " +
     this.selectedOptions.font_weight + " " +
     this.selectedOptions.font_size + 'px' + " " +
@@ -191,8 +137,7 @@ wrapText(text) {
     this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
       console.log('Close Result', this.selectedOptions)
-      if(this.overLayText)
-        this.drawText(this.overLayText);
+      this.drawWithFabricJS(this.selectedImage);
     }, (reason) => {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
@@ -214,13 +159,26 @@ wrapText(text) {
 
   handlePropertyChange(event){
     console.log('Event', event.target.value , this.selectedOptions);
-    if(event.target.checked)
-      this.selectedOptions[this.modalOpenedFor.toLowerCase().replace(' ', '_')] = event.target.value;
+    if(event.target.checked){
+      if(this.modalOpenedFor == 'Stroke Styles')
+        this.selectedOptions.strokeWidth = 1;
 
-      console.log('Selected Options', this.selectedOptions);
+      this.selectedOptions[this.modalOpenedFor.toLowerCase().replace(' ', '_')] = event.target.value;
+    }
+    else {
+      if(this.modalOpenedFor == 'Stroke Styles')
+        this.selectedOptions.strokeWidth = 0;
+    }
+    console.log('Selected Options', this.selectedOptions);
   }
 
   isString(value){ return typeof value == 'string' ? true : false;}
 
   isSelected(value){ return this.selectedOptions[this.modalOpenedFor.toLowerCase().replace(' ', '_')] = value ? true : false; }
+
+  get canvasWidth(){
+    const canvasArea = this.canvasArea.nativeElement.offsetWidth;
+    console.log(this.canvas_Width,canvasArea);
+    return ( this.canvas_Width > canvasArea ) ?  canvasArea - 20 : this.canvas_Width;
+  }
 }

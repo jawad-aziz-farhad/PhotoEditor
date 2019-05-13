@@ -6,7 +6,7 @@ export class Data {
                                        {title: 'Hudson', effect : 'filter-hudson' } , {title: 'Skyline', effect : 'filter-skyline' } , ];
     public sizes :  Array<any>     = ['Small', 'Large', 'Wide' , 'Tall'];
     public colos:   Array<any>     = ['#fff', , '#000' , '#FF5733', '#B4A817' , '#4259EA' , '#AB5ED5'];
-    public font_family:   Array<any>     = ['Arial', 'Georgia' , 'Helvetica', 'Sans Serif']
+    public font_family:   Array<any>     = ['Arial', 'Georgia' , 'Helvetica', 'Sans Serif' , 'Comic Sans']
     public font_styles: Array<any> = ['Normal', 'Italic', 'Oblique'];
     public font_weights: Array<any> = ['Normal', 'Bold', 'Bolder', 'Lighter', 100, 200 , 300 , 400 , 500 , 600 , 700, 800 , 900]
     public font_sizes:  Array<any> = [8 , 10 , 12, 16, 18, 22, 26, 28, 32, 36, 40, 44, 48 , 52];
