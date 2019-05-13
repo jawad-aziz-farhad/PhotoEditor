@@ -16,6 +16,7 @@ export class EditorComponent implements OnInit  {
   data: any;
   selectedOptions: any;
   selectedImage: string;
+  toggle : boolean;
 
   overLayText: any;
 
@@ -40,35 +41,55 @@ export class EditorComponent implements OnInit  {
   ngOnInit() {
     this.selectedImage = 'assets/images/image-1.jpg';
     this.data = new Data();
+    this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { effect: '', font_style: 'normal', font_size: 32 , font_family: 'Helvetica' , font_weight: 'normal' , text_align: 'center' , colors: '#000', stroke_styles : '', strokeWidth : 0, canvasSize : 'small' , text_shadow: 0, shadow_color: ''};
+    this.selectedOptions =  { filter: '', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , colors: '#000', stroke : '', strokeWidth : 0, canvasSize : 'small' , shadow: 0};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';
-    this.drawWithFabricJS(this.selectedImage);
-    //this.setBackground();
+    //this.drawWithFabricJS(this.selectedImage);
+    
+    this.setBackground();
   }  
 
 
   setBackground(){
     
     this.canvas = new fabric.Canvas('canvas');    
-    this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
+    this.canvas.setDimensions({width:this.canvas_Width, height:this.canvas_Height});
     this.canvas.clear();
 
-    fabric.Image.fromURL(this.selectedImage, (img) => {
-
-      img.scaleToWidth(this.canvas.getWidth() / img.width );
-      img.scaleToHeight(this.canvas.getHeight() / img.height);
-
-      img.filters.push(
-        new fabric.Image.filters.Grayscale()
-      );
     
+
+     fabric.Image.fromURL(this.selectedImage, (img) => {
+
+      img.filters.push(new fabric.Image.filters.Grayscale());
+
+      
+      img.scaleToWidth(this.canvas.getWidth());
+      img.scaleToHeight(this.canvas.getHeight());
+      // apply filters and re-render canvas when done
       img.applyFilters();
+      // add image onto canvas (it also re-render the canvas)
       this.canvas.add(img);
       this.canvas.renderAll();
-    });
+
+    //   img.scaleToWidth(this.canvas.getWidth());
+    //   img.scaleToHeight(this.canvas.getHeight());
+
+    //   img.filters.push(
+    //     new fabric.Image.filters.Grayscale()
+    //   );
+    
+    //  img.applyFilters();
+    //   this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
+    //     scaleX: this.canvas.getWidth() / img.width,
+    //     scaleY: this.canvas.getHeight() / img.height
+    //   });
+
+    //   this.canvas.renderAll();
+    
+  });
   }
 
   drawWithFabricJS(selectedImage){
@@ -89,11 +110,11 @@ export class EditorComponent implements OnInit  {
 
 
       let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter your text here', {
-        fontSize: this.selectedOptions.font_size,
-        fontFamily: this.selectedOptions.font_family,
+        fontSize: this.selectedOptions.fontSize,
+        fontFamily: this.selectedOptions.fontFamily,
         fill: "#C0C0C0",
-        textAlign: this.selectedOptions.text_align,
-        stroke: this.selectedOptions.stroke_styles,
+        textAlign: this.selectedOptions.textAlign,
+        stroke: this.selectedOptions.stroke,
         strokeWidth: this.selectedOptions.strokeWidth,
       });
       this.canvas.add(text);
@@ -135,46 +156,51 @@ export class EditorComponent implements OnInit  {
   }
 
   
-  onAttributeChange(event , attribute){
+  onAttributeChange(value , attribute){
     switch(attribute){
-      case 'canvas_size':
-      this.selectedOptions.canvasSize = event.target.value;
-      this.setCanvasSize(event.target.value);
+      case 'canvasSize':
+      this.selectedOptions.canvasSize = value;
+      this.setCanvasSize(value);
       break;
       case 'effect':
-        this.selectedOptions.effect = event.target.value;
+        this.selectedOptions.effect = value;
       break;
-      case 'font_family':
-      this.selectedOptions.font_family = event.target.value;      
-      this.canvas.getActiveObject().set("fontFamily", event.target.value);
+      case 'fontFamily':
+      this.selectedOptions.font_family = value;      
+      this.canvas.getActiveObject().set("fontFamily", value);
       break;
-      case 'font_style':
-      this.selectedOptions.font_style = event.target.value;
+      case 'fontStyle':
+      this.selectedOptions.font_style = value;
       break;
-      case 'font_size':
-      this.selectedOptions.font_size = event.target.value;
-      this.canvas.getActiveObject().set("fontSize", event.target.value);
+      case 'fontSize':
+      this.selectedOptions.font_size =value;
+      this.canvas.getActiveObject().set("fontSize", value);
       break;
-      case 'font_weight':
-      this.selectedOptions.font_weight = event.target.value;
-      this.canvas.getActiveObject().set("fontWeight", event.target.value);
+      case 'fontWeight':
+      this.selectedOptions.font_weight = value;
+      this.canvas.getActiveObject().set("fontWeight", value);
       break;
       case 'color':
-      this.selectedOptions.colors = event.target.value;
+      this.selectedOptions.colors = value;
       break;
-      case 'text_shadow':
-      this.selectedOptions.text_shadow = this.selectedOptions.text_shadow == 3 ? 0 : event.target.value;
-      const shadow = `${event.target.value}` + ' 5px 5px 5px'
+      case 'shadow':
+      this.selectedOptions.text_shadow = this.selectedOptions.text_shadow == 3 ? 0 :value;
+      const shadow = `${value}` + ' 3px 3px 3px'
       this.canvas.getActiveObject().set("shadow", shadow);
       break;
+      case 'stroke':
+      this.canvas.getActiveObject().set('stroke', value);
+      this.canvas.getActiveObject().set('strokeWidth' , 2);
+      case 'textAlign':
+      this.canvas.getActiveObject().set('textAlign', `${value.toLowerCase()}`);
       default:
       break;
     }
 
-    //this.drawWithFabricJS(this.selectedImage);
-
-    
-    this.canvas.renderAll();
+    if(attribute == 'canvasSize')
+      this.drawWithFabricJS(this.selectedImage);
+    else
+      this.canvas.renderAll();
     
   }
 
@@ -183,21 +209,11 @@ export class EditorComponent implements OnInit  {
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-  textFont(): string {
-    
-    return this.selectedOptions.font_style  + " " +
-    this.selectedOptions.font_weight + " " +
-    this.selectedOptions.font_size + 'px' + " " +
-    this.selectedOptions.font_family;
-
-  }
-
   open(content, option) {
     this.modalOpenedFor = option;
     this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
-      console.log('Close Result', this.selectedOptions)
-      this.drawWithFabricJS(this.selectedImage);
+      console.log('Close Result', this.selectedOptions);
     }, (reason) => {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
@@ -214,22 +230,13 @@ export class EditorComponent implements OnInit  {
   }
 
   get options() {
-    return this.modalOpenedFor ? this.data[this.modalOpenedFor.toLowerCase().replace(' ', '_')] : [];
+    return this.modalOpenedFor ? this.data[this.modalOpenedFor] : [];
   }
 
   handlePropertyChange(event){
-    console.log('Event', event.target.value , this.selectedOptions);
-    if(event.target.checked){
-      if(this.modalOpenedFor == 'Stroke Styles')
-        this.selectedOptions.strokeWidth = 1;
-
-      this.selectedOptions[this.modalOpenedFor.toLowerCase().replace(' ', '_')] = event.target.value;
+    if(event.target.checked) {
+      this.onAttributeChange(event.target.value , this.modalOpenedFor);
     }
-    else {
-      if(this.modalOpenedFor == 'Stroke Styles')
-        this.selectedOptions.strokeWidth = 0;
-    }
-    console.log('Selected Options', this.selectedOptions);
   }
 
   isString(value){ return typeof value == 'string' ? true : false;}

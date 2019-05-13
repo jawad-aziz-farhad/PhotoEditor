@@ -54,7 +54,7 @@
                   <div class="card-body">
                     <div class="row">
 
-                      <div class="col-md-3" *ngFor="let canvasSize of data?.canvasSizes; let i=index;" (click)="onAttributeChange( {target: { value : canvasSize.title.toLowerCase() } }  , 'canvas_size')">
+                      <div class="col-md-3" *ngFor="let canvasSize of data?.canvasSizes; let i=index;" (click)="onAttributeChange(  canvasSize.title.toLowerCase() , 'canvasSize')">
                         <div class="shape-section tall-view canvas-screen">
                           <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.canvasSize == (canvasSize.title | lowercase) }">
                               <img [src]="canvasSize.src" alt="{{ canvasSize.title }}">
@@ -76,7 +76,7 @@
                     <div class="card-body">
                       <div class="row">
 
-                        <div class="col-md-3" #filters *ngFor="let effect of data?._effects;let i=index;" (click)="onAttributeChange( { target: { value : effect.effect } }  , 'effect')">
+                        <div class="col-md-3" #filters *ngFor="let effect of data?._effects;let i=index;" (click)="onAttributeChange( effect.effect  , 'effect')">
                             <div class="shape-section filter">
                                 <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.effect == effect.effect }">
                                     <figure class="{{ effect.effect }}">
@@ -103,7 +103,7 @@
                       <div class="row no-gutters">
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Font Family' }" (click)="open(content, 'Font Family')">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'fontFamily' }" (click)="open(content, 'fontFamily')">
                                       <img src="assets/_images/font.svg" alt="">
                                   </div>
                                   <span>Font</span>
@@ -117,7 +117,6 @@
                                         style="width: 0px"
                                         [style.display]="!toggle ? 'none':' inherit' "
                                         [style.background]="selectedOptions.color"
-                                        [cpIgnoredElements]="[ignoredButton, ignoredInput]"
                                         [(cpToggle)]="toggle"
                                         [(colorPicker)]="selectedOptions.color"
                                         (colorPickerChange)="changeColor($event)"    />
@@ -129,33 +128,33 @@
                           </div>
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.strokeWidth == 1 }" (click)="open(content, 'Stroke Styles')">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke == 1 }" (click)="open(content, 'stroke')">
                                       <img src="assets/_images/stroke.svg" alt="">
                                   </div>
                                   <span>Stroke</span>
                               </div>
                           </div>
 
-                          <div class="col-md-2" (click)="onAttributeChange( { target: { value : 3 } }  , 'text_shadow')">
+                          <div class="col-md-2" >
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.text_shadow == 3 }">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow == 3 }"  (click)="open(content, 'shadow')">
                                       <img src="assets/_images/shadow.svg" alt="">
                                   </div>
                                   <span>Shadow</span>
                               </div>
                           </div>
-                          <div class="col-md-2">
+                          <!-- <div class="col-md-2">
                               <div class="shape-section typo">
                                   <div class="shape-img">
                                       <img src="assets/_images/opacity.svg" alt="">
                                   </div>
                                   <span>Opacity</span>
                               </div>
-                          </div>
+                          </div> -->
 
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Text Align' }" (click)="open(content, 'Text Align')">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'textAlign' }" (click)="open(content, 'textAlign')">
                                       <img src="assets/_images/left-alignment.svg" alt="">
                                   </div>
                                   <span>Align</span>
@@ -181,7 +180,7 @@
     <div class="custom-control custom-radio" *ngFor="let option of options; let i=index;">
       <input type="radio" class="custom-control-input" id="selectedOption_{{ i }}" name="{{ modalOpenedFor }}" 
             [value]="isString(option) ? (option | lowercase) : option" (change)="handlePropertyChange($event)">
-      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ ( modalOpenedFor == 'Colors' || modalOpenedFor == 'Stroke Styles' ) ? data?.colorNames[i] : option }}</label>
+      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ ( modalOpenedFor == 'Colors' || modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow') ? data?.colorNames[i] : option }}</label>
     </div>
 
   </div>

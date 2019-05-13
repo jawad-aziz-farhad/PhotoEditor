@@ -8,10 +8,10 @@ export class Data {
     public _effects: Array<any>     = [ { title: 'None', effect : ''}, { title: 'Gray', effect : 'gray-effect'}, { title: 'Blur', effect : 'blur-effect'}, { title: 'Sepia', effect : 'sepia-effect'} , { title: 'Brightness', effect : 'brightness-effect'}];                                   
     public sizes :  Array<any>     = ['Small', 'Large', 'Wide' , 'Tall'];
     public colos:   Array<any>     = ['#fff', , '#000' , '#FF5733', '#B4A817' , '#4259EA' , '#AB5ED5'];
-    public font_family:   Array<any>     = ['Arial', 'Georgia' , 'Helvetica', 'Sans Serif' , 'Comic Sans']
-    public font_styles: Array<any> = ['Normal', 'Italic', 'Oblique'];
-    public font_weights: Array<any> = ['Normal', 'Bold', 'Bolder', 'Lighter', 100, 200 , 300 , 400 , 500 , 600 , 700, 800 , 900]
-    public font_sizes:  Array<any> = [8 , 10 , 12, 16, 18, 22, 26, 28, 32, 36, 40, 44, 48 , 52];
+    public fontFamily:   Array<any>     = ['Arial', 'Georgia' , 'Helvetica', 'Sans Serif' , 'Comic Sans']
+    public fontStyle: Array<any> = ['Normal', 'Italic', 'Oblique'];
+    public fontWeight: Array<any> = ['Normal', 'Bold', 'Bolder', 'Lighter', 100, 200 , 300 , 400 , 500 , 600 , 700, 800 , 900]
+    public fontSize:  Array<any> = [8 , 10 , 12, 16, 18, 22, 26, 28, 32, 36, 40, 44, 48 , 52];
     public colors: Array<any> = ['rgb(0, 255, 255)', 'rgb(240, 255, 255)', 'rgb(245, 245, 220)','rgb(0, 0, 0)','rgb(0, 0, 255)',
                                 'rgb(165, 42, 42)', 'rgb(0, 255, 255)', 'rgb(0, 0, 139)', 'rgb(0, 139, 139)','rgb(169, 169, 169)',
                                 'rgb(0, 100, 0)'  , 'rgb(189, 183, 107)', 'rgb(139, 0, 139)', 'rgb(85, 107, 47)','rgb(255, 140, 0)',
@@ -27,13 +27,14 @@ export class Data {
     , 'Darksalmon' , 'Darkviolet' , 'Fuchsia' , 'Gold' , 'Green' , 'Indigo' , 'Khaki' , 'Lightblue' , 'Lightcyan' , 'Lightgreen' , 'Lightgrey' , 'Lightpink' , 'Lightyellow' , 'Lime' , 'Magenta' , 'Maroon' , 'Navy' , 'Olive' , 'Orange' , 'Pink' ,
      'Purple' , 'Violet' , 'Red' , 'Silver' , 'White', 'Yellow' , 'Transparent'];
 
-    public stroke_styles: Array<any> = this.colors;
+    public stroke: Array<any> = this.colors;
+    public shadow: Array<any> = this.colors;
     
     public canvasSizes: Array<any> = [{src: 'assets/_images/two-squares-v.svg' , title: 'Tall'}, {src: 'assets/_images/two-squares-h.svg', title: 'Wide'} ,{src: 'assets/_images/four-squares.svg' , title: 'Large'}, {src: 'assets/_images/one-squares.svg' , title: 'Small'}];
     
     public shadowBlurs: Array<any> = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30];
     
-    public text_align: Array<any> = ['Left', 'Right', 'Center'];
+    public textAlign: Array<any> = ['Left', 'Right', 'Center'];
     
     constructor(){}
 }
