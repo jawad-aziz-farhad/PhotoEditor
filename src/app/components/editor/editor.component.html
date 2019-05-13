@@ -76,10 +76,10 @@
                     <div class="card-body">
                       <div class="row">
 
-                        <div class="col-md-3" #filters *ngFor="let effect of data?.effects;let i=index;" (click)="onAttributeChange( { target: { value : effect.effect } }  , 'effect')">
+                        <div class="col-md-3" #filters *ngFor="let effect of data?._effects;let i=index;" (click)="onAttributeChange( { target: { value : effect.effect } }  , 'effect')">
                             <div class="shape-section filter">
                                 <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.effect == effect.effect }">
-                                    <figure>
+                                    <figure class="{{ effect.effect }}">
                                         <img [src]="selectedImage" id="filter_{{i}}">
                                     </figure>
                                     <!-- <canvas class="img-fluid" id="filter_canvas_{{i}}"></canvas> -->
@@ -111,9 +111,19 @@
                           </div>
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Colors' }" (click)="open(content, 'Colors')">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Colors' }" (click)="toggle = !toggle">
                                       <img src="assets/_images/color.svg" alt="">
+                                      <input #ignoredInput 
+                                        style="width: 0px"
+                                        [style.display]="!toggle ? 'none':' inherit' "
+                                        [style.background]="selectedOptions.color"
+                                        [cpIgnoredElements]="[ignoredButton, ignoredInput]"
+                                        [(cpToggle)]="toggle"
+                                        [(colorPicker)]="selectedOptions.color"
+                                        (colorPickerChange)="changeColor($event)"    />
+                                        <!-- <mat-color-picker></mat-color-picker> -->
                                   </div>
+                                  
                                   <span>Color</span>
                               </div>
                           </div>

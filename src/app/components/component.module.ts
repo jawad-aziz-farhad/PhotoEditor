@@ -3,6 +3,9 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
+import { ColorPickerModule } from 'ngx-color-picker';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+//import { MatColorPickerModule } from 'mat-color-picker';
 
 import { HomeComponent } from './home/home.component';
 import { TestComponent } from './test/test.component';
@@ -16,7 +19,8 @@ import { EditorComponent } from './editor/editor.component';
       BrowserModule,
       AngularDraggableModule,
       NgbModule,
-      FormsModule
+      FormsModule,
+      ColorPickerModule
     ],
     exports: [ NavbarComponent , HomeComponent , TestComponent ], 
     providers: [],

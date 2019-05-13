@@ -36,10 +36,10 @@ export class TestComponent implements OnInit  {
 
     rotationAmount = 0;
 
-    canvasOriginalWidth = 800;
-    canvasOriginalHeight = 600;
-    canvasWidth = 800;
-    canvasHeight = 600;
+    // canvasOriginalWidth = 800;
+    // canvasOriginalHeight = 600;
+    // canvasWidth = 800;
+    // canvasHeight = 600;
     imgWidth;
     imgHeight;    
     canvasScale = 1;
@@ -81,11 +81,10 @@ export class TestComponent implements OnInit  {
     afterLoading() {       
 
         this.canvas = new fabric.Canvas('canvas');
-
         // create a rectangle object
         var text = new fabric.IText("Hello world !", {
           fill: '#000000',
-          fontSize: 18,
+          fontSize: this.selectedOptions.fontSize,
           textAlign:'center',
           top: this.canvas.getHeight() / 2,
           left: this.canvas.getWidth() / 2 - 50,
@@ -191,11 +190,11 @@ export class TestComponent implements OnInit  {
     
     
     setCanvasZoom() {
-        this.canvasWidth =  this.canvasOriginalWidth *  this.canvasScale;
-        this.canvasHeight =  this.canvasOriginalHeight *  this.canvasScale;
+        this.canvas_Width =  this.canvas_Width *  this.canvasScale;
+        this.canvas_Height =  this.canvas_Height *  this.canvasScale;
 
-        this.canvas.setWidth( this.canvasWidth);
-        this.canvas.setHeight( this.canvasHeight);
+        this.canvas.setWidth( this.canvas_Width);
+        this.canvas.setHeight( this.canvas_Height);
     }
     setCanvasSize(sizeObject) {
         this.canvas.setWidth(sizeObject.width);
@@ -222,18 +221,18 @@ export class TestComponent implements OnInit  {
 
         this.setCanvasZoom();
 
-        var canvasAspect = this.canvasWidth / this.canvasHeight;
+        var canvasAspect = this.canvas_Width / this.canvas_Height;
         var imgAspect = this.bgImage.width / this.bgImage.height;
         var left, top, scaleFactor;
 
         if (canvasAspect >= imgAspect) {
-            let scaleFactor = this.canvasWidth / this.bgImage.width;
+            let scaleFactor = this.canvas_Width / this.bgImage.width;
             left = 0;
-            top = -((this.bgImage.height * scaleFactor) - this.canvasHeight) / 2;
+            top = -((this.bgImage.height * scaleFactor) - this.canvas_Height) / 2;
         } else {
-            let scaleFactor = this.canvasHeight / this.bgImage.height;
+            let scaleFactor = this.canvas_Height / this.bgImage.height;
             top = 0;
-            left = -((this.bgImage.width * scaleFactor) - this.canvasWidth) / 2;
+            left = -((this.bgImage.width * scaleFactor) - this.canvas_Width) / 2;
 
         }
 

@@ -31,6 +31,7 @@ export class EditorComponent implements OnInit  {
                               large : { width: 900, height : 900 },
                               };
 
+  color: string = "#000";                            
   @ViewChildren('filters') filters : QueryList<any>;
 
 
@@ -44,27 +45,53 @@ export class EditorComponent implements OnInit  {
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';
-
     this.drawWithFabricJS(this.selectedImage);
+    //this.setBackground();
   }  
 
-  drawWithFabricJS(selectedImage){
-    this.selectedImage = selectedImage;
-    this.canvas = new fabric.Canvas('canvas');
+
+  setBackground(){
+    
+    this.canvas = new fabric.Canvas('canvas');    
     this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
     this.canvas.clear();
 
     fabric.Image.fromURL(this.selectedImage, (img) => {
 
+      img.scaleToWidth(this.canvas.getWidth() / img.width );
+      img.scaleToHeight(this.canvas.getHeight() / img.height);
+
+      img.filters.push(
+        new fabric.Image.filters.Grayscale()
+      );
+    
+      img.applyFilters();
+      this.canvas.add(img);
+      this.canvas.renderAll();
+    });
+  }
+
+  drawWithFabricJS(selectedImage){
+    this.selectedImage = selectedImage;
+    this.canvas = new fabric.Canvas('canvas');
+    this.canvas.clear();
+    this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
+    
+    fabric.Image.fromURL(this.selectedImage, (img) => {
+
+      img.scaleToWidth(this.canvas.getWidth());
+      img.scaleToHeight(this.canvas.getHeight());
+      
       this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
-      scaleX: this.canvas.getWidth() / img.width,
-      scaleY: this.canvas.getHeight() / img.height
+        scaleX: this.canvas.getWidth() / img.width,
+        scaleY: this.canvas.getHeight() / img.height
       });
 
-      var text = new fabric.IText('Enter your text here', {
+
+      let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter your text here', {
         fontSize: this.selectedOptions.font_size,
         fontFamily: this.selectedOptions.font_family,
-        fill: this.selectedOptions.colors,
+        fill: "#C0C0C0",
         textAlign: this.selectedOptions.text_align,
         stroke: this.selectedOptions.stroke_styles,
         strokeWidth: this.selectedOptions.strokeWidth,
@@ -74,8 +101,33 @@ export class EditorComponent implements OnInit  {
       this.canvas.setActiveObject(text);
       this.canvas.bringToFront(text);
 
+      text.on("editing:entered",  (e)  =>{
+        var obj = this.canvas.getActiveObject();
+        if(obj.text === 'Enter your text here')
+        {
+            obj.selectAll();
+            obj.text = "";
+            obj.fill = this.selectedOptions.colors;
+            obj.hiddenTextarea.value = "";
+            obj.dirty = true;
+            obj.setCoords();
+            this.canvas.renderAll();
+        }
+
+        else{
+          this.overLayText = obj.text;
+        }
+    });
+
       this.canvas.renderAll();
     });
+  }
+
+  changeColor(color){
+    console.log("Color Change", color);
+    this.selectedOptions.color = `${color}`;
+    this.canvas.getActiveObject().set("fill", `${color}`);
+    this.canvas.renderAll();
   }
 
   get images(): Array<any> {
@@ -93,28 +145,36 @@ export class EditorComponent implements OnInit  {
         this.selectedOptions.effect = event.target.value;
       break;
       case 'font_family':
-      this.selectedOptions.font_family = event.target.value;
+      this.selectedOptions.font_family = event.target.value;      
+      this.canvas.getActiveObject().set("fontFamily", event.target.value);
       break;
       case 'font_style':
       this.selectedOptions.font_style = event.target.value;
       break;
       case 'font_size':
       this.selectedOptions.font_size = event.target.value;
+      this.canvas.getActiveObject().set("fontSize", event.target.value);
       break;
       case 'font_weight':
       this.selectedOptions.font_weight = event.target.value;
+      this.canvas.getActiveObject().set("fontWeight", event.target.value);
       break;
       case 'color':
       this.selectedOptions.colors = event.target.value;
       break;
       case 'text_shadow':
       this.selectedOptions.text_shadow = this.selectedOptions.text_shadow == 3 ? 0 : event.target.value;
+      const shadow = `${event.target.value}` + ' 5px 5px 5px'
+      this.canvas.getActiveObject().set("shadow", shadow);
       break;
       default:
       break;
     }
 
-    this.drawWithFabricJS(this.selectedImage);
+    //this.drawWithFabricJS(this.selectedImage);
+
+    
+    this.canvas.renderAll();
     
   }
 

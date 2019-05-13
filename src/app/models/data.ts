@@ -4,6 +4,8 @@ export class Data {
                                        {title: 'Brooklyn', effect : 'filter-brooklyn' },  {title: 'Crema', effect : 'filter-crema' },  
                                        {title: 'Moon', effect : 'filter-moon' } , {title: 'Gingham', effect : 'filter-gingham' } ,
                                        {title: 'Hudson', effect : 'filter-hudson' } , {title: 'Skyline', effect : 'filter-skyline' } , ];
+
+    public _effects: Array<any>     = [ { title: 'None', effect : ''}, { title: 'Gray', effect : 'gray-effect'}, { title: 'Blur', effect : 'blur-effect'}, { title: 'Sepia', effect : 'sepia-effect'} , { title: 'Brightness', effect : 'brightness-effect'}];                                   
     public sizes :  Array<any>     = ['Small', 'Large', 'Wide' , 'Tall'];
     public colos:   Array<any>     = ['#fff', , '#000' , '#FF5733', '#B4A817' , '#4259EA' , '#AB5ED5'];
     public font_family:   Array<any>     = ['Arial', 'Georgia' , 'Helvetica', 'Sans Serif' , 'Comic Sans']
