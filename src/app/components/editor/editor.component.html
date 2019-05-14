@@ -10,10 +10,9 @@
 
             <!-- 1st Column -->
             <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
-              <div class="row" *ngFor="let image of images;let i=index;" (click)="drawWithFabricJS(image)">
+              <div class="row" *ngFor="let image of images;let i=index;" (click)="onAttributeChange(image , 'imageChange')">
                 <div class="col">
                   <img class="img-fluid" [src]="image"/>
-                  <!-- <img #img (load)="afterLoading()" [src]="selectedImage" style="display: none;"/> -->
                   <img #img [src]="selectedImage" style="display: none;"/>
                 </div>
               </div>
@@ -76,15 +75,14 @@
                     <div class="card-body">
                       <div class="row">
 
-                        <div class="col-md-3" #filters *ngFor="let effect of data?._effects;let i=index;" (click)="onAttributeChange( effect.effect  , 'effect')">
+                        <div class="col-md-3" #filters *ngFor="let filter of data?.filters;let i=index;" (click)="applyFilter( filter.toLowerCase() )">
                             <div class="shape-section filter">
-                                <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.effect == effect.effect }">
-                                    <figure class="{{ effect.effect }}">
+                                <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.filter == filter.toLowerCase() }">
+                                    <figure class="{{ filter.toLowerCase() }}">
                                         <img [src]="selectedImage" id="filter_{{i}}">
                                     </figure>
-                                    <!-- <canvas class="img-fluid" id="filter_canvas_{{i}}"></canvas> -->
                                 </div>
-                                <span>{{ effect.title }}</span>
+                                <span>{{ filter }}</span>
                             </div>
                         </div>
 
@@ -111,16 +109,15 @@
                           </div>
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'Colors' }" (click)="toggle = !toggle">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="open(content, 'color')">
                                       <img src="assets/_images/color.svg" alt="">
-                                      <input #ignoredInput 
+                                      <!-- <input #ignoredInput 
                                         style="width: 0px"
                                         [style.display]="!toggle ? 'none':' inherit' "
                                         [style.background]="selectedOptions.color"
                                         [(cpToggle)]="toggle"
                                         [(colorPicker)]="selectedOptions.color"
-                                        (colorPickerChange)="changeColor($event)"    />
-                                        <!-- <mat-color-picker></mat-color-picker> -->
+                                        (colorPickerChange)="changeColor($event)"    /> -->
                                   </div>
                                   
                                   <span>Color</span>
@@ -180,7 +177,7 @@
     <div class="custom-control custom-radio" *ngFor="let option of options; let i=index;">
       <input type="radio" class="custom-control-input" id="selectedOption_{{ i }}" name="{{ modalOpenedFor }}" 
             [value]="isString(option) ? (option | lowercase) : option" (change)="handlePropertyChange($event)">
-      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ ( modalOpenedFor == 'Colors' || modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow') ? data?.colorNames[i] : option }}</label>
+      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ ( modalOpenedFor == 'color' || modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow') ? data?.colorNames[i] : option }}</label>
     </div>
 
   </div>

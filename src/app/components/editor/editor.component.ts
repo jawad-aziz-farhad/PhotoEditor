@@ -27,8 +27,8 @@ export class EditorComponent implements OnInit  {
 
   modalOpenedFor: string;
   canvasSizes: any = {small : { width: 500, height : 500 },
-                              tall  : { width: 450, height : 900 },
-                              wide  : { width: 900, height : 450 },
+                              wide  : { width: 450, height : 900 },
+                              tall  : { width: 900, height : 450 },
                               large : { width: 900, height : 900 },
                               };
 
@@ -43,66 +43,105 @@ export class EditorComponent implements OnInit  {
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { filter: '', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , colors: '#000', stroke : '', strokeWidth : 0, canvasSize : 'small' , shadow: 0};
+    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , colors: '#000', stroke : '', strokeWidth : 0, canvasSize : 'small' , shadow: 0};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';
-    //this.drawWithFabricJS(this.selectedImage);
     
-    this.setBackground();
+   //this.drawWithFabricJS(this.selectedImage);
+    
+    this.setUpCanvas(this.selectedImage);
   }  
 
 
-  setBackground(){
-    
+  setUpCanvas(image) {
+
     this.canvas = new fabric.Canvas('canvas');    
-    this.canvas.setDimensions({width:this.canvas_Width, height:this.canvas_Height});
-    this.canvas.clear();
-
+    this.canvas.setHeight(this.canvas_Width);
+    this.canvas.setWidth(this.canvas_Height);
     
+    fabric.Image.fromURL(image, img => {
 
-     fabric.Image.fromURL(this.selectedImage, (img) => {
-
-      img.filters.push(new fabric.Image.filters.Grayscale());
-
-      
       img.scaleToWidth(this.canvas.getWidth());
-      img.scaleToHeight(this.canvas.getHeight());
-      // apply filters and re-render canvas when done
-      img.applyFilters();
-      // add image onto canvas (it also re-render the canvas)
+      
+      img.set({
+        scaleX :this.canvas.getWidth() / img.width,   //new update
+        scaleY: this.canvas.getHeight() / img.height,   //new update,
+        selectable: false
+      });
+
+      this.canvas.centerObject(img);
+      img.setCoords();
+      
+      if ( Math.max(img.width, img.height) > 2048) {
+        let fscale = 2048 / Math.max(img.width, img.height);
+        img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
+        img.applyFilters();
+      }
+    
       this.canvas.add(img);
+
+      let text = this.setText();
+
+      text.on("editing:entered",  (e)  => {
+        var obj = this.canvas.getActiveObject();
+        if(obj.text === 'Enter your text here')
+        {
+            obj.selectAll();
+            obj.text = "";
+            obj.fill = this.selectedOptions.colors;
+            obj.hiddenTextarea.value = "";
+            obj.dirty = true;
+            obj.setCoords();
+            this.canvas.renderAll();
+        }
+
+        else{
+          this.overLayText = obj.text;
+        }
+    });
+      this.canvas.add(text);
+      this.canvas.centerObject(text);
+      this.canvas.setActiveObject(text);
+      this.canvas.bringToFront(text);
+      
       this.canvas.renderAll();
-
-    //   img.scaleToWidth(this.canvas.getWidth());
-    //   img.scaleToHeight(this.canvas.getHeight());
-
-    //   img.filters.push(
-    //     new fabric.Image.filters.Grayscale()
-    //   );
     
-    //  img.applyFilters();
-    //   this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
-    //     scaleX: this.canvas.getWidth() / img.width,
-    //     scaleY: this.canvas.getHeight() / img.height
-    //   });
+    });
+  }
 
-    //   this.canvas.renderAll();
+  setText(){
+    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter your text here', {
+      fontSize: this.selectedOptions.fontSize,
+      fontFamily: this.selectedOptions.fontFamily,
+      fill: "#C0C0C0",
+      textAlign: this.selectedOptions.textAlign,
+      stroke: this.selectedOptions.stroke,
+      strokeWidth: this.selectedOptions.strokeWidth,
+    });
+
+     
     
-  });
+    return text;
   }
 
   drawWithFabricJS(selectedImage){
-    this.selectedImage = selectedImage;
     this.canvas = new fabric.Canvas('canvas');
-    this.canvas.clear();
     this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
+    this.canvas.clear();
     
-    fabric.Image.fromURL(this.selectedImage, (img) => {
+    fabric.Image.fromURL(selectedImage, (img) => {
 
       img.scaleToWidth(this.canvas.getWidth());
       img.scaleToHeight(this.canvas.getHeight());
       
+      if ( Math.max(img.width, img.height) > 2048) {
+        console.log('Greater than 2048.');
+        let fscale = 2048 / Math.max(img.width, img.height);
+        img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
+        img.applyFilters();
+      }
+
       this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
         scaleX: this.canvas.getWidth() / img.width,
         scaleY: this.canvas.getHeight() / img.height
@@ -122,7 +161,7 @@ export class EditorComponent implements OnInit  {
       this.canvas.setActiveObject(text);
       this.canvas.bringToFront(text);
 
-      text.on("editing:entered",  (e)  =>{
+      text.on("editing:entered",  (e)  => {
         var obj = this.canvas.getActiveObject();
         if(obj.text === 'Enter your text here')
         {
@@ -145,7 +184,6 @@ export class EditorComponent implements OnInit  {
   }
 
   changeColor(color){
-    console.log("Color Change", color);
     this.selectedOptions.color = `${color}`;
     this.canvas.getActiveObject().set("fill", `${color}`);
     this.canvas.renderAll();
@@ -159,8 +197,12 @@ export class EditorComponent implements OnInit  {
   onAttributeChange(value , attribute){
     switch(attribute){
       case 'canvasSize':
+      console.log('Size', value);
       this.selectedOptions.canvasSize = value;
       this.setCanvasSize(value);
+      break;
+      case 'imageChange':
+      this.selectedImage = value;
       break;
       case 'effect':
         this.selectedOptions.effect = value;
@@ -182,6 +224,7 @@ export class EditorComponent implements OnInit  {
       break;
       case 'color':
       this.selectedOptions.colors = value;
+      this.canvas.getActiveObject().set("fill", `${value}`);
       break;
       case 'shadow':
       this.selectedOptions.text_shadow = this.selectedOptions.text_shadow == 3 ? 0 :value;
@@ -197,8 +240,10 @@ export class EditorComponent implements OnInit  {
       break;
     }
 
-    if(attribute == 'canvasSize')
-      this.drawWithFabricJS(this.selectedImage);
+    if(attribute == 'canvasSize' || attribute == 'imageChange'){
+      this.canvas.clear();
+      this.setUpCanvas(this.selectedImage);
+    }
     else
       this.canvas.renderAll();
     
@@ -248,4 +293,36 @@ export class EditorComponent implements OnInit  {
     console.log(this.canvas_Width,canvasArea);
     return ( this.canvas_Width > canvasArea ) ?  canvasArea - 20 : this.canvas_Width;
   }
+
+  applyFilter(filter){
+    this.selectedOptions.filter = filter;
+    const obj = this.canvas.item(0);
+    if (obj.filters.length > 1) 
+      obj.filters.pop();
+    
+    switch(filter){
+      case 'gray':
+      obj.filters.push(new fabric.Image.filters.Grayscale());
+      break;
+      case 'sepia':
+      obj.filters.push(new fabric.Image.filters.Sepia());
+      break;
+      case 'brownie':
+      const _filter = new fabric.Image.filters.ColorMatrix({
+        matrix: [0.59970, 0.34553, -0.27082, 0, 0.186, -0.03770, 0.86095, 0.15059, 0, -0.1449, 0.24113, -0.07441, 0.44972, 0, -0.02965, 0, 0, 0, 1, 0]
+      });
+      obj.filters.push(_filter);
+      break;
+      case 'invert':
+      obj.filters.push(new fabric.Image.filters.Invert());
+      break;
+      
+      default:
+      break;
+    }
+
+    obj.applyFilters();
+    this.canvas.renderAll();
+  }
+
 }
