@@ -4,27 +4,24 @@
 <div class="canvas-wrapper">
 
     <div class="canvas-drawer">
-      <!-- <div class="canvas-content resize-able tall">
-      </div> -->
-        <div class="row m-2">
-
-            <!-- 1st Column -->
-            <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
-              <div class="row" *ngFor="let image of images;let i=index;" (click)="onAttributeChange(image , 'imageChange')">
-                <div class="col">
-                  <img class="img-fluid" [src]="image"/>
-                  <img #img [src]="selectedImage" style="display: none;"/>
-                </div>
-              </div>
+      <div class="row m-2">
+        <!-- 1st Column -->
+        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
+          <div class="row" *ngFor="let image of images;let i=index;" (click)="onAttributeChange(image , 'imageChange')">
+            <div class="col">
+              <img class="img-fluid" [src]="image"/>
+              <img #img [src]="selectedImage" style="display: none;"/>
             </div>
-            <!-- /. 1st Column -->
-        
-            <!-- 2nd Column -->
-            <div #canvasArea class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border border-dark" >
-                <canvas id="canvas"></canvas>       
-            </div>
-            <!-- /. 2nd Column -->
+          </div>
         </div>
+        <!-- /. 1st Column -->
+    
+        <!-- 2nd Column -->
+        <div #canvasArea id="canvas_area" class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border border-dark" >
+          <canvas id="canvas"></canvas>       
+        </div>
+        <!-- /. 2nd Column -->
+      </div>
     </div>
 
     <div class="canvas-controls">
@@ -111,21 +108,13 @@
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="open(content, 'color')">
                                       <img src="assets/_images/color.svg" alt="">
-                                      <!-- <input #ignoredInput 
-                                        style="width: 0px"
-                                        [style.display]="!toggle ? 'none':' inherit' "
-                                        [style.background]="selectedOptions.color"
-                                        [(cpToggle)]="toggle"
-                                        [(colorPicker)]="selectedOptions.color"
-                                        (colorPickerChange)="changeColor($event)"    /> -->
-                                  </div>
-                                  
+                                  </div>                                  
                                   <span>Color</span>
                               </div>
                           </div>
                           <div class="col-md-2">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke == 1 }" (click)="open(content, 'stroke')">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' }" (click)="open(content, 'stroke')">
                                       <img src="assets/_images/stroke.svg" alt="">
                                   </div>
                                   <span>Stroke</span>
@@ -134,7 +123,7 @@
 
                           <div class="col-md-2" >
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow == 3 }"  (click)="open(content, 'shadow')">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' }"  (click)="open(content, 'shadow')">
                                       <img src="assets/_images/shadow.svg" alt="">
                                   </div>
                                   <span>Shadow</span>
@@ -171,21 +160,22 @@
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{ modalOpenedFor }}</h4>
   </div>
-  <div class="modal-body">
-   
-
+  <div class="modal-body" *ngIf="['textAlign', 'fontFamily'].indexOf(modalOpenedFor) > -1">   
     <div class="custom-control custom-radio" *ngFor="let option of options; let i=index;">
       <input type="radio" class="custom-control-input" id="selectedOption_{{ i }}" name="{{ modalOpenedFor }}" 
-            [value]="isString(option) ? (option | lowercase) : option" (change)="handlePropertyChange($event)">
-      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ ( modalOpenedFor == 'color' || modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow') ? data?.colorNames[i] : option }}</label>
+        [value]="(option | lowercase)" (change)="handlePropertyChange($event)">
+      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ option }}</label>
     </div>
-
   </div>
+
+  <div *ngIf="['textAlign', 'fontFamily'].indexOf(modalOpenedFor) == -1">
+    <color-sketch [color]="color" (onChangeComplete)="handlePropertyChange($event)"></color-sketch>
+  </div>
+
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-dark"  aria-label="Close" (click)="modal.dismiss('Cancel')">
-      Cancel
+      Close
     </button>
-    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Apply')">Apply</button>
   </div>
 </ng-template>
 

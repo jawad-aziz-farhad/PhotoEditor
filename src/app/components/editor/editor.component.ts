@@ -3,6 +3,8 @@ import { Data } from 'src/app/models/data';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { fabric } from 'fabric';
 
+declare var $: any;
+
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
@@ -11,6 +13,7 @@ import { fabric } from 'fabric';
 export class EditorComponent implements OnInit  {
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
+  @ViewChildren('filters') filters : QueryList<any>;
 
   canvas: any
   data: any;
@@ -33,7 +36,7 @@ export class EditorComponent implements OnInit  {
                               };
 
   color: string = "#000";                            
-  @ViewChildren('filters') filters : QueryList<any>;
+  
 
 
   constructor(private modalService: NgbModal) { }
@@ -43,31 +46,34 @@ export class EditorComponent implements OnInit  {
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , colors: '#000', stroke : '', strokeWidth : 0, canvasSize : 'small' , shadow: 0};
+    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 0, canvasSize : 'small' , shadow: ''};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';
     
-   //this.drawWithFabricJS(this.selectedImage);
-    
+   //this.drawWithFabricJS(this.selectedImage);    
     this.setUpCanvas(this.selectedImage);
   }  
 
 
-  setUpCanvas(image) {
-
+  setUpCanvas(image) {  
+    $('#canvas_area').find('.canvas-container').css({margin: ''});
     this.canvas = new fabric.Canvas('canvas');    
-    this.canvas.setHeight(this.canvas_Width);
+    this.canvas.setHeight(this.canvasWidth);
     this.canvas.setWidth(this.canvas_Height);
     
     fabric.Image.fromURL(image, img => {
 
-      img.scaleToWidth(this.canvas.getWidth());
-      
+      //img.scaleToWidth(this.canvas.getWidth());
+      //img.scaleToHeight(this.canvas.getHeight());
+     
       img.set({
         scaleX :this.canvas.getWidth() / img.width,   //new update
         scaleY: this.canvas.getHeight() / img.height,   //new update,
-        selectable: false
+        originX: "center", 
+        originY: "center",
+        selectable: false,
+        centeredScaling: true
       });
 
       this.canvas.centerObject(img);
@@ -78,50 +84,123 @@ export class EditorComponent implements OnInit  {
         img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
         img.applyFilters();
       }
+
+      this.canvas.on('mouse:wheel', (opt) => {
+        var delta = opt.e.deltaY;
+        var zoom = this.canvas.getZoom();
+        zoom = zoom + delta/200;
+        if (zoom > 20) zoom = 20;
+        if (zoom < 0.01) zoom = 0.01;
+        this.canvas.setZoom(zoom);
+        opt.e.preventDefault();
+        opt.e.stopPropagation();
+      });
     
       this.canvas.add(img);
 
       let text = this.setText();
 
-      text.on("editing:entered",  (e)  => {
+      this.canvas.on('text:changed', (e) => {
         var obj = this.canvas.getActiveObject();
-        if(obj.text === 'Enter your text here')
-        {
-            obj.selectAll();
-            obj.text = "";
-            obj.fill = this.selectedOptions.colors;
-            obj.hiddenTextarea.value = "";
-            obj.dirty = true;
+        
+        // Text now empty, show placeholder:
+        if(obj.getText() === '')
+          {
+          obj.setText('Enter text');
+          obj.set('opacity', 0.3);
+          obj.set('showplaceholder', true); // Set flag on IText object
+          obj.setCoords();
+          this.canvas.renderAll();
+          }
+        
+        // Placeholder currently active:
+        else if(obj.get('showplaceholder') === true)
+          {
+          // The text in the IText should now be the placeholder plus the character that  was pressed, so text and placeholder should be different, so remove the placeholder (unless the pressed key was backspace in which case do nothing):
+          if(e.target.text !== 'Enter text')
+            {
+            // New char should be at position 0, so remove placeholder from rest of text:
+            obj.setText(obj.getText().substr(0,1));
+            obj._updateTextarea();
+            obj.set('opacity', 1);
+            obj.set('showplaceholder', false); // Remove flag on IText object
             obj.setCoords();
-            this.canvas.renderAll();
-        }
+            this.canvas.renderAll();	
+            }
+          }
+        });
+        
+        // Editing mode is entered on the IText
+        this.canvas.on('text:editing:entered', (e) => {
+        var obj = this.canvas.getActiveObject();
+        
+        // If the placeholder is active, move the cursor to position 0 so we
+        // can trim the string correctly when typing starts:
+        if(obj.get('showplaceholder') == true)
+          {
+          // Move cursor to beginning of line:
+          obj.setSelectionStart(0);
+          obj.setSelectionEnd(0);
+          this.canvas.renderAll();
+          }
+        });
 
-        else{
-          this.overLayText = obj.text;
-        }
-    });
-      this.canvas.add(text);
-      this.canvas.centerObject(text);
-      this.canvas.setActiveObject(text);
-      this.canvas.bringToFront(text);
+    // text.on("editing:entered",  (e)  => {
+    //   var obj = this.canvas.getActiveObject();
+    //   if(obj.text === 'Enter your text here')
+    //   {
+    //       obj.selectAll();
+    //       obj.text = "";
+    //       obj.selectable = true;
+    //       obj.fill = this.selectedOptions.fill;
+    //       obj.hiddenTextarea.value = "";
+    //       obj.dirty = true;
+    //       obj.setCoords();
+    //       this.canvas.renderAll();
+    //   }
+
+    //   else{
+    //     this.overLayText = obj.text;
+    //   }
+    // });
+
+    // text.on("editing:exited",  (e)  => {
+    //   var obj = this.canvas.getActiveObject();
+    //   if(obj.text == '')
+    //   {
+    //       obj.selectAll();
+    //       obj.text = "Enter your text here";
+    //       obj.selectable = true;
+    //       obj.fill = "#C0C0C0";
+    //       obj.dirty = false;
+    //       //obj.setCoords();
+          
+    //       this.canvas.centerObjectH(obj);
+    //       this.canvas.setActiveObject(obj);
+    //       this.canvas.renderAll();
+    //   }
+    // });
+
+    this.canvas.add(text);
+    this.canvas.centerObject(text);
+    this.canvas.setActiveObject(text);
+    this.canvas.bringToFront(text);
       
-      this.canvas.renderAll();
+    this.canvas.renderAll();
     
     });
   }
 
   setText(){
-    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter your text here', {
+    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter text', {
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
       textAlign: this.selectedOptions.textAlign,
       stroke: this.selectedOptions.stroke,
       strokeWidth: this.selectedOptions.strokeWidth,
+      shadow : this.selectedOptions.shadow
     });
-
-     
-    
     return text;
   }
 
@@ -167,7 +246,7 @@ export class EditorComponent implements OnInit  {
         {
             obj.selectAll();
             obj.text = "";
-            obj.fill = this.selectedOptions.colors;
+            obj.fill = this.selectedOptions.fill;
             obj.hiddenTextarea.value = "";
             obj.dirty = true;
             obj.setCoords();
@@ -188,16 +267,10 @@ export class EditorComponent implements OnInit  {
     this.canvas.getActiveObject().set("fill", `${color}`);
     this.canvas.renderAll();
   }
-
-  get images(): Array<any> {
-    return ['assets/images/image-1.jpg', 'assets/images/image-2.jpg' , 'assets/images/image-3.jpg' , 'assets/images/image-4.jpg' , 'assets/images/image-5.jpg']
-  }
-
   
   onAttributeChange(value , attribute){
     switch(attribute){
       case 'canvasSize':
-      console.log('Size', value);
       this.selectedOptions.canvasSize = value;
       this.setCanvasSize(value);
       break;
@@ -208,33 +281,35 @@ export class EditorComponent implements OnInit  {
         this.selectedOptions.effect = value;
       break;
       case 'fontFamily':
-      this.selectedOptions.font_family = value;      
+      this.selectedOptions.fontFamily = value;      
       this.canvas.getActiveObject().set("fontFamily", value);
       break;
       case 'fontStyle':
-      this.selectedOptions.font_style = value;
+      this.selectedOptions.fontStyle = value;
       break;
       case 'fontSize':
-      this.selectedOptions.font_size =value;
+      this.selectedOptions.fontSize =value;
       this.canvas.getActiveObject().set("fontSize", value);
       break;
       case 'fontWeight':
-      this.selectedOptions.font_weight = value;
+      this.selectedOptions.fontWeight = value;
       this.canvas.getActiveObject().set("fontWeight", value);
       break;
       case 'color':
-      this.selectedOptions.colors = value;
+      this.selectedOptions.fill = value;
       this.canvas.getActiveObject().set("fill", `${value}`);
       break;
       case 'shadow':
-      this.selectedOptions.text_shadow = this.selectedOptions.text_shadow == 3 ? 0 :value;
-      const shadow = `${value}` + ' 3px 3px 3px'
+      const shadow = `${value}` + ' 3px 3px 3px';
+      this.selectedOptions.shadow = shadow;
       this.canvas.getActiveObject().set("shadow", shadow);
       break;
       case 'stroke':
       this.canvas.getActiveObject().set('stroke', value);
       this.canvas.getActiveObject().set('strokeWidth' , 2);
+      this.selectedOptions.stroke = value;
       case 'textAlign':
+      this.selectedOptions.textAlign = value.toLowerCase();
       this.canvas.getActiveObject().set('textAlign', `${value.toLowerCase()}`);
       default:
       break;
@@ -256,15 +331,21 @@ export class EditorComponent implements OnInit  {
 
   open(content, option) {
     this.modalOpenedFor = option;
+    if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
+      this.selectedOptions[this.modalOpenedFor] = '';
+      const obj = this.canvas.getActiveObject();
+      obj.set(this.modalOpenedFor, '');
+      this.canvas.renderAll();
+      return;
+    }
     this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
-      console.log('Close Result', this.selectedOptions);
     }, (reason) => {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
   }
 
-  private getDismissReason(reason: any): string {
+  getDismissReason(reason: any): string {
     if (reason === ModalDismissReasons.ESC) {
       return 'by pressing ESC';
     } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
@@ -274,24 +355,12 @@ export class EditorComponent implements OnInit  {
     }
   }
 
-  get options() {
-    return this.modalOpenedFor ? this.data[this.modalOpenedFor] : [];
-  }
-
   handlePropertyChange(event){
-    if(event.target.checked) {
+    if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
-    }
-  }
-
-  isString(value){ return typeof value == 'string' ? true : false;}
-
-  isSelected(value){ return this.selectedOptions[this.modalOpenedFor.toLowerCase().replace(' ', '_')] = value ? true : false; }
-
-  get canvasWidth(){
-    const canvasArea = this.canvasArea.nativeElement.offsetWidth;
-    console.log(this.canvas_Width,canvasArea);
-    return ( this.canvas_Width > canvasArea ) ?  canvasArea - 20 : this.canvas_Width;
+    else if(event.color.hex)
+       this.onAttributeChange(event.color.hex , this.modalOpenedFor);    
+    
   }
 
   applyFilter(filter){
@@ -324,5 +393,44 @@ export class EditorComponent implements OnInit  {
     obj.applyFilters();
     this.canvas.renderAll();
   }
+
+  createImageRatioSize(maxW, maxH, imgW, imgH) {
+    var ratio = imgH / imgW;
+    if (imgW >= maxW && ratio <= 1){
+        imgW = maxW;
+        imgH = imgW * ratio;
+    } else if(imgH >= maxH){
+        imgH = maxH;
+        imgW = imgH / ratio;
+    } else if (ratio !== 1) {
+        if (imgW > imgH) {
+            imgW = maxW;
+            imgH = imgW * ratio;
+        } else {
+            imgH = maxH;
+            imgW = imgH / ratio;
+        }
+    }
+
+    return {
+        w: imgW,
+        h: imgH
+    };
+}
+  
+  get images(): Array<any> {
+    return ['assets/images/image-1.jpg', 'assets/images/image-2.jpg' , 'assets/images/image-3.jpg' , 'assets/images/image-4.jpg' , 'assets/images/image-5.jpg']
+  }
+
+  get canvasWidth(){
+    const canvasArea = this.canvasArea.nativeElement.offsetWidth;
+    return ( this.canvas_Width > canvasArea ) ?  canvasArea - 20 : this.canvas_Width;
+  }
+
+  get options() {
+    return this.modalOpenedFor ? this.data[this.modalOpenedFor] : [];
+  }
+
+  
 
 }
