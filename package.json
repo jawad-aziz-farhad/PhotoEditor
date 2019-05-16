@@ -28,6 +28,7 @@
     "jquery": "^3.4.1",
     "mat-color-picker": "^1.4.3",
     "md-color-menu": "^0.5.2",
+    "ngx-color": "^2.0.7",
     "ngx-color-picker": "^7.5.0",
     "popper": "^1.0.1",
     "popper.js": "^1.15.0",

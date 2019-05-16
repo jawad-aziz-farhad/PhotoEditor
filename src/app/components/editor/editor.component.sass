@@ -141,15 +141,22 @@ body
 .btn-save:before
   background-image: url('../../../assets/_images/tick.svg')
 
-
 .gray
+  -webkit-filter: grayscale(50%); /* Safari 6.0 - 9.0 */
   filter: grayscale(50%)
 
 .blur-effect 
+  -webkit-filter: blur(0.8px) /* Safari 6.0 - 9.0 */
   filter: blur(0.8px)
 
 .brightness
+  -webkit-filter: brightness(1.0) /* Safari 6.0 - 9.0 */
   filter: brightness(1.0)
 
 .sepia
+  -webkit-filter: sepia(60%) /* Safari 6.0 - 9.0 */
   filter: sepia(60%)  
+  
+.invert 
+  -webkit-filter: invert(20%);; /* Safari 6.0 - 9.0 */
+  filter: invert(20%)
