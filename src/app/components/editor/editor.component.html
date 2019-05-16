@@ -34,7 +34,7 @@
                     <button class="btn btn-block btn-done btn-action">Done</button>
                 </div>
                 <div class="col-md-4">
-                    <button class="btn btn-block btn-save btn-action">Save</button>
+                    <button class="btn btn-block btn-save btn-action" (click)="saveCanvasAsImage()">Save</button>
                 </div>
             </div>
         </div>
@@ -42,11 +42,18 @@
             <div class="accordion" id="accordionExample">
               <div class="card c-shapes">
                 <div class="card-header p-0" id="headingOne">
-                    <a href="#" class="btn btn-link coll-exp" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    <!-- <a href="#" class="btn btn-link coll-exp" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                       Shape
-                    </a>
-                </div>
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
+                    </a> -->
+                    <button class="btn btn-link collapsed coll-exp float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                      Shape
+                    </button>
+                    <button type="button" class="btn btn-default btn-sm float-right" (click)="showShapeArea = !showShapeArea">
+                      <i *ngIf="showShapeArea" class="fas fa-chevron-up"></i>
+                      <i *ngIf="!showShapeArea" class="fas fa-chevron-down"></i>
+                    </button>
+                  </div>
+                <div id="collapseOne" [hidden]="!showShapeArea" class="collapse show" aria-labelledby="headingOne">
                   <div class="card-body">
                     <div class="row">
 
@@ -62,13 +69,23 @@
                     </div>
                 </div>
               </div>
-                <div class="card c-effects">
+              
+              
+
+              <div class="card c-effects">
                   <div class="card-header p-0" id="headingTwo">
-                  <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                    Filters
-                  </a>
+                    <!-- <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                      Filters
+                    </a> -->
+                    <button class="btn btn-link collapsed coll-exp float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                      Filters
+                    </button>
+                    <button type="button" class="btn btn-default btn-sm float-right" (click)="showFilterArea = !showFilterArea">
+                      <i *ngIf="showFilterArea" class="fas fa-chevron-up"></i>
+                      <i *ngIf="!showFilterArea" class="fas fa-chevron-down"></i>
+                    </button>
                   </div>
-                  <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo">
+                  <div id="collapseTwo" [hidden]="!showFilterArea" class="collapse show" aria-labelledby="headingTwo">
                     <div class="card-body">
                       <div class="row">
 
@@ -89,14 +106,19 @@
                 </div>
                 <div class="card c-options">
                   <div class="card-header p-0" id="headingThree">
-                      <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        Text Options
-                      </a>
+                    <div class="form-check float-left">
+                      <input type="checkbox" class="form-check-input" id="addText" (change)="onCanvasTextChange($event)" [checked]="showCanvasText">
+                      <label class="form-check-label" for="addText">{{ showCanvasText ? 'Remove Text' : 'Add Text' }}</label>
+                    </div>
+                    <button type="button" class="btn btn-default btn-sm float-right" (click)="showTextArea = !showTextArea">
+                      <i *ngIf="showTextArea" class="fas fa-chevron-up"></i>
+                      <i *ngIf="!showTextArea" class="fas fa-chevron-down"></i>
+                    </button>
                   </div>
-                  <div id="collapseThree" class="collapse show" aria-labelledby="headingThree">
+                  <div id="collapseThree" [hidden]="!showTextArea" class="" aria-labelledby="headingThree">
                     <div class="card-body">
                       <div class="row no-gutters">
-                          <div class="col-md-2">
+                          <div class="col">
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'fontFamily' }" (click)="open(content, 'fontFamily')">
                                       <img src="assets/_images/font.svg" alt="">
@@ -104,7 +126,7 @@
                                   <span>Font</span>
                               </div>
                           </div>
-                          <div class="col-md-2">
+                          <div class="col">
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="open(content, 'color')">
                                       <img src="assets/_images/color.svg" alt="">
@@ -112,7 +134,7 @@
                                   <span>Color</span>
                               </div>
                           </div>
-                          <div class="col-md-2">
+                          <div class="col">
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' }" (click)="open(content, 'stroke')">
                                       <img src="assets/_images/stroke.svg" alt="">
@@ -121,7 +143,7 @@
                               </div>
                           </div>
 
-                          <div class="col-md-2" >
+                          <div class="col" >
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' }"  (click)="open(content, 'shadow')">
                                       <img src="assets/_images/shadow.svg" alt="">
@@ -138,7 +160,7 @@
                               </div>
                           </div> -->
 
-                          <div class="col-md-2">
+                          <div class="col">
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'textAlign' }" (click)="open(content, 'textAlign')">
                                       <img src="assets/_images/left-alignment.svg" alt="">
@@ -146,9 +168,18 @@
                                   <span>Align</span>
                               </div>
                           </div>
+
                       </div>
+
+                      <div class="row">
+                        <div class="col" #colorPickerCol >
+                          <app-color-slider *ngIf="colorPickerWidth" [canvasWidth]="colorPickerWidth" (color)="handlePropertyChange($event)"></app-color-slider>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
+
                 </div>
               </div>
           </div>
@@ -159,6 +190,9 @@
 <ng-template #content let-modal>
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{ modalOpenedFor }}</h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('Cancel')">
+      <span aria-hidden="true">&times;</span>
+    </button>
   </div>
   <div class="modal-body" *ngIf="['textAlign', 'fontFamily'].indexOf(modalOpenedFor) > -1">   
     <div class="custom-control custom-radio" *ngFor="let option of options; let i=index;">
@@ -173,9 +207,6 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark"  aria-label="Close" (click)="modal.dismiss('Cancel')">
-      Close
-    </button>
   </div>
 </ng-template>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { fabric } from 'fabric';
@@ -10,9 +10,10 @@ declare var $: any;
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.sass']
 })
-export class EditorComponent implements OnInit  {
+export class EditorComponent implements OnInit , AfterViewInit {
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
+  @ViewChild('colorPickerCol') colorPickerCol: ElementRef;
   @ViewChildren('filters') filters : QueryList<any>;
 
   canvas: any
@@ -28,15 +29,21 @@ export class EditorComponent implements OnInit  {
 
   private closeResult: string;
 
+  showShapeArea: boolean;
+  showFilterArea: boolean;
+  showTextArea: boolean;
+
+  showCanvasText: boolean;
+
   modalOpenedFor: string;
   canvasSizes: any = {small : { width: 500, height : 500 },
-                              wide  : { width: 450, height : 900 },
-                              tall  : { width: 900, height : 450 },
+                              tall  : { width: 450, height : 900 },
+                              wide  : { width: 900, height : 450 },
                               large : { width: 900, height : 900 },
                               };
 
   color: string = "#000";                            
-  
+  colorPickerWidth: any;
 
 
   constructor(private modalService: NgbModal) { }
@@ -49,18 +56,32 @@ export class EditorComponent implements OnInit  {
     this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 0, canvasSize : 'small' , shadow: ''};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
-    this.modalOpenedFor = '';
-    
+    this.modalOpenedFor = '';   
+   
+    this.showShapeArea = true;
+    this.showFilterArea = true;
+    this.showTextArea = true;
+    this.showCanvasText = true;
+
+
+    this.colorPickerWidth = this.colorPickerCol.nativeElement.offsetWidth;
+
    //this.drawWithFabricJS(this.selectedImage);    
     this.setUpCanvas(this.selectedImage);
   }  
 
+  ngAfterViewInit(){
+    console.log('Color Picker ', this.colorPickerWidth);
+  }
+
+  
+
 
   setUpCanvas(image) {  
-    $('#canvas_area').find('.canvas-container').css({margin: ''});
+    
     this.canvas = new fabric.Canvas('canvas');    
-    this.canvas.setHeight(this.canvasWidth);
-    this.canvas.setWidth(this.canvas_Height);
+    this.canvas.setWidth(this.canvasWidth);
+    this.canvas.setHeight(this.canvas_Height);
     
     fabric.Image.fromURL(image, img => {
 
@@ -96,98 +117,11 @@ export class EditorComponent implements OnInit  {
         opt.e.stopPropagation();
       });
     
-      this.canvas.add(img);
+    this.canvas.add(img);
 
-      let text = this.setText();
-
-      this.canvas.on('text:changed', (e) => {
-        var obj = this.canvas.getActiveObject();
-        
-        // Text now empty, show placeholder:
-        if(obj.getText() === '')
-          {
-          obj.setText('Enter text');
-          obj.set('opacity', 0.3);
-          obj.set('showplaceholder', true); // Set flag on IText object
-          obj.setCoords();
-          this.canvas.renderAll();
-          }
-        
-        // Placeholder currently active:
-        else if(obj.get('showplaceholder') === true)
-          {
-          // The text in the IText should now be the placeholder plus the character that  was pressed, so text and placeholder should be different, so remove the placeholder (unless the pressed key was backspace in which case do nothing):
-          if(e.target.text !== 'Enter text')
-            {
-            // New char should be at position 0, so remove placeholder from rest of text:
-            obj.setText(obj.getText().substr(0,1));
-            obj._updateTextarea();
-            obj.set('opacity', 1);
-            obj.set('showplaceholder', false); // Remove flag on IText object
-            obj.setCoords();
-            this.canvas.renderAll();	
-            }
-          }
-        });
-        
-        // Editing mode is entered on the IText
-        this.canvas.on('text:editing:entered', (e) => {
-        var obj = this.canvas.getActiveObject();
-        
-        // If the placeholder is active, move the cursor to position 0 so we
-        // can trim the string correctly when typing starts:
-        if(obj.get('showplaceholder') == true)
-          {
-          // Move cursor to beginning of line:
-          obj.setSelectionStart(0);
-          obj.setSelectionEnd(0);
-          this.canvas.renderAll();
-          }
-        });
-
-    // text.on("editing:entered",  (e)  => {
-    //   var obj = this.canvas.getActiveObject();
-    //   if(obj.text === 'Enter your text here')
-    //   {
-    //       obj.selectAll();
-    //       obj.text = "";
-    //       obj.selectable = true;
-    //       obj.fill = this.selectedOptions.fill;
-    //       obj.hiddenTextarea.value = "";
-    //       obj.dirty = true;
-    //       obj.setCoords();
-    //       this.canvas.renderAll();
-    //   }
-
-    //   else{
-    //     this.overLayText = obj.text;
-    //   }
-    // });
-
-    // text.on("editing:exited",  (e)  => {
-    //   var obj = this.canvas.getActiveObject();
-    //   if(obj.text == '')
-    //   {
-    //       obj.selectAll();
-    //       obj.text = "Enter your text here";
-    //       obj.selectable = true;
-    //       obj.fill = "#C0C0C0";
-    //       obj.dirty = false;
-    //       //obj.setCoords();
-          
-    //       this.canvas.centerObjectH(obj);
-    //       this.canvas.setActiveObject(obj);
-    //       this.canvas.renderAll();
-    //   }
-    // });
-
-    this.canvas.add(text);
-    this.canvas.centerObject(text);
-    this.canvas.setActiveObject(text);
-    this.canvas.bringToFront(text);
-      
+    this.setText();
     this.canvas.renderAll();
-    
+
     });
   }
 
@@ -201,7 +135,85 @@ export class EditorComponent implements OnInit  {
       strokeWidth: this.selectedOptions.strokeWidth,
       shadow : this.selectedOptions.shadow
     });
-    return text;
+
+    this.setTextEvents(text); 
+    this.canvas.add(text);
+    this.canvas.centerObject(text);
+    this.canvas.setActiveObject(text);
+    this.canvas.bringToFront(text);
+  }
+
+  setTextEvents(text){
+
+    this.canvas.on('text:changed', (e) => {
+      var obj = this.canvas.getActiveObject();
+      
+      // Text now empty, show placeholder:
+      if(obj.text === '')
+      {
+        obj.text = 'Enter text';
+        obj.set('opacity', 0.3);
+        obj.set('showplaceholder', true); // Set flag on IText object
+        obj.setCoords();
+        this.canvas.renderAll();
+      }
+      else if(obj.text === 'Enter text'){
+        obj.selectAll();
+        obj.text = "";
+        obj.selectable = true;
+        obj.fill = this.selectedOptions.fill;
+        obj.hiddenTextarea.value = "";
+        obj.dirty = true;
+        obj.setCoords();
+        this.canvas.renderAll();
+      }
+
+      
+      // Placeholder currently active:
+      else if(obj.get('showplaceholder') === true)
+        {
+        // The text in the IText should now be the placeholder plus the character that  was pressed, so text and placeholder should be different, so remove the placeholder (unless the pressed key was backspace in which case do nothing):
+        if(obj.text !== 'Enter text')
+          {           
+          // New char should be at position 0, so remove placeholder from rest of text:
+          obj.text = obj.text.substr(0,1);
+          obj._updateTextarea();
+          obj.set('opacity', 1);
+          obj.set('showplaceholder', false); // Remove flag on IText object
+          obj.setCoords();
+          this.canvas.renderAll();	
+          }
+        }
+      });
+      
+      // Editing mode is entered on the IText
+      this.canvas.on('text:editing:entered', (e) => {
+      var obj = this.canvas.getActiveObject();
+      
+      // If the placeholder is active, move the cursor to position 0 so we
+      // can trim the string correctly when typing starts:
+      if(obj.text === 'Enter text')
+        {
+          // Move cursor to beginning of line:
+          obj.selectAll();
+          obj.text = "";
+          obj.selectable = true;
+          obj.fill = this.selectedOptions.fill;
+          obj.hiddenTextarea.value = "";
+          obj.dirty = true;
+          obj.setCoords();
+          this.canvas.renderAll();
+        }
+      });
+
+      text.on("editing:exited",  (e)  => {
+        var obj = this.canvas.getActiveObject();
+        if(obj.text == ''){
+          this.canvas.remove(obj);
+          this.setText();   
+          this.canvas.renderAll();
+        }
+      });
   }
 
   drawWithFabricJS(selectedImage){
@@ -317,6 +329,7 @@ export class EditorComponent implements OnInit  {
 
     if(attribute == 'canvasSize' || attribute == 'imageChange'){
       this.canvas.clear();
+      this.canvas.dispose();
       this.setUpCanvas(this.selectedImage);
     }
     else
@@ -356,11 +369,11 @@ export class EditorComponent implements OnInit  {
   }
 
   handlePropertyChange(event){
+    console.log('Event value', event);
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
     else if(event.color.hex)
-       this.onAttributeChange(event.color.hex , this.modalOpenedFor);    
-    
+      this.onAttributeChange(event.color.hex , this.modalOpenedFor);
   }
 
   applyFilter(filter){
@@ -429,6 +442,41 @@ export class EditorComponent implements OnInit  {
 
   get options() {
     return this.modalOpenedFor ? this.data[this.modalOpenedFor] : [];
+  }
+
+  onCanvasTextChange(event){
+    if(event.target.checked)
+      this.setText();
+    else {
+      const obj = this.canvas.getActiveObject();
+      this.canvas.remove(obj);
+    }
+    this.showCanvasText = event.target.checked;
+    this.canvas.renderAll();
+  }
+
+  dataURLtoBlob(dataurl) {
+    let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+     bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+  }
+
+  saveCanvasAsImage(){
+    let obj = this.canvas.getActiveObject();
+    if(obj.text == 'Enter text'){
+      this.canvas.remove(obj);
+      this.canvas.renderAll();
+    }
+    const link = document.createElement("a");
+    const imgData = this.canvas.toDataURL({format: 'png', multiplier: 4});
+    const blob = this.dataURLtoBlob(imgData);
+    const objurl = URL.createObjectURL(blob);
+    link.download = new Date().getTime() + ".png";
+    link.href = objurl;
+    link.click();
   }
 
   

@@ -10,9 +10,11 @@ import { HomeComponent } from './home/home.component';
 import { TestComponent } from './test/test.component';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { EditorComponent } from './editor/editor.component';
+import { ColorPalleteComponent } from './color-pallete/color-pallete.component';
+import { ColorSliderComponent } from './color-slider/color-slider.component';
 
 @NgModule({
-    declarations: [NavbarComponent, HomeComponent , TestComponent, EditorComponent
+    declarations: [NavbarComponent, HomeComponent , TestComponent, EditorComponent, ColorPalleteComponent, ColorSliderComponent
     ],
     imports: [
       BrowserModule,
