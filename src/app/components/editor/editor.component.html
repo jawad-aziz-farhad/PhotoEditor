@@ -45,7 +45,7 @@
                     <!-- <a href="#" class="btn btn-link coll-exp" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                       Shape
                     </a> -->
-                    <button class="btn btn-link collapsed coll-exp float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                       Shape
                     </button>
                     <button type="button" class="btn btn-default btn-sm float-right" (click)="showShapeArea = !showShapeArea">
@@ -68,8 +68,7 @@
 
                     </div>
                 </div>
-              </div>
-              
+              </div>             
               
 
               <div class="card c-effects">
@@ -77,7 +76,7 @@
                     <!-- <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                       Filters
                     </a> -->
-                    <button class="btn btn-link collapsed coll-exp float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                       Filters
                     </button>
                     <button type="button" class="btn btn-default btn-sm float-right" (click)="showFilterArea = !showFilterArea">
@@ -87,9 +86,9 @@
                   </div>
                   <div id="collapseTwo" [hidden]="!showFilterArea" class="collapse show" aria-labelledby="headingTwo">
                     <div class="card-body">
-                      <div class="row">
+                      <div class="row no-gutters">
 
-                        <div class="col-md-3" #filters *ngFor="let filter of data?.filters;let i=index;" (click)="applyFilter( filter.toLowerCase() )">
+                        <div class="col" #filters *ngFor="let filter of data?.filters;let i=index;" (click)="applyFilter( filter.toLowerCase() )">
                             <div class="shape-section filter">
                                 <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.filter == filter.toLowerCase() }">
                                     <figure class="{{ filter.toLowerCase() }}">
@@ -103,8 +102,10 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="card c-options">
+              </div>
+              
+              
+              <div class="card c-options">
                   <div class="card-header p-0" id="headingThree">
                     <div class="form-check float-left">
                       <input type="checkbox" class="form-check-input" id="addText" (change)="onCanvasTextChange($event)" [checked]="showCanvasText">
@@ -117,6 +118,13 @@
                   </div>
                   <div id="collapseThree" [hidden]="!showTextArea" class="" aria-labelledby="headingThree">
                     <div class="card-body">
+                      <!-- Color Picker-->
+                      <div class="row no-gutters mb-1" [hidden]="!showColorPicker$">
+                        <div class="col" #colorPickerCol>
+                          <app-color-slider *ngIf="colorPickerWidth" [canvasWidth]="colorPickerWidth" (color)="handlePropertyChange($event)"></app-color-slider>
+                        </div>
+                      </div>
+
                       <div class="row no-gutters">
                           <div class="col">
                               <div class="shape-section typo">
@@ -128,7 +136,7 @@
                           </div>
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="open(content, 'color')">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="showColorPicker('color')">
                                       <img src="assets/_images/color.svg" alt="">
                                   </div>                                  
                                   <span>Color</span>
@@ -136,16 +144,16 @@
                           </div>
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' }" (click)="open(content, 'stroke')">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' }" (click)="showColorPicker('stroke')">
                                       <img src="assets/_images/stroke.svg" alt="">
                                   </div>
                                   <span>Stroke</span>
                               </div>
                           </div>
 
-                          <div class="col" >
+                          <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' }"  (click)="open(content, 'shadow')">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' }"  (click)="showColorPicker('shadow')">
                                       <img src="assets/_images/shadow.svg" alt="">
                                   </div>
                                   <span>Shadow</span>
@@ -168,13 +176,6 @@
                                   <span>Align</span>
                               </div>
                           </div>
-
-                      </div>
-
-                      <div class="row">
-                        <div class="col" #colorPickerCol >
-                          <app-color-slider *ngIf="colorPickerWidth" [canvasWidth]="colorPickerWidth" (color)="handlePropertyChange($event)"></app-color-slider>
-                        </div>
                       </div>
 
                     </div>

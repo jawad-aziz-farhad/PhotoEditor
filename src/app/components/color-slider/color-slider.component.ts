@@ -14,7 +14,7 @@ export class ColorSliderComponent implements AfterViewInit {
   };
 
   @Output()
-  color: EventEmitter<string> = new EventEmitter();
+  color: EventEmitter<any> = new EventEmitter();
 
   _canvasWidth : number;
   private ctx: CanvasRenderingContext2D;
@@ -85,36 +85,20 @@ export class ColorSliderComponent implements AfterViewInit {
   emitColor(x: number, y: number) {
     const rgbaColor = this.getColorAtPosition(x, y);
     this.color.emit(rgbaColor);
-  }
-
-  
+  }  
 
   getColorAtPosition(x: number, y: number) {
     const imageData = this.ctx.getImageData(x, y, 1, 1).data;
-    //return 'rgba(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ',1)';
     const rgba = 'rgba(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ',1)';
     const hex  = this.rgba2Hex(rgba);
-    return hex;
+    return { color: { hex : hex } }; 
   }
 
-  rgba2Hex(rgba) {
-    let a, isPercent,
-      rgb = rgba.replace(/\s/g, '').match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i),
-      alpha = (rgb && rgb[4] || "").trim(),
-      hex = rgb ?
-      (rgb[1] | 1 << 8).toString(16).slice(1) +
-      (rgb[2] | 1 << 8).toString(16).slice(1) +
-      (rgb[3] | 1 << 8).toString(16).slice(1) : rgba;
-  
-    if (alpha !== "") {
-      a = alpha;
-    } else {
-      a = 1;
-    }
-    // multiply before convert to HEX
-    a = ((a * 255) | 1 << 8).toString(16).slice(1)
-    hex = hex + a;
-  
-    return hex;
+  rgba2Hex (rgba) {
+    rgba = rgba.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+    return (rgba && rgba.length === 4) ? "#" +
+     ("0" + parseInt(rgba[1],10).toString(16)).slice(-2) +
+     ("0" + parseInt(rgba[2],10).toString(16)).slice(-2) +
+     ("0" + parseInt(rgba[3],10).toString(16)).slice(-2) : '';
   }
 }

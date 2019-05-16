@@ -44,6 +44,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
   color: string = "#000";                            
   colorPickerWidth: any;
+  showColorPicker$: boolean;
 
 
   constructor(private modalService: NgbModal) { }
@@ -63,6 +64,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.showTextArea = true;
     this.showCanvasText = true;
 
+    this.showColorPicker$ = false;
 
     this.colorPickerWidth = this.colorPickerCol.nativeElement.offsetWidth;
 
@@ -369,7 +371,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
   }
 
   handlePropertyChange(event){
-    console.log('Event value', event);
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
     else if(event.color.hex)
@@ -453,6 +454,19 @@ export class EditorComponent implements OnInit , AfterViewInit {
     }
     this.showCanvasText = event.target.checked;
     this.canvas.renderAll();
+  }
+
+  showColorPicker(attribute){
+    this.modalOpenedFor = attribute;
+    if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
+      this.selectedOptions[this.modalOpenedFor] = '';
+      const obj = this.canvas.getActiveObject();
+      obj.set(this.modalOpenedFor, '');
+      this.canvas.renderAll();
+      return;
+    }
+    this.showColorPicker$ = true;
+   
   }
 
   dataURLtoBlob(dataurl) {
