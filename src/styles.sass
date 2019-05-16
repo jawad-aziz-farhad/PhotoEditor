@@ -1,3 +1,109 @@
 /* You can add global styles to this file, and also import other style files */
 @import "assets/instagram_css/instagram.min.css";
 
+.switch 
+  position: relative
+  display: inline-block
+  width: 100%
+  height: 20px
+
+.switch input
+  display:none!important
+
+.slider 
+  position: absolute
+  cursor: pointer
+  top: 0
+  right: 0
+  bottom: 0
+  background-color: #ccc
+  -webkit-transition: .4s
+  transition: .4s
+  width: 40px
+
+
+.slider:before 
+    position: absolute
+    content: ""
+    height: 12px
+    width: 12px
+    left: 7px
+    bottom: 4px
+    background-color: white
+    -webkit-transition: .4s
+    transition: .4s
+
+input:checked + .slider 
+  background-color: #2196F3
+
+
+input:focus + .slider 
+  box-shadow: 0 0 1px #2196F3
+
+
+input:checked + .slider:before 
+  -webkit-transform: translateX(16px)
+  -ms-transform: translateX(16px)
+  transform: translateX(16px)
+
+
+
+.slider.round 
+  border-radius: 34px
+
+.shape-img figure
+  margin: 0px
+
+.slider.round:before 
+  border-radius: 50%
+
+label.switch
+  font-weight: 500
+
+.coll-exp
+  position: relative
+
+.coll-exp[aria-expanded="false"]:before
+    content: ''
+    position: absolute
+    right: 0
+    width: 0
+    height: 0
+    border-left: 10px solid transparent
+    border-right: 10px solid transparent
+    border-top: 10px solid #fff
+    top: 15px
+    z-index: 9;
+
+.coll-exp[aria-expanded="false"]:after
+    content: ''
+    position: absolute
+    right: 0
+    width: 0
+    height: 0
+    border-left: 10px solid transparent
+    border-right: 10px solid transparent
+    border-top: 10px solid #474747
+    top: 18px
+
+.coll-exp[aria-expanded="true"]:before
+    content: ''
+    position: absolute
+    right: 0
+    width: 0
+    height: 0
+    border-left: 10px solid transparent
+    border-right: 10px solid transparent
+    border-bottom: 10px solid #474747
+    top: 15px
+
+.coll-exp[aria-expanded="true"]:after
+    content: ''
+    position: absolute
+    right: 0
+    width: 0
+    height: 0
+    border-left: 10px solid transparent
+    border-right: 10px solid transparent
+    border-bottom: 10px solid #fff
+    top: 18px

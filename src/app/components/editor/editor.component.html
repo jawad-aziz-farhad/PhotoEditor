@@ -70,9 +70,9 @@
                   </div>
                   <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo">
                     <div class="card-body">
-                      <div class="row">
+                      <div class="row no-gutters">
 
-                        <div class="col-md-3" #filters *ngFor="let filter of data?.filters;let i=index;" (click)="applyFilter( filter.toLowerCase() )">
+                        <div class="col" #filters *ngFor="let filter of data?.filters;let i=index;" (click)="applyFilter( filter.toLowerCase() )">
                             <div class="shape-section filter">
                                 <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.filter == filter.toLowerCase() }">
                                     <figure class="{{ filter.toLowerCase() }}">
@@ -89,9 +89,10 @@
                 </div>
                 <div class="card c-options">
                   <div class="card-header p-0" id="headingThree">
-                      <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                      <label class="switch m-0"><input type="checkbox" ><span class="slider round"></span> Text Options</label>
+                      <!-- <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                         Text Options
-                      </a>
+                      </a> -->
                   </div>
                   <div id="collapseThree" class="collapse show" aria-labelledby="headingThree">
                     <div class="card-body">
