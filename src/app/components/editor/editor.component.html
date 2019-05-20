@@ -1,4 +1,7 @@
 
+
+
+
 <app-navbar></app-navbar>
 
 <div class="canvas-wrapper">
@@ -25,26 +28,24 @@
     </div>
 
     <div class="canvas-controls">
-      <div class="canvas-actions">
-            <div class="row">
-                <div class="col-md-4">
-                    <button class="btn btn-block btn-share btn-action">Share</button>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-block btn-done btn-action">Done</button>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-block btn-save btn-action" (click)="saveCanvasAsImage()">Save</button>
-                </div>
+        <div class="canvas-actions">
+          <div class="row">
+            <div class="col-md-4">
+                <button class="btn btn-block btn-share btn-action">Share</button>
             </div>
+            <div class="col-md-4">
+                <button class="btn btn-block btn-done btn-action">Done</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-block btn-save btn-action" (click)="saveCanvasAsImage()">Save</button>
+            </div>
+          </div>
         </div>
+
         <div class="canvas-shapes">
             <div class="accordion" id="accordionExample">
               <div class="card c-shapes">
                 <div class="card-header p-0" id="headingOne">
-                    <!-- <a href="#" class="btn btn-link coll-exp" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                      Shape
-                    </a> -->
                     <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                       Shape
                     </button>
@@ -73,9 +74,32 @@
 
               <div class="card c-effects">
                   <div class="card-header p-0" id="headingTwo">
-                    <!-- <a href="#" class="btn btn-link collapsed coll-exp" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                      Filters
-                    </a> -->
+                    <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                      Resize
+                    </button>
+                    <button type="button" class="btn btn-default btn-sm float-right" (click)="showResizeArea = !showResizeArea">
+                      <i *ngIf="showResizeArea" class="fas fa-chevron-up"></i>
+                      <i *ngIf="!showResizeArea" class="fas fa-chevron-down"></i>
+                    </button>
+                  </div>
+                  <div id="collapseTwo" [hidden]="!showResizeArea" class="collapse show" aria-labelledby="headingTwo">
+                    <div class="card-body">
+                      <div class="row no-gutters">
+
+                        <div class="col" #resizer>
+                            <div class="shape-section resizer">
+                              <input type='range' step='.5' max='5' min='1' (change)='setZoom($event)' value="0">
+                            </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+              </div>
+
+              <!-- FILTERS -->
+              <div class="card c-effects">
+                  <div class="card-header p-0" id="headingTwo">
                     <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                       Filters
                     </button>
@@ -104,12 +128,12 @@
                   </div>
               </div>
               
-              
+              <!-- TEXT -->
               <div class="card c-options">
                   <div class="card-header p-0" id="headingThree">
                     <div class="form-check float-left">
                       <input type="checkbox" class="form-check-input" id="addText" (change)="onCanvasTextChange($event)" [checked]="showCanvasText">
-                      <label class="form-check-label" for="addText">{{ showCanvasText ? 'Remove Text' : 'Add Text' }}</label>
+                      <label class="form-check-label" for="addText">Add Text</label>
                     </div>
                     <button type="button" class="btn btn-default btn-sm float-right" (click)="showTextArea = !showTextArea">
                       <i *ngIf="showTextArea" class="fas fa-chevron-up"></i>
@@ -118,17 +142,40 @@
                   </div>
                   <div id="collapseThree" [hidden]="!showTextArea" class="" aria-labelledby="headingThree">
                     <div class="card-body">
-                      <!-- Color Picker-->
-                      <div class="row no-gutters mb-1" [hidden]="!showColorPicker$">
-                        <div class="col" #colorPickerCol>
-                          <app-color-slider *ngIf="colorPickerWidth" [canvasWidth]="colorPickerWidth" (color)="handlePropertyChange($event)"></app-color-slider>
+                      <!-- Color Picker , Font Picker , AlignmentPicker -->
+                      <div class="row no-gutters mb-1" [hidden]="!showColorPicker$ && !showFontPicker$ && !showTextAlignPicker$">
+                        <!-- For Color -->
+                        <div class="col" #colorPickerCol *ngIf="showColorPicker$">
+                          <app-color-slider *ngIf="rowWidth" [canvasWidth]="rowWidth" (color)="handlePropertyChange($event)"></app-color-slider>
+                        </div>
+                        <!-- For Font -->
+                        <div class="col" *ngIf="showFontPicker$">
+                          <div class="row">
+                            <div class="col">
+                              <div class="form-group">
+                                <select name="" id="" class="form-control" (change)="onAttributeChange($event.target.value, 'fontFamily')">
+                                  <option value="" selected disabled hidden>Chosse Font</option>
+                                  <option *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}">{{ font }}</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- For Text Align -->
+                        <div class="col" *ngIf="showTextAlignPicker$">
+                          <div class="row">
+                            <div class="col text-center shape-img" *ngFor="let align of data?.textAlign$; let i=index;" [ngClass]="{'section-active': selectedOptions?.textAlign == align.value }"  (click)="onAttributeChange(align.value , 'textAlign')">
+                              <i class="fa {{ align.icon }}" aria-hidden="true"></i>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      <div class="row no-gutters">
+
+                      <div class="row no-gutters" #optionsRow>
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'fontFamily' }" (click)="open(content, 'fontFamily')">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'fontFamily' }" (click)="showOptions('fontFamily')">
                                       <img src="assets/_images/font.svg" alt="">
                                   </div>
                                   <span>Font</span>
@@ -136,7 +183,7 @@
                           </div>
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="showColorPicker('color')">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="showOptions('color')">
                                       <img src="assets/_images/color.svg" alt="">
                                   </div>                                  
                                   <span>Color</span>
@@ -144,8 +191,8 @@
                           </div>
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' }" (click)="showColorPicker('stroke')">
-                                      <img src="assets/_images/stroke.svg" alt="">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' || modalOpenedFor == 'stroke'}" (click)="showOptions('stroke')">
+                                    <img src="assets/_images/stroke.svg" alt="">
                                   </div>
                                   <span>Stroke</span>
                               </div>
@@ -153,24 +200,16 @@
 
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' }"  (click)="showColorPicker('shadow')">
+                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' || modalOpenedFor == 'shadow'}"  (click)="showOptions('shadow')">
                                       <img src="assets/_images/shadow.svg" alt="">
                                   </div>
                                   <span>Shadow</span>
                               </div>
                           </div>
-                          <!-- <div class="col-md-2">
-                              <div class="shape-section typo">
-                                  <div class="shape-img">
-                                      <img src="assets/_images/opacity.svg" alt="">
-                                  </div>
-                                  <span>Opacity</span>
-                              </div>
-                          </div> -->
-
+                          
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'textAlign' }" (click)="open(content, 'textAlign')">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'textAlign' }" (click)="showOptions('textAlign')">
                                       <img src="assets/_images/left-alignment.svg" alt="">
                                   </div>
                                   <span>Align</span>
@@ -181,34 +220,13 @@
                     </div>
                   </div>
 
-                </div>
               </div>
+
+            </div>
           </div>
       </div>
   </div>
 </div>
 
-<ng-template #content let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{ modalOpenedFor }}</h4>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('Cancel')">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body" *ngIf="['textAlign', 'fontFamily'].indexOf(modalOpenedFor) > -1">   
-    <div class="custom-control custom-radio" *ngFor="let option of options; let i=index;">
-      <input type="radio" class="custom-control-input" id="selectedOption_{{ i }}" name="{{ modalOpenedFor }}" 
-        [value]="(option | lowercase)" (change)="handlePropertyChange($event)">
-      <label class="custom-control-label" for="selectedOption_{{ i }}">{{ option }}</label>
-    </div>
-  </div>
-
-  <div *ngIf="['textAlign', 'fontFamily'].indexOf(modalOpenedFor) == -1">
-    <color-sketch [color]="color" (onChangeComplete)="handlePropertyChange($event)"></color-sketch>
-  </div>
-
-  <div class="modal-footer">
-  </div>
-</ng-template>
 
 

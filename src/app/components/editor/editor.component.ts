@@ -13,7 +13,7 @@ declare var $: any;
 export class EditorComponent implements OnInit , AfterViewInit {
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
-  @ViewChild('colorPickerCol') colorPickerCol: ElementRef;
+  @ViewChild('optionsRow') optionsRow: ElementRef;
   @ViewChildren('filters') filters : QueryList<any>;
 
   canvas: any
@@ -32,6 +32,10 @@ export class EditorComponent implements OnInit , AfterViewInit {
   showShapeArea: boolean;
   showFilterArea: boolean;
   showTextArea: boolean;
+  showResizeArea: boolean;
+  showColorPicker$: boolean;
+  showFontPicker$: boolean;
+  showTextAlignPicker$: boolean;
 
   showCanvasText: boolean;
 
@@ -43,8 +47,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
                               };
 
   color: string = "#000";                            
-  colorPickerWidth: any;
-  showColorPicker$: boolean;
+  rowWidth: any;
+  
 
 
   constructor(private modalService: NgbModal) { }
@@ -59,24 +63,26 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
    
-    this.showShapeArea = true;
+    this.showShapeArea  = true;
     this.showFilterArea = true;
-    this.showTextArea = true;
+    this.showTextArea   = true;
     this.showCanvasText = true;
+    this.showResizeArea = true;
 
     this.showColorPicker$ = false;
+    this.showFontPicker$  = false;
+    this.showTextAlignPicker$ = false;
 
-    this.colorPickerWidth = this.colorPickerCol.nativeElement.offsetWidth;
+    this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
 
    //this.drawWithFabricJS(this.selectedImage);    
-    this.setUpCanvas(this.selectedImage);
+   this.setUpCanvas(this.selectedImage);
   }  
 
   ngAfterViewInit(){
-    console.log('Color Picker ', this.colorPickerWidth);
+    console.log('Color Picker ', this.rowWidth);
   }
 
-  
 
 
   setUpCanvas(image) {  
@@ -122,13 +128,29 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas.add(img);
 
     this.setText();
-    this.canvas.renderAll();
 
+    this.canvas.setZoom(1);
+
+      let panning = false;
+      this.canvas.on('mouse:up', (e) => {
+        panning = false;
+      });      
+      this.canvas.on('mouse:down', (e) => {
+        panning = true;
+      });
+      this.canvas.on('mouse:move',  (e) => {
+        if (panning && e && e.e && this.canvas.getZoom() > 1) {
+          const units = 10;
+          const delta = new fabric.Point(e.e.movementX, e.e.movementY);
+          this.canvas.relativePan(delta);
+        }
+      });      
+      this.canvas.renderAll();
     });
   }
 
   setText(){
-    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter text', {
+    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
@@ -153,13 +175,13 @@ export class EditorComponent implements OnInit , AfterViewInit {
       // Text now empty, show placeholder:
       if(obj.text === '')
       {
-        obj.text = 'Enter text';
+        obj.text = 'Click here to edit text';
         obj.set('opacity', 0.3);
         obj.set('showplaceholder', true); // Set flag on IText object
         obj.setCoords();
         this.canvas.renderAll();
       }
-      else if(obj.text === 'Enter text'){
+      else if(obj.text === 'Click here to edit text'){
         obj.selectAll();
         obj.text = "";
         obj.selectable = true;
@@ -175,7 +197,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
       else if(obj.get('showplaceholder') === true)
         {
         // The text in the IText should now be the placeholder plus the character that  was pressed, so text and placeholder should be different, so remove the placeholder (unless the pressed key was backspace in which case do nothing):
-        if(obj.text !== 'Enter text')
+        if(obj.text !== 'Click here to edit text')
           {           
           // New char should be at position 0, so remove placeholder from rest of text:
           obj.text = obj.text.substr(0,1);
@@ -194,7 +216,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
       
       // If the placeholder is active, move the cursor to position 0 so we
       // can trim the string correctly when typing starts:
-      if(obj.text === 'Enter text')
+      if(obj.text === 'Click here to edit text')
         {
           // Move cursor to beginning of line:
           obj.selectAll();
@@ -323,8 +345,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
       this.canvas.getActiveObject().set('strokeWidth' , 2);
       this.selectedOptions.stroke = value;
       case 'textAlign':
-      this.selectedOptions.textAlign = value.toLowerCase();
-      this.canvas.getActiveObject().set('textAlign', `${value.toLowerCase()}`);
+      this.selectedOptions.textAlign =  `${value}`;
+      this.canvas.getActiveObject().set('textAlign', `${value}`);
       default:
       break;
     }
@@ -332,11 +354,11 @@ export class EditorComponent implements OnInit , AfterViewInit {
     if(attribute == 'canvasSize' || attribute == 'imageChange'){
       this.canvas.clear();
       this.canvas.dispose();
+      this.selectedOptions.filter = 'none';
       this.setUpCanvas(this.selectedImage);
     }
     else
       this.canvas.renderAll();
-    
   }
 
   setCanvasSize(size){
@@ -456,16 +478,27 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas.renderAll();
   }
 
-  showColorPicker(attribute){
+  showOptions(attribute){
+    this.showColorPicker$ = this.showFontPicker$ = this.showTextAlignPicker$ = false;
     this.modalOpenedFor = attribute;
-    if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
-      this.selectedOptions[this.modalOpenedFor] = '';
-      const obj = this.canvas.getActiveObject();
-      obj.set(this.modalOpenedFor, '');
-      this.canvas.renderAll();
-      return;
+    if(['stroke', 'shadow' , 'color'].indexOf(attribute) > -1){
+      this.showColorPicker$ = true;
+      if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
+        this.selectedOptions[this.modalOpenedFor] = '';
+        const obj = this.canvas.getActiveObject();
+        obj.set(this.modalOpenedFor, '');
+        this.canvas.renderAll();
+        this.modalOpenedFor = '';
+        return;
+      }
     }
-    this.showColorPicker$ = true;
+    else if(attribute == 'fontFamily'){
+      this.showFontPicker$ = true;
+    }
+    else if(attribute == 'textAlign'){
+      this.showTextAlignPicker$ = true;
+    }
+
    
   }
 
@@ -480,7 +513,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
   saveCanvasAsImage(){
     let obj = this.canvas.getActiveObject();
-    if(obj.text == 'Enter text'){
+    if(obj.text == 'Click here to edit text'){
       this.canvas.remove(obj);
       this.canvas.renderAll();
     }
@@ -493,6 +526,15 @@ export class EditorComponent implements OnInit , AfterViewInit {
     link.click();
   }
 
+  setZoom(event){
+    console.log('Zoom Value', event.target.value);
+    const zoomLevel = event.target.value;
+    if(zoomLevel > 1)
+      this.canvas.setZoom(this.canvas.getZoom() * zoomLevel);
+    else
+      this.canvas.setZoom(1);
+    this.canvas.renderAll();
+  }
   
 
 }
