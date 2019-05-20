@@ -35,6 +35,7 @@ export class Data {
     public shadowBlurs: Array<any> = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30];
     
     public textAlign: Array<any> = ['Left', 'Right', 'Center'];
+    public textAlign$: Array<any> = [{ icon: 'fa-align-left', value: 'left' }, { icon: 'fa-align-center', value: 'center' }, { icon: 'fa-align-right', value: 'right' }]
     
     constructor(){}
 }
