@@ -90,8 +90,11 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
 
+    console.log('Images', this.all_Images);
    //this.drawWithFabricJS(this.selectedImage);    
    this.setUpCanvas(this.selectedImage);
+
+
   }  
 
   ngAfterViewInit(){
