@@ -9,9 +9,11 @@ import { TestComponent } from './test/test.component';
 import { AngularDraggableModule } from 'angular2-draggable';
 import { EditorComponent } from './editor/editor.component';
 import { ColorSliderComponent } from './color-slider/color-slider.component';
+import { RepositionComponent } from './reposition/reposition.component';
+import { NewEditorComponent } from './new-editor/new-editor.component';
 
 @NgModule({
-    declarations: [NavbarComponent, HomeComponent , TestComponent, EditorComponent, ColorSliderComponent
+    declarations: [NavbarComponent, HomeComponent , TestComponent, EditorComponent, ColorSliderComponent , RepositionComponent, NewEditorComponent
     ],
     imports: [
       BrowserModule,
@@ -19,7 +21,7 @@ import { ColorSliderComponent } from './color-slider/color-slider.component';
       NgbModule,
       FormsModule
     ],
-    exports: [ NavbarComponent , HomeComponent , TestComponent ], 
+    exports: [ NavbarComponent , HomeComponent , TestComponent , RepositionComponent], 
     providers: [],
     bootstrap: []
   })
