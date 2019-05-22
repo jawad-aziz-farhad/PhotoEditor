@@ -8,12 +8,11 @@ import { TestComponent } from './test/test.component';
 import { EditorComponent } from './editor/editor.component';
 import { ColorSliderComponent } from './color-slider/color-slider.component';
 import { RepositionComponent } from './reposition/reposition.component';
-import { NewEditorComponent } from './new-editor/new-editor.component';
 
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 @NgModule({
-    declarations: [NavbarComponent, HomeComponent , TestComponent, EditorComponent, ColorSliderComponent , RepositionComponent, NewEditorComponent
+    declarations: [NavbarComponent, HomeComponent , TestComponent, EditorComponent, ColorSliderComponent , RepositionComponent
     ],
     imports: [
       BrowserModule,
