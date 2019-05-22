@@ -13,7 +13,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
   @ViewChild('optionsRow') optionsRow: ElementRef;
-  @ViewChildren('filters') filters : QueryList<any>;
 
   canvas: any
   data: any;
@@ -26,7 +25,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
   canvas_Width: number;
   canvas_Height: number;
 
-  private closeResult: string;
 
   showShapeArea: boolean;
   showFilterArea: boolean;
@@ -48,9 +46,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
   color: string = "#000";                            
   rowWidth: any;
   zoomLevel: any;
+  isDropup: boolean;
   
-
-
   constructor() { }
 
   ngOnInit() {
@@ -58,7 +55,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3};
+    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
@@ -73,13 +70,15 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.showFontPicker$  = false;
     this.showTextAlignPicker$ = false;
 
+    this.isDropup = true;
 
     this.zoomLevel = 0;
 
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
 
-   //this.drawWithFabricJS(this.selectedImage);    
    this.setUpCanvas(this.selectedImage);
+
+
   }  
 
   ngAfterViewInit(){
@@ -151,7 +150,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
       textAlign: this.selectedOptions.textAlign,
       stroke: this.selectedOptions.stroke,
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
-      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0
+      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
+      opacity: this.selectedOptions.opacity
     });
 
     this.setTextEvents(text); 
@@ -360,10 +360,9 @@ export class EditorComponent implements OnInit , AfterViewInit {
       this.selectedOptions.stroke = value;
       break;
       
-      case 'textAlign':
-      this.selectedOptions.textAlign =  `${value}`;
-      this.canvas.getActiveObject().set('textAlign', value);
-      this.canvas.getActiveObject().setCoords(); 
+      case 'opacity':
+      this.selectedOptions.opacity =  value;
+      this.canvas.getActiveObject().set('opacity', value);
       break;
       default:
       break;
@@ -384,7 +383,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-
+  
   handlePropertyChange(event){
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
@@ -526,7 +525,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     link.click();
   }
 
-  setZoom(event){
+  setZoom(event) {    
     // console.log('Zoom Value', event.target.value);
     // const zoomLevel = event.target.value;
     // if(zoomLevel > 1)
@@ -569,6 +568,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
       return this.selectedOptions.strokeWidth;
     else if(this.modalOpenedFor == 'shadow')
       return this.selectedOptions.shadowWidth;
+    else if(this.modalOpenedFor == 'opacity')
+      return this.selectedOptions.opacity;
   }
 
   mouseWheel(){
@@ -644,6 +645,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
       event.preventDefault();
   });
   }
+
   
 
 }

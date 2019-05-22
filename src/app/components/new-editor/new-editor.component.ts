@@ -13,7 +13,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
   @ViewChild('optionsRow') optionsRow: ElementRef;
-  @ViewChildren('filters') filters : QueryList<any>;
 
   canvas: any
   data: any;
