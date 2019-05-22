@@ -10,9 +10,9 @@
       <div class="row m-2 row-height">
         <!-- 1st Column -->
         <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
-          <div class="row" *ngFor="let image of all_Images;let i=index;" (click)="onAttributeChange(image , 'imageChange')">
+          <div class="row" *ngFor="let image of images;let i=index;" (click)="onAttributeChange(image , 'imageChange')">
             <div class="col left">
-              <img class="img-fluid" [src]="processImgUrl(image)"/>
+              <img class="img-fluid" [src]="image"/>
               <img #img [src]="selectedImage" style="display: none;"/>
             </div>
           </div>
@@ -117,9 +117,10 @@
                   <div id="collapseThree" [hidden]="!showTextArea" class="" aria-labelledby="headingThree">
                     <div class="card-body">
 
-                      <div class="row" *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow' ">
+                      <div class="row" *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow' || modalOpenedFor == 'opacity' ">
                         <div class="col">
-                          <input class="w-100" type='range' step='1' max='10' min='1' (change)='handlePropertyChange($event)' [value]="rangeVal">
+                          <input *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow'" class="w-100" type='range' step='1' max='10' min='1' (change)='handlePropertyChange($event)' [value]="rangeVal">
+                          <input *ngIf="modalOpenedFor == 'opacity' " class="w-100" type='range' step='.001' max='1' min='0' (change)='handlePropertyChange($event)' [value]="rangeVal">
                         </div>
                       </div>
                       
@@ -134,12 +135,25 @@
                         <div class="col" *ngIf="showFontPicker$">
                           <div class="row">
                             <div class="col">
-                              <div class="form-group">
+                              <!-- <div class="form-group">
                                 <select name="" id="" class="form-control" (change)="onAttributeChange($event.target.value, 'fontFamily')">
                                   <option value="" selected disabled hidden>Chosse Font</option>
                                   <option *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}">{{ font }}</option>
                                 </select>
-                              </div>
+                              </div> -->
+                              <div class="btn-group w-100" dropdown [dropup]="isDropup">
+                                  <button id="button-dropup" dropdownToggle type="button" class="btn btn-light btn-lg btn-block text-left"
+                                          aria-controls="dropdown-dropup">
+                                    {{ selectedOptions?.fontFamily }} <span class="caret pull-right"></span>
+                                  </button>
+                                  <ul id="dropdown-dropup" *dropdownMenu class="dropdown-menu w-100"
+                                      role="menu" aria-labelledby="button-dropup">
+                                    <li role="menuitem" *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}">
+                                      <a class="dropdown-item" href="#">{{ font }}</a>
+                                    </li>
+                                   
+                                  </ul>
+                                </div>
                             </div>
                           </div>
                         </div>
@@ -191,10 +205,10 @@
                           
                           <div class="col">
                               <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'textAlign' }" (click)="showOptions('textAlign')">
-                                      <img src="assets/_images/left-alignment.svg" alt="">
+                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'opacity' }" (click)="showOptions('opacity')">
+                                      <img src="assets/_images/opacity.svg" alt="">
                                   </div>
-                                  <span>Align</span>
+                                  <span>Opacity</span>
                               </div>
                           </div>
                       </div>

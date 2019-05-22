@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { fabric } from 'fabric';
 
 declare var $: any;
@@ -8,7 +7,7 @@ declare var $: any;
 @Component({
   selector: 'app-new-editor',
   templateUrl: './new-editor.component.html',
-  styleUrls: ['./new-editor.component.sass']
+  styleUrls: ['./new-editor.component.scss']
 })
 export class NewEditorComponent implements OnInit , AfterViewInit {
 
@@ -49,28 +48,16 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   color: string = "#000";                            
   rowWidth: any;
   zoomLevel: any;
+  isDropup: boolean;
   
-  
-  all_Images: Array<any> = [
-    "https://images.unsplash.com/photo-1460500063983-994d4c27756c?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    "https://images.unsplash.com/photo-1460378150801-e2c95cb65a50?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    "https://images.unsplash.com/photo-1458400411386-5ae465c4e57e?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    "https://images.unsplash.com/photo-1452827073306-6e6e661baf57?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    "https://images.unsplash.com/photo-1452215199360-c16ba37005fe?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&fit=crop&s=ba433e209f134b4c8b2a7804a3db2b49",
-    "https://images.unsplash.com/photo-1442551382982-e59a4efb3c86?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    "https://images.unsplash.com/photo-1440613905118-99b921706b5c?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    "https://images.unsplash.com/photo-1423784346385-c1d4dac9893a?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    "https://images.unsplash.com/reserve/imNop2O1Rit190cSkxXv_1-7069.jpg?crop=entropy&fit=crop&fm=jpg&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80",
-    ];
-
-  constructor(private modalService: NgbModal) { }
+  constructor() { }
 
   ngOnInit() {
     this.selectedImage = 'assets/images/image-1.jpg';
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3};
+    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
@@ -85,13 +72,12 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.showFontPicker$  = false;
     this.showTextAlignPicker$ = false;
 
+    this.isDropup = true;
 
     this.zoomLevel = 0;
 
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
 
-    console.log('Images', this.all_Images);
-   //this.drawWithFabricJS(this.selectedImage);    
    this.setUpCanvas(this.selectedImage);
 
 
@@ -166,7 +152,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       textAlign: this.selectedOptions.textAlign,
       stroke: this.selectedOptions.stroke,
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
-      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0
+      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
+      opacity: this.selectedOptions.opacity
     });
 
     this.setTextEvents(text); 
@@ -375,10 +362,9 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       this.selectedOptions.stroke = value;
       break;
       
-      case 'textAlign':
-      this.selectedOptions.textAlign =  `${value}`;
-      this.canvas.getActiveObject().set('textAlign', value);
-      this.canvas.getActiveObject().setCoords(); 
+      case 'opacity':
+      this.selectedOptions.opacity =  value;
+      this.canvas.getActiveObject().set('opacity', value);
       break;
       default:
       break;
@@ -399,32 +385,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-  open(content, option) {
-    this.modalOpenedFor = option;
-    if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
-      this.selectedOptions[this.modalOpenedFor] = '';
-      const obj = this.canvas.getActiveObject();
-      obj.set(this.modalOpenedFor, '');
-      this.canvas.renderAll();
-      return;
-    }
-    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
-  }
-
-  getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-      return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-      return 'by clicking on a backdrop';
-    } else {
-      return  `with: ${reason}`;
-    }
-  }
-
+  
   handlePropertyChange(event){
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
@@ -498,10 +459,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     return ['assets/images/image-1.jpg', 'assets/images/image-2.jpg' , 'assets/images/image-3.jpg' , 'assets/images/image-4.jpg' , 'assets/images/image-5.jpg']
   }
 
-  get allImage(){ 
-    console.log('all Images', this.all_Images);
-    return this.all_Images; }
-
   get canvasWidth(){
     const canvasArea = this.canvasArea.nativeElement.offsetWidth;
     return ( this.canvas_Width > canvasArea ) ?  canvasArea - 20 : this.canvas_Width;
@@ -570,7 +527,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     link.click();
   }
 
-  setZoom(event){
+  setZoom(event) {    
     // console.log('Zoom Value', event.target.value);
     // const zoomLevel = event.target.value;
     // if(zoomLevel > 1)
@@ -613,6 +570,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       return this.selectedOptions.strokeWidth;
     else if(this.modalOpenedFor == 'shadow')
       return this.selectedOptions.shadowWidth;
+    else if(this.modalOpenedFor == 'opacity')
+      return this.selectedOptions.opacity;
   }
 
   mouseWheel(){
@@ -689,12 +648,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   });
   }
 
-  processImgUrl(url: string) {
-    console.log(url);
-    let appender = url.indexOf('?') > -1 ? '&w=' + 200 + '&h=' + 100 : '';
-    return url + appender;
-  }
-  
   
 
 }
