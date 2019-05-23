@@ -1,0 +1,38 @@
+body {
+	font-family: 'Raleway', sans-serif;
+}
+
+
+
+.shape-section {
+	text-align: center;
+	cursor: pointer;
+}
+
+.shape-section img {
+	max-width: 32px;
+	margin-bottom: 0px;
+}
+
+.shape-section span {
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.shape-img {
+	padding: 11px 0 11px 0;
+	border: 3px solid transparent;
+}
+
+.section-active {
+	border-color: #00D0D3;
+}
+
+.canvas-shapes .accordion .card {
+	border: 0;
+}
+
+.shape-section.typo .shape-img {
+	padding: 9px;
+	height: 54px;
+}

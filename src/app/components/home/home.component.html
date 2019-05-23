@@ -114,33 +114,30 @@
                       <i *ngIf="!showTextArea" class="fas fa-chevron-down"></i>
                     </button>
                   </div>
+
                   <div id="collapseThree" [hidden]="!showTextArea" class="" aria-labelledby="headingThree">
+                    
                     <div class="card-body">
 
                       <div class="row" *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow' || modalOpenedFor == 'opacity' ">
                         <div class="col">
                           <input *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow'" class="w-100" type='range' step='1' max='10' min='1' (change)='handlePropertyChange($event)' [value]="rangeVal">
-                          <input *ngIf="modalOpenedFor == 'opacity' " class="w-100" type='range' step='.001' max='1' min='0' (change)='handlePropertyChange($event)' [value]="rangeVal">
+                          <input *ngIf="modalOpenedFor == 'opacity' " class="w-100" type='range' step='.001' max='1' min='0' (change)="onAttributeChange($event.target.value, 'opacity')" [value]="rangeVal">
                         </div>
                       </div>
                       
-                      <!-- Color Picker , Font Picker , AlignmentPicker -->
-                      <div class="row no-gutters mb-1" [hidden]="!showColorPicker$ && !showFontPicker$ && !showTextAlignPicker$">
-
+                      <!-- Color Picker , Font Picker -->
+                      <div class="row no-gutters mb-1" [hidden]="!showColorPicker$ && !showFontPicker$">
+                        
                         <!-- For Color -->
-                        <div class="col" #colorPickerCol *ngIf="showColorPicker$">
-                          <app-color-slider *ngIf="rowWidth" [canvasWidth]="rowWidth" (color)="handlePropertyChange($event)"></app-color-slider>
+                        <div class="col" *ngIf="showColorPicker$">
+                          <app-color-slider (color)="handlePropertyChange($event)"></app-color-slider>
                         </div>
+
                         <!-- For Font -->
                         <div class="col" *ngIf="showFontPicker$">
                           <div class="row">
                             <div class="col">
-                              <!-- <div class="form-group">
-                                <select name="" id="" class="form-control" (change)="onAttributeChange($event.target.value, 'fontFamily')">
-                                  <option value="" selected disabled hidden>Chosse Font</option>
-                                  <option *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}">{{ font }}</option>
-                                </select>
-                              </div> -->
                               <div class="btn-group w-100" dropdown [dropup]="isDropup">
                                   <button id="button-dropup" dropdownToggle type="button" class="btn btn-light btn-lg btn-block text-left"
                                           aria-controls="dropdown-dropup">
@@ -148,27 +145,21 @@
                                   </button>
                                   <ul id="dropdown-dropup" *dropdownMenu class="dropdown-menu w-100"
                                       role="menu" aria-labelledby="button-dropup">
-                                    <li role="menuitem" *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}">
+                                    <li role="menuitem" *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}" (mouseover)="onAttributeChange(font, 'mouseOver')" (mouseleave)="onAttributeChange(selectedOptions?.fontFamily , 'mouseLeave')" (click)="onAttributeChange(font , 'fontFamily')">
                                       <a class="dropdown-item" href="#">{{ font }}</a>
-                                    </li>
-                                   
+                                    </li>                                   
                                   </ul>
                                 </div>
                             </div>
                           </div>
                         </div>
-                        <!-- For Text Align -->
-                        <div class="col" *ngIf="showTextAlignPicker$">
-                          <div class="row">
-                            <div class="col text-center shape-img" *ngFor="let align of data?.textAlign$; let i=index;" [ngClass]="{'section-active': selectedOptions?.textAlign == align.value }"  (click)="onAttributeChange(align.value , 'textAlign')">
-                              <i class="fa {{ align.icon }}" aria-hidden="true"></i>
-                            </div>
-                          </div>
-                        </div>
+                        
                       </div>
 
+                      
+                      <app-text-modifiers [options]="selectedOptions" (onModify)="showOptions($event)"></app-text-modifiers>
 
-                      <div class="row no-gutters" #optionsRow>
+                      <!-- <div class="row no-gutters" #optionsRow>
                           <div class="col">
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'fontFamily' }" (click)="showOptions('fontFamily')">
@@ -197,7 +188,7 @@
                           <div class="col">
                               <div class="shape-section typo">
                                   <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' || modalOpenedFor == 'shadow'}"  (click)="showOptions('shadow')">
-                                      <img src="assets/_images/shadow.svg" alt="">
+                                    <img src="assets/_images/shadow.svg" alt="">
                                   </div>
                                   <span>Shadow</span>
                               </div>
@@ -211,11 +202,21 @@
                                   <span>Opacity</span>
                               </div>
                           </div>
-                      </div>
+
+                          <div class="col">
+                            <div class="shape-section typo">
+                                <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'textBackgroundColor' }" (click)="showOptions('textBackgroundColor')">
+                                    <img src="assets/_images/color.svg" alt="">
+                                </div>                                  
+                                <span>Bg Tint</span>
+                            </div>
+                          </div>
+
+                      </div> -->
 
                     </div>
+                  
                   </div>
-
               </div>
 
             </div>

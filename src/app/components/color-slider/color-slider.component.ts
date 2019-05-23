@@ -1,17 +1,24 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, Output, HostListener, EventEmitter, Input } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, Output, HostListener, EventEmitter, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-color-slider',
   templateUrl: './color-slider.component.html',
   styleUrls: ['./color-slider.component.sass']
 })
-export class ColorSliderComponent implements AfterViewInit {
+export class ColorSliderComponent implements OnInit , AfterViewInit {
+
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
 
-  @Input() set canvasWidth(width){
-    this._canvasWidth = width;
-  };
+  // @Input() set canvasWidth(width){
+  //   this._canvasWidth = width;
+  // };
+
+  @Input('canvasWidth')
+  set in(canvasWidth){
+    this._canvasWidth = canvasWidth;
+    //this.draw();
+  }
 
   @Output()
   color: EventEmitter<any> = new EventEmitter();
@@ -21,8 +28,12 @@ export class ColorSliderComponent implements AfterViewInit {
   private mousedown: boolean = false;
   private selectedHeight: number;
 
-  ngAfterViewInit() {
+  ngOnInit(){
     this.draw();
+  }
+
+  ngAfterViewInit() {
+    //this.draw();
   }
 
   draw() {

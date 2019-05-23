@@ -7,7 +7,7 @@ declare var $: any;
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.sass']
+  styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit , AfterViewInit {
 
@@ -25,7 +25,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
   canvas_Width: number;
   canvas_Height: number;
 
-
   showShapeArea: boolean;
   showFilterArea: boolean;
   showTextArea: boolean;
@@ -33,6 +32,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
   showColorPicker$: boolean;
   showFontPicker$: boolean;
   showTextAlignPicker$: boolean;
+  showTextBackgroundColorPicker$: boolean;
 
   showCanvasText: boolean;
 
@@ -55,7 +55,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1};
+    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', 
+                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : ''};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
@@ -69,6 +70,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.showColorPicker$ = false;
     this.showFontPicker$  = false;
     this.showTextAlignPicker$ = false;
+    this.showTextBackgroundColorPicker$ = false;
 
     this.isDropup = true;
 
@@ -77,15 +79,11 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
 
    this.setUpCanvas(this.selectedImage);
-
-
   }  
 
   ngAfterViewInit(){
     console.log('Color Picker ', this.rowWidth);
   }
-
-
 
   setUpCanvas(image) {  
     
@@ -151,7 +149,11 @@ export class EditorComponent implements OnInit , AfterViewInit {
       stroke: this.selectedOptions.stroke,
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
       shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
-      opacity: this.selectedOptions.opacity
+      opacity: this.selectedOptions.opacity,
+      textBackgroundColor : this.selectedOptions.textBackgroundColor,
+      borderColor: '#00c6d2',
+      editingBorderColor: '#00c6d2',
+      cornerSize : 5
     });
 
     this.setTextEvents(text); 
@@ -159,6 +161,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas.centerObject(text);
     this.canvas.setActiveObject(text);
     this.canvas.bringToFront(text);
+    
   }
 
   setTextEvents(text){
@@ -303,66 +306,63 @@ export class EditorComponent implements OnInit , AfterViewInit {
       this.selectedOptions.canvasSize = value;
       this.setCanvasSize(value);
       break;
-
       case 'imageChange':
       this.selectedImage = value;
-      break;
-      
+      break;      
       case 'effect':
       this.selectedOptions.effect = value;
       break;
-      
+      case 'mouseOver':
+      this.canvas.getActiveObject().set('fontFamily', value);
+      break;
+      case 'mouseLeave':      
       case 'fontFamily':
       this.selectedOptions.fontFamily = value;      
       this.canvas.getActiveObject().set("fontFamily", value);
       break;
-      
       case 'fontStyle':
       this.selectedOptions.fontStyle = value;
-      break;
-      
+      break;      
       case 'fontSize':
       this.selectedOptions.fontSize =value;
       this.canvas.getActiveObject().set("fontSize", value);
       break;
-      
       case 'fontWeight':
       this.selectedOptions.fontWeight = value;
       this.canvas.getActiveObject().set("fontWeight", value);
-      break;
-      
+      break;      
       case 'color':
       this.selectedOptions.fill = value;
       this.canvas.getActiveObject().set("fill", `${value}`);
-      break;
-      
+      break;      
       case 'shadow':
       this.selectedOptions.shadow = value;
       const shadowWidth = this.selectedOptions.shadowWidth;
       const shadow = `${value}` + ' ' + shadowWidth +'px ' +  shadowWidth + 'px ' + shadowWidth + 'px';
       this.canvas.getActiveObject().set("shadow", shadow);
-      break;
-      
+      break;      
       case 'shadowWidth':
       this.selectedOptions.shadowWidth = value;
       const _shadow = `${this.selectedOptions.shadow}` +  ' ' + value+ 'px ' +  value + 'px ' + value + 'px';
       this.canvas.getActiveObject().set("shadow", _shadow);
-      break;
-      
+      break;      
       case 'strokeWidth':
       this.selectedOptions.strokeWidth= value;
       this.canvas.getActiveObject().set("strokeWidth", value);
-      break;
-      
+      break;      
       case 'stroke':
       this.canvas.getActiveObject().set('stroke', value);
       this.canvas.getActiveObject().set('strokeWidth' , this.selectedOptions.strokeWidth);
       this.selectedOptions.stroke = value;
-      break;
-      
+      break;      
       case 'opacity':
       this.selectedOptions.opacity =  value;
+      this.canvas.getActiveObject().selectAll();
       this.canvas.getActiveObject().set('opacity', value);
+      break;      
+      case 'textBackgroundColor':
+      this.selectedOptions.textBackgroundColor =  value;
+      this.canvas.getActiveObject().set('textBackgroundColor', value);
       break;
       default:
       break;
@@ -387,7 +387,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
   handlePropertyChange(event){
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
-    else if(['stroke' , 'shadow' , 'color'].indexOf(this.modalOpenedFor) > -1) {
+    else if(['stroke' , 'shadow' , 'color' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1) {
       if( typeof event.color != 'undefined')
         this.onAttributeChange(event.color.hex , this.modalOpenedFor);
       else{
@@ -480,7 +480,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
   showOptions(attribute){
     this.showColorPicker$ = this.showFontPicker$ = this.showTextAlignPicker$ = false;
     this.modalOpenedFor = attribute;
-    if(['stroke', 'shadow' , 'color'].indexOf(attribute) > -1){
+    if(['stroke', 'shadow' , 'color' , 'textBackgroundColor'].indexOf(attribute) > -1){
       this.showColorPicker$ = true;
       if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
         this.selectedOptions[this.modalOpenedFor] = '';
@@ -497,6 +497,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
     else if(attribute == 'textAlign'){
       this.showTextAlignPicker$ = true;
     }
+    else if(attribute == 'textBackgroundColor')
+      this.showTextBackgroundColorPicker$ = true;
 
    
   }
@@ -643,9 +645,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
    
       event.stopPropagation();
       event.preventDefault();
-  });
+    });
   }
-
-  
-
 }
