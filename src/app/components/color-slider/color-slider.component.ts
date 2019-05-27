@@ -79,7 +79,7 @@ export class ColorSliderComponent implements AfterViewInit {
     this.mousedown = false;
   }
 
-  @HostListener('window:mouseover') onHover(evt: MouseEvent) {
+  @HostListener('window:mouseover', ['$event']) onHover(evt: MouseEvent) {
     this.mousedown = true;
     this.selectedHeight = evt.offsetX;
     this.draw();
