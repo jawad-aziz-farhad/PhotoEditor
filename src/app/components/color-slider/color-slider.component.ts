@@ -5,21 +5,16 @@ import { Component, ViewChild, ElementRef, AfterViewInit, Output, HostListener, 
   templateUrl: './color-slider.component.html',
   styleUrls: ['./color-slider.component.sass']
 })
-export class ColorSliderComponent implements OnInit , AfterViewInit {
+export class ColorSliderComponent implements AfterViewInit {
 
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
 
-  // @Input() set canvasWidth(width){
-  //   this._canvasWidth = width;
-  // };
+  @Input() set canvasWidth(width){
+    this._canvasWidth = width;
+  };
 
-  @Input('canvasWidth')
-  set in(canvasWidth){
-    this._canvasWidth = canvasWidth;
-    //this.draw();
-  }
-
+  
   @Output()
   color: EventEmitter<any> = new EventEmitter();
 
@@ -28,12 +23,9 @@ export class ColorSliderComponent implements OnInit , AfterViewInit {
   private mousedown: boolean = false;
   private selectedHeight: number;
 
-  ngOnInit(){
-    this.draw();
-  }
-
+ 
   ngAfterViewInit() {
-    //this.draw();
+    this.draw();
   }
 
   draw() {
@@ -81,9 +73,17 @@ export class ColorSliderComponent implements OnInit , AfterViewInit {
     }
   }
 
+
   @HostListener('window:mouseup', ['$event'])
   onMouseUp(evt: MouseEvent) {
     this.mousedown = false;
+  }
+
+  @HostListener('window:mouseover') onHover(evt: MouseEvent) {
+    this.mousedown = true;
+    this.selectedHeight = evt.offsetX;
+    this.draw();
+    this.emitColor(evt.offsetX, evt.offsetY);
   }
 
   onMouseDown(evt: MouseEvent) {

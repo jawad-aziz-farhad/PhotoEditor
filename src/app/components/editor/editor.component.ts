@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
+import 'fabric-customise-controls';
 
 declare var $: any;
 
@@ -11,7 +12,9 @@ declare var $: any;
 })
 export class EditorComponent implements OnInit , AfterViewInit {
 
+ 
   @ViewChild('canvasArea') canvasArea: ElementRef;
+  @ViewChild('canvas') _canvas: ElementRef;
   @ViewChild('optionsRow') optionsRow: ElementRef;
 
   canvas: any
@@ -78,12 +81,13 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
 
-   this.setUpCanvas(this.selectedImage);
+    this.setUpCanvas(this.selectedImage);
   }  
 
   ngAfterViewInit(){
     console.log('Color Picker ', this.rowWidth);
   }
+
 
   setUpCanvas(image) {  
     
@@ -91,14 +95,11 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas = new fabric.Canvas('canvas');    
     this.canvas.setWidth(this.canvasWidth);
     this.canvas.setHeight(this.canvas_Height);
-    
+
     fabric.Image.fromURL(image, img => {
 
-      //img.scaleToWidth(this.canvas.getWidth());
-      //img.scaleToHeight(this.canvas.getHeight());
-     
       img.set({
-        scaleX :this.canvas.getWidth() / img.width,   //new update
+        scaleX : this.canvas.getWidth() / img.width,   //new update
         scaleY: this.canvas.getHeight() / img.height,   //new update,
         originX: "center", 
         originY: "center",
@@ -106,8 +107,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
         centeredScaling: true
       });
 
-      this.canvas.centerObject(img);
-      img.setCoords();
+      // img.scaleToWidth(this.canvas.getWidth() );
+      // img.scaleToHeight(this.canvas.getHeight() );
       
       if ( Math.max(img.width, img.height) > 2048) {
         let fscale = 2048 / Math.max(img.width, img.height);
@@ -115,7 +116,10 @@ export class EditorComponent implements OnInit , AfterViewInit {
         img.applyFilters();
       }
 
-    this.canvas.add(img);
+    img.setCoords();  
+    this.canvas.centerObject(img);
+    //this.canvas.add(img);
+    this.canvas.setBackgroundImage(img , this.canvas.renderAll.bind(this.canvas));
 
     this.setText();
 
@@ -133,10 +137,30 @@ export class EditorComponent implements OnInit , AfterViewInit {
           const delta = new fabric.Point(e.e.movementX, e.e.movementY);
           this.canvas.relativePan(delta);
         }
-      });      
+      });    
 
-      //this.mouseWheel();
+      this.canvas.on('object:moving', function (e) {
+        var obj = e.target;
+         // if object is too big ignore
+        if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+            return;
+        }        
+        obj.setCoords();        
+        // top-left  corner
+        if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+            obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+            obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+        }
+        // bot-right corner
+        if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+            obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+            obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+        }
+      });
+
       this.canvas.renderAll();
+
+      this.customizeControls();
     });
   }
 
@@ -146,14 +170,18 @@ export class EditorComponent implements OnInit , AfterViewInit {
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
       textAlign: this.selectedOptions.textAlign,
-      stroke: this.selectedOptions.stroke,
+      
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
+      paintFirst: 'stroke',
+      stroke: this.selectedOptions.stroke,
       shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
+      strokeLineCap: 'round',
       opacity: this.selectedOptions.opacity,
       textBackgroundColor : this.selectedOptions.textBackgroundColor,
       borderColor: '#00c6d2',
       editingBorderColor: '#00c6d2',
-      cornerSize : 5
+      borderScaleFactor: 2,
+      padding: 3
     });
 
     this.setTextEvents(text); 
@@ -237,7 +265,149 @@ export class EditorComponent implements OnInit , AfterViewInit {
       });
   }
 
+  customizeControls(){
+
+    fabric.Object.prototype.drawControls = function (ctx) {
+
+      if (!this.hasControls) {
+        return this;
+      }
+    
+      var wh = this._calculateCurrentDimensions(),
+          width = wh.x,
+          height = wh.y,
+          scaleOffset = this.cornerSize,
+          left = -(width + scaleOffset) / 2,
+          top = -(height + scaleOffset) / 2,
+          methodName = this.transparentCorners ? 'stroke' : 'fill';
+    
+      ctx.save();
+      
+      ctx.strokeStyle = ctx.fillStyle = this.cornerColor;
+      if (!this.transparentCorners) {
+        ctx.strokeStyle = this.cornerStrokeColor;
+      }
+
+      this._setLineDash(ctx, this.cornerDashArray, null);
+
+      // top-left
+      this._drawControl('tl', ctx, methodName,
+          left,
+          top,
+          this.tlIcon,
+          this.tlSettings
+      );
+
+      // top-right
+      this._drawControl('tr', ctx, methodName,
+          left + width,
+          top,
+          this.trIcon,
+          this.trSettings
+      );
+
+      // bottom-left
+      this._drawControl('bl', ctx, methodName,
+          left,
+          top + height,
+          this.blIcon,
+          this.blSettings
+      );
+
+      // bottom-right
+      this._drawControl('br', ctx, methodName,
+          left + width,
+          top + height,
+          this.brIcon,
+          this.brSettings
+      );
+    
+      if (!this.get('lockUniScaling')) {
+    
+        // middle-top
+        this._drawControl('mt', ctx, methodName,
+          left + width / 2,
+          top);
+    
+        // middle-bottom
+        this._drawControl('mb', ctx, methodName,
+          left + width / 2,
+          top + height);
+    
+        // middle-right
+        this._drawControl('mr', ctx, methodName,
+          left + width,
+          top + height / 2);
+    
+        // middle-left
+        this._drawControl('ml', ctx, methodName,
+          left,
+          top + height / 2);
+      }
+    
+      // middle-top-rotate
+      if (this.hasRotatingPoint) {
+        var rotate = new Image(), rotateLeft, rotateTop;
+        rotate.src = 'http://www.navifun.net/files/pins/tiny/Arrow-Rotate-Clockwise.png';
+        rotateLeft = left + width / 2;
+        rotateTop = top - this.rotatingPointOffset;
+        ctx.drawImage(rotate, rotateLeft, rotateTop, 15, 15);
+      }
+    
+      ctx.restore();
+    
+      return this;
+    
+    }
+
+    /*
+    fabric.Canvas.prototype.customiseControls({
+      tl: {
+          action: 'rotate',
+          cursor: 'cow.png'
+      },
+      tr: {
+          action: 'scale'
+      },
+      bl: {
+          action: 'remove',
+          cursor: 'pointer'
+      },
+      br: {
+          action: 'moveUp',
+          cursor: 'pointer'
+      },
+      mb: {
+          action: 'moveDown',
+          cursor: 'pointer'
+      },
+      mt: {
+          action: {
+            'rotateByDegrees': 45
+          }
+      },
+      mr: {
+          action: function( e, target ) {
+              target.set( {
+                  left: 200
+              } );
+              this.canvas.renderAll();
+          }
+       },
+       // only is hasRotatingPoint is not set to false
+       mtr: {
+          action: 'rotate',
+          cursor: 'cow.png'
+       },
+  }, function() {
+      this.canvas.renderAll();
+  } );
+  */
+  }
+
   drawWithFabricJS(selectedImage){
+
+    
     this.canvas = new fabric.Canvas('canvas');
     this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
     this.canvas.clear();
@@ -248,7 +418,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
       img.scaleToHeight(this.canvas.getHeight());
       
       if ( Math.max(img.width, img.height) > 2048) {
-        console.log('Greater than 2048.');
         let fscale = 2048 / Math.max(img.width, img.height);
         img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
         img.applyFilters();
@@ -265,8 +434,10 @@ export class EditorComponent implements OnInit , AfterViewInit {
         fontFamily: this.selectedOptions.fontFamily,
         fill: "#C0C0C0",
         textAlign: this.selectedOptions.textAlign,
-        stroke: this.selectedOptions.stroke,
+       
         strokeWidth: this.selectedOptions.strokeWidth,
+        paintFirst: "stroke",
+        stroke: this.selectedOptions.stroke,
       });
       this.canvas.add(text);
       this.canvas.centerObject(text);

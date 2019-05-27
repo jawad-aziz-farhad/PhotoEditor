@@ -245,7 +245,6 @@ export class HomeComponent implements OnInit , AfterViewInit {
       img.scaleToHeight(this.canvas.getHeight());
       
       if ( Math.max(img.width, img.height) > 2048) {
-        console.log('Greater than 2048.');
         let fscale = 2048 / Math.max(img.width, img.height);
         img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
         img.applyFilters();
