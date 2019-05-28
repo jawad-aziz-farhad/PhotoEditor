@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
-import 'fabric-customise-controls';
 
 declare var $: any;
 
@@ -80,6 +79,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.zoomLevel = 0;
 
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
+
+    this.customizeControls();
 
     this.setUpCanvas(this.selectedImage);
   }  
@@ -160,17 +161,29 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
       this.canvas.renderAll();
 
-      this.customizeControls();
+      
     });
   }
 
   setText(){
+
+    var HideControls = {
+      'tl': false,
+      'tr': false,
+      'bl': false,
+      'br': true,
+      'ml': true,
+      'mt': true,
+      'mr': true,
+      'mb': true,
+      'mtr': true
+    };
+
     let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
-      textAlign: this.selectedOptions.textAlign,
-      
+      textAlign: this.selectedOptions.textAlign,      
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
       paintFirst: 'stroke',
       stroke: this.selectedOptions.stroke,
@@ -181,8 +194,11 @@ export class EditorComponent implements OnInit , AfterViewInit {
       borderColor: '#00c6d2',
       editingBorderColor: '#00c6d2',
       borderScaleFactor: 2,
-      padding: 3
+      padding: 3,
+      hasRotatingPoint: false
     });
+
+    text.setControlsVisibility(HideControls);
 
     this.setTextEvents(text); 
     this.canvas.add(text);
@@ -269,95 +285,136 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
     fabric.Object.prototype.drawControls = function (ctx) {
 
-      if (!this.hasControls) {
-        return this;
-      }
-    
-      var wh = this._calculateCurrentDimensions(),
-          width = wh.x,
-          height = wh.y,
-          scaleOffset = this.cornerSize,
-          left = -(width + scaleOffset) / 2,
-          top = -(height + scaleOffset) / 2,
-          methodName = this.transparentCorners ? 'stroke' : 'fill';
-    
-      ctx.save();
+      var DIMICON = 15;
       
+      var dataImage = [
+        "https://cdn1.iconfinder.com/data/icons/streamline-interface/60/cell-8-10-120.png", /*scale*/
+        "https://cdn1.iconfinder.com/data/icons/ui-color/512/Untitled-12-128.png", /*delete*/
+        "https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/sync-16.png", /*rotate*/
+        "https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/write-compose-16.png", /*change text*/
+        "https://cdn3.iconfinder.com/data/icons/social-messaging-productivity-1/128/save-16.png" /*save*/
+      ];
+      if (!this.hasControls) return this;
+
+      var size = this.cornerSize,
+      size2 = size / 2,
+      strokeWidth2 = ~~(this.strokeWidth / 2), // half strokeWidth rounded down
+      left = -(this.width / 2),
+      top = -(this.height / 2),
+      paddingX = this.padding / this.scaleX,
+      paddingY = this.padding / this.scaleY,
+      scaleOffsetY = size2 / this.scaleY,
+      scaleOffsetX = size2 / this.scaleX,
+      scaleOffsetSizeX = (size2 - size) / this.scaleX,
+      scaleOffsetSizeY = (size2 - size) / this.scaleY,
+      height = this.height,
+      width = this.width,
+      methodName = this.transparentCorners ? 'stroke' : 'fill';
+  
+      ctx.save();
+  
+      ctx.lineWidth = 1 / Math.max(this.scaleX, this.scaleY);
+  
+      ctx.globalAlpha = this.isMoving ? this.borderOpacityWhenMoving : 1;
       ctx.strokeStyle = ctx.fillStyle = this.cornerColor;
-      if (!this.transparentCorners) {
-        ctx.strokeStyle = this.cornerStrokeColor;
-      }
-
-      this._setLineDash(ctx, this.cornerDashArray, null);
-
+  
       // top-left
       this._drawControl('tl', ctx, methodName,
-          left,
-          top,
-          this.tlIcon,
-          this.tlSettings
-      );
-
+          left - scaleOffsetX - strokeWidth2 - paddingX,
+          top - scaleOffsetY - strokeWidth2 - paddingY);
+  
       // top-right
       this._drawControl('tr', ctx, methodName,
-          left + width,
-          top,
-          this.trIcon,
-          this.trSettings
-      );
-
+          left + width - scaleOffsetX + strokeWidth2 + paddingX,
+          top - scaleOffsetY - strokeWidth2 - paddingY);
+  
       // bottom-left
       this._drawControl('bl', ctx, methodName,
-          left,
-          top + height,
-          this.blIcon,
-          this.blSettings
-      );
-
+          left - scaleOffsetX - strokeWidth2 - paddingX,
+          top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
+  
       // bottom-right
       this._drawControl('br', ctx, methodName,
-          left + width,
-          top + height,
-          this.brIcon,
-          this.brSettings
-      );
-    
+          left + width + scaleOffsetSizeX + strokeWidth2 + paddingX,
+          top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
+  
       if (!this.get('lockUniScaling')) {
-    
-        // middle-top
-        this._drawControl('mt', ctx, methodName,
-          left + width / 2,
-          top);
-    
-        // middle-bottom
-        this._drawControl('mb', ctx, methodName,
-          left + width / 2,
-          top + height);
-    
-        // middle-right
-        this._drawControl('mr', ctx, methodName,
-          left + width,
-          top + height / 2);
-    
-        // middle-left
-        this._drawControl('ml', ctx, methodName,
-          left,
-          top + height / 2);
+          /*
+          // middle-top
+          this._drawControl('tl', ctx, methodName,
+              left + width / 2 - scaleOffsetX,
+              top - scaleOffsetY - strokeWidth2 - paddingY , dataImage[0]);
+          let image = new Image();
+          image.src = dataImage[1];  
+          ctx.drawImage(image, left, top, size / this.scaleX, size / this.scaleY);
+          
+          // middle-bottom
+          this._drawControl('mb', ctx, methodName,
+              left + width / 2 - scaleOffsetX,
+              top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
+  
+          // middle-right
+          this._drawControl('mr', ctx, methodName,
+              left + width + scaleOffsetSizeX + strokeWidth2 + paddingX,
+              top + height / 2 - scaleOffsetY);
+  
+          // middle-left
+          this._drawControl('ml', ctx, methodName,
+              left - scaleOffsetX - strokeWidth2 - paddingX,
+              top + height / 2 - scaleOffsetY);
+              
+        */
+
+        this._drawControl = function(control, ctx, methodName , left, top ){
+          let image = new Image();
+          switch(control){
+            case 'tl':
+            image = new Image();
+            image.src = dataImage[1];  
+            ctx.drawImage(image, left, top, DIMICON , DIMICON);
+            break;
+
+            case 'tr':
+            image = new Image();
+            image.src = dataImage[1];  
+            ctx.drawImage(image, 
+                          (left + (width - (scaleOffsetX + strokeWidth2 + paddingX) ) ),
+                          (top - ( scaleOffsetY - strokeWidth2 - paddingY ) ), 
+                          DIMICON, 
+                          DIMICON );
+            break;
+
+            case 'br':
+            image = new Image();
+            image.src = dataImage[1];  
+            ctx.drawImage(image, 
+                          (left + (width - (scaleOffsetX + strokeWidth2 + paddingX) ) ),
+                          (top - ( scaleOffsetY - strokeWidth2 - paddingY ) ), 
+                          DIMICON, 
+                          DIMICON );
+            break;
+
+            default:
+            break;
+          }
+        };
+
       }
-    
+  
       // middle-top-rotate
       if (this.hasRotatingPoint) {
         var rotate = new Image(), rotateLeft, rotateTop;
-        rotate.src = 'http://www.navifun.net/files/pins/tiny/Arrow-Rotate-Clockwise.png';
-        rotateLeft = left + width / 2;
-        rotateTop = top - this.rotatingPointOffset;
-        ctx.drawImage(rotate, rotateLeft, rotateTop, 15, 15);
+        rotate.src = dataImage[2];
+        rotateLeft = left + width / 2 - scaleOffsetX;
+        rotateTop = this.flipY
+            ? (top + height + (this.rotatingPointOffset / this.scaleY) - this.cornerSize / this.scaleX / 2 + strokeWidth2 + paddingY)
+            : (top - (this.rotatingPointOffset / this.scaleY) - this.cornerSize / this.scaleY / 2 - strokeWidth2 - paddingY);
+        ctx.drawImage(rotate, rotateLeft, rotateTop, size / this.scaleX, size / this.scaleY);
       }
-    
+  
       ctx.restore();
-    
+  
       return this;
-    
     }
 
     /*
@@ -404,6 +461,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
   } );
   */
   }
+
+  
 
   drawWithFabricJS(selectedImage){
 

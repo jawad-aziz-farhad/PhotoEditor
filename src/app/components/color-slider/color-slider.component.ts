@@ -73,7 +73,6 @@ export class ColorSliderComponent implements AfterViewInit {
     }
   }
 
-
   @HostListener('window:mouseup', ['$event'])
   onMouseUp(evt: MouseEvent) {
     this.mousedown = false;
