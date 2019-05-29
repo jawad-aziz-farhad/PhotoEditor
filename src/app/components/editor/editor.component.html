@@ -200,7 +200,7 @@
 
                           <div class="col">
                             <div class="shape-section typo">
-                                <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'textBackgroundColor' }" (click)="showOptions('textBackgroundColor')">
+                                <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.textBackgroundColor != '' || modalOpenedFor == 'textBackgroundColor' }" (click)="showOptions('textBackgroundColor')">
                                     <img src="assets/_images/color.svg" alt="">
                                 </div>                                  
                                 <span>Bg Tint</span>
@@ -209,9 +209,15 @@
 
                       </div>
 
+                      
+                      
                     </div>
                   </div>
 
+              </div>
+
+              <div class="row no-gutters mt-2">
+                <app-text-modifiers [options]="selectedOptions"></app-text-modifiers>
               </div>
 
             </div>

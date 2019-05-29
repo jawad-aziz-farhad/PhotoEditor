@@ -1,11 +1,11 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, Output, HostListener, EventEmitter, Input, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, Output, HostListener, EventEmitter, Input, OnInit, OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-color-slider',
   templateUrl: './color-slider.component.html',
   styleUrls: ['./color-slider.component.sass']
 })
-export class ColorSliderComponent implements AfterViewInit {
+export class ColorSliderComponent implements AfterViewInit , OnDestroy {
 
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
@@ -28,15 +28,20 @@ export class ColorSliderComponent implements AfterViewInit {
     this.draw();
   }
 
+  ngOnDestroy(){
+    this.clearTheCanvas();
+  }
+
   draw() {
     if (!this.ctx) {
       this.ctx = this.canvas.nativeElement.getContext('2d');
     }
+    
+    this.clearTheCanvas();
+
     const width = this.canvas.nativeElement.width;
     const height = this.canvas.nativeElement.height;
-
-    this.ctx.clearRect(0, 0, width, height);
-
+    
     const gradient = this.ctx.createLinearGradient(width, 0, 0, 0);
     gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
     gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
@@ -73,17 +78,23 @@ export class ColorSliderComponent implements AfterViewInit {
     }
   }
 
+  clearTheCanvas(){
+    const width = this.canvas.nativeElement.width;
+    const height = this.canvas.nativeElement.height;
+    this.ctx.clearRect(0, 0, width, height);
+  }
+
   @HostListener('window:mouseup', ['$event'])
   onMouseUp(evt: MouseEvent) {
     this.mousedown = false;
   }
 
-  @HostListener('window:mouseover', ['$event']) onHover(evt: MouseEvent) {
-    this.mousedown = true;
-    this.selectedHeight = evt.offsetX;
-    this.draw();
-    this.emitColor(evt.offsetX, evt.offsetY);
-  }
+  // @HostListener('window:mouseover', ['$event']) onHover(evt: MouseEvent) {
+  //   this.mousedown = true;
+  //   this.selectedHeight = evt.offsetX;
+  //   this.draw();
+  //   this.emitColor(evt.offsetX, evt.offsetY);
+  // }
 
   onMouseDown(evt: MouseEvent) {
     this.mousedown = true;

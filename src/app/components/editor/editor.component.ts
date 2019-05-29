@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
+import 'fabric-customise-controls';
 
 declare var $: any;
 
@@ -58,7 +59,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.toggle = false;
     this.overLayText = '';
     this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', 
-                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : ''};
+                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : '' , angle: 0};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
@@ -78,9 +79,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
     this.zoomLevel = 0;
 
-    this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
-
-    this.customizeControls();
+    this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
 
     this.setUpCanvas(this.selectedImage);
   }  
@@ -88,7 +87,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
   ngAfterViewInit(){
     console.log('Color Picker ', this.rowWidth);
   }
-
 
   setUpCanvas(image) {  
     
@@ -119,7 +117,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
     img.setCoords();  
     this.canvas.centerObject(img);
-    //this.canvas.add(img);
     this.canvas.setBackgroundImage(img , this.canvas.renderAll.bind(this.canvas));
 
     this.setText();
@@ -160,26 +157,25 @@ export class EditorComponent implements OnInit , AfterViewInit {
       });
 
       this.canvas.renderAll();
-
-      
     });
   }
 
   setText(){
 
     var HideControls = {
-      'tl': false,
-      'tr': false,
+      'tl': true,
+      'tr': true,
       'bl': false,
       'br': true,
-      'ml': true,
-      'mt': true,
-      'mr': true,
-      'mb': true,
-      'mtr': true
+      'ml': false,
+      'mt': false,
+      'mr': false,
+      'mb': false,
+      'mtr': false
     };
 
     let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
+      angle: this.selectedOptions.angle,
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
@@ -194,7 +190,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
       borderColor: '#00c6d2',
       editingBorderColor: '#00c6d2',
       borderScaleFactor: 2,
-      padding: 3,
+      padding: 15,
       hasRotatingPoint: false
     });
 
@@ -205,7 +201,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas.centerObject(text);
     this.canvas.setActiveObject(text);
     this.canvas.bringToFront(text);
-    
+
+    this.customizeControls();
   }
 
   setTextEvents(text){
@@ -281,245 +278,62 @@ export class EditorComponent implements OnInit , AfterViewInit {
       });
   }
 
-  customizeControls(){
+  customizeControls() {
 
-    fabric.Object.prototype.drawControls = function (ctx) {
+    const icons = [
+      'assets/_images/circle.svg',
+      'assets/_images/rotate.svg',
+      'assets/_images/expand.svg'
+    ];
 
-      var DIMICON = 15;
-      
-      var dataImage = [
-        "https://cdn1.iconfinder.com/data/icons/streamline-interface/60/cell-8-10-120.png", /*scale*/
-        "https://cdn1.iconfinder.com/data/icons/ui-color/512/Untitled-12-128.png", /*delete*/
-        "https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/sync-16.png", /*rotate*/
-        "https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/write-compose-16.png", /*change text*/
-        "https://cdn3.iconfinder.com/data/icons/social-messaging-productivity-1/128/save-16.png" /*save*/
-      ];
-      if (!this.hasControls) return this;
-
-      var size = this.cornerSize,
-      size2 = size / 2,
-      strokeWidth2 = ~~(this.strokeWidth / 2), // half strokeWidth rounded down
-      left = -(this.width / 2),
-      top = -(this.height / 2),
-      paddingX = this.padding / this.scaleX,
-      paddingY = this.padding / this.scaleY,
-      scaleOffsetY = size2 / this.scaleY,
-      scaleOffsetX = size2 / this.scaleX,
-      scaleOffsetSizeX = (size2 - size) / this.scaleX,
-      scaleOffsetSizeY = (size2 - size) / this.scaleY,
-      height = this.height,
-      width = this.width,
-      methodName = this.transparentCorners ? 'stroke' : 'fill';
-  
-      ctx.save();
-  
-      ctx.lineWidth = 1 / Math.max(this.scaleX, this.scaleY);
-  
-      ctx.globalAlpha = this.isMoving ? this.borderOpacityWhenMoving : 1;
-      ctx.strokeStyle = ctx.fillStyle = this.cornerColor;
-  
-      // top-left
-      this._drawControl('tl', ctx, methodName,
-          left - scaleOffsetX - strokeWidth2 - paddingX,
-          top - scaleOffsetY - strokeWidth2 - paddingY);
-  
-      // top-right
-      this._drawControl('tr', ctx, methodName,
-          left + width - scaleOffsetX + strokeWidth2 + paddingX,
-          top - scaleOffsetY - strokeWidth2 - paddingY);
-  
-      // bottom-left
-      this._drawControl('bl', ctx, methodName,
-          left - scaleOffsetX - strokeWidth2 - paddingX,
-          top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
-  
-      // bottom-right
-      this._drawControl('br', ctx, methodName,
-          left + width + scaleOffsetSizeX + strokeWidth2 + paddingX,
-          top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
-  
-      if (!this.get('lockUniScaling')) {
-          /*
-          // middle-top
-          this._drawControl('tl', ctx, methodName,
-              left + width / 2 - scaleOffsetX,
-              top - scaleOffsetY - strokeWidth2 - paddingY , dataImage[0]);
-          let image = new Image();
-          image.src = dataImage[1];  
-          ctx.drawImage(image, left, top, size / this.scaleX, size / this.scaleY);
-          
-          // middle-bottom
-          this._drawControl('mb', ctx, methodName,
-              left + width / 2 - scaleOffsetX,
-              top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
-  
-          // middle-right
-          this._drawControl('mr', ctx, methodName,
-              left + width + scaleOffsetSizeX + strokeWidth2 + paddingX,
-              top + height / 2 - scaleOffsetY);
-  
-          // middle-left
-          this._drawControl('ml', ctx, methodName,
-              left - scaleOffsetX - strokeWidth2 - paddingX,
-              top + height / 2 - scaleOffsetY);
-              
-        */
-
-        this._drawControl = function(control, ctx, methodName , left, top ){
-          let image = new Image();
-          switch(control){
-            case 'tl':
-            image = new Image();
-            image.src = dataImage[1];  
-            ctx.drawImage(image, left, top, DIMICON , DIMICON);
-            break;
-
-            case 'tr':
-            image = new Image();
-            image.src = dataImage[1];  
-            ctx.drawImage(image, 
-                          (left + (width - (scaleOffsetX + strokeWidth2 + paddingX) ) ),
-                          (top - ( scaleOffsetY - strokeWidth2 - paddingY ) ), 
-                          DIMICON, 
-                          DIMICON );
-            break;
-
-            case 'br':
-            image = new Image();
-            image.src = dataImage[1];  
-            ctx.drawImage(image, 
-                          (left + (width - (scaleOffsetX + strokeWidth2 + paddingX) ) ),
-                          (top - ( scaleOffsetY - strokeWidth2 - paddingY ) ), 
-                          DIMICON, 
-                          DIMICON );
-            break;
-
-            default:
-            break;
-          }
-        };
-
-      }
-  
-      // middle-top-rotate
-      if (this.hasRotatingPoint) {
-        var rotate = new Image(), rotateLeft, rotateTop;
-        rotate.src = dataImage[2];
-        rotateLeft = left + width / 2 - scaleOffsetX;
-        rotateTop = this.flipY
-            ? (top + height + (this.rotatingPointOffset / this.scaleY) - this.cornerSize / this.scaleX / 2 + strokeWidth2 + paddingY)
-            : (top - (this.rotatingPointOffset / this.scaleY) - this.cornerSize / this.scaleY / 2 - strokeWidth2 - paddingY);
-        ctx.drawImage(rotate, rotateLeft, rotateTop, size / this.scaleX, size / this.scaleY);
-      }
-  
-      ctx.restore();
-  
-      return this;
-    }
-
-    /*
-    fabric.Canvas.prototype.customiseControls({
+    fabric.Canvas.prototype['customiseControls']({
       tl: {
-          action: 'rotate',
-          cursor: 'cow.png'
+        action: (e, target) => {
+          this.selectedOptions.angle = 0;
+          this.showCanvasText = false;
+          this.canvas.remove(target);
+        },
+        cursor: 'pointer'
       },
       tr: {
-          action: 'scale'
-      },
-      bl: {
-          action: 'remove',
-          cursor: 'pointer'
-      },
-      br: {
-          action: 'moveUp',
-          cursor: 'pointer'
-      },
-      mb: {
-          action: 'moveDown',
-          cursor: 'pointer'
-      },
-      mt: {
-          action: {
-            'rotateByDegrees': 45
-          }
-      },
-      mr: {
-          action: function( e, target ) {
-              target.set( {
-                  left: 200
-              } );
-              this.canvas.renderAll();
-          }
-       },
-       // only is hasRotatingPoint is not set to false
-       mtr: {
-          action: 'rotate',
-          cursor: 'cow.png'
-       },
-  }, function() {
-      this.canvas.renderAll();
-  } );
-  */
-  }
-
-  
-
-  drawWithFabricJS(selectedImage){
-
-    
-    this.canvas = new fabric.Canvas('canvas');
-    this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
-    this.canvas.clear();
-    
-    fabric.Image.fromURL(selectedImage, (img) => {
-
-      img.scaleToWidth(this.canvas.getWidth());
-      img.scaleToHeight(this.canvas.getHeight());
-      
-      if ( Math.max(img.width, img.height) > 2048) {
-        let fscale = 2048 / Math.max(img.width, img.height);
-        img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
-        img.applyFilters();
-      }
-
-      this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
-        scaleX: this.canvas.getWidth() / img.width,
-        scaleY: this.canvas.getHeight() / img.height
-      });
-
-
-      let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter your text here', {
-        fontSize: this.selectedOptions.fontSize,
-        fontFamily: this.selectedOptions.fontFamily,
-        fill: "#C0C0C0",
-        textAlign: this.selectedOptions.textAlign,
-       
-        strokeWidth: this.selectedOptions.strokeWidth,
-        paintFirst: "stroke",
-        stroke: this.selectedOptions.stroke,
-      });
-      this.canvas.add(text);
-      this.canvas.centerObject(text);
-      this.canvas.setActiveObject(text);
-      this.canvas.bringToFront(text);
-
-      text.on("editing:entered",  (e)  => {
-        var obj = this.canvas.getActiveObject();
-        if(obj.text === 'Enter your text here')
-        {
-          obj.selectAll();
-          obj.text = "";
-          obj.fill = this.selectedOptions.fill;
-          obj.hiddenTextarea.value = "";
-          obj.dirty = true;
-          obj.setCoords();
+        cursor: 'pointer',
+        action: (e, target) => {
+          const angle = target.angle == 0 ? target.angle + 45 : (target.angle == 360 ? 0 :  target.angle * 2 );
+          this.selectedOptions.angle = angle;
+          target.rotate(angle);
+          target.setCoords();
           this.canvas.renderAll();
         }
-        else{
-          this.overLayText = obj.text;
-        }
+      },
+      br: {
+        action: 'scale',
+      },    
+    }, () => {
+      this.canvas.renderAll();
     });
 
+    this.canvas.item(0)['customiseCornerIcons']({
+      settings: {
+        borderColor: '#00c6d2',
+        editingBorderColor: '#00c6d2',
+        cornerBackgroundColor: 'white',
+        cornerSize: 30,
+        cornerShape: 'circle',
+        cornerPadding: 10
+      },
+      tl: {
+        icon: icons[0],
+        action: 'remove',
+        cursor: 'pointer'
+      },
+      tr: {
+        icon: icons[1],
+        
+      },    
+      br: {
+        icon: icons[2]
+      }   
+    }, () => {
       this.canvas.renderAll();
     });
   }
@@ -533,6 +347,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
   onAttributeChange(value , attribute){
     switch(attribute){
       case 'canvasSize':
+      this.selectedOptions.angle = 0;
       this.selectedOptions.canvasSize = value;
       this.setCanvasSize(value);
       break;
@@ -613,7 +428,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-  
   handlePropertyChange(event){
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
@@ -630,8 +444,9 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
   applyFilter(filter){
     this.selectedOptions.filter = filter;
-    const obj = this.canvas.item(0);
-    if (obj.filters.length > 1) 
+    const obj = this.canvas.backgroundImage;
+    if(!obj) return;
+    if (obj.filters && obj.filters.length > 1) 
       obj.filters.pop();
     
     switch(filter){
@@ -678,8 +493,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
     }
 
     return {
-        w: imgW,
-        h: imgH
+      w: imgW,
+      h: imgH
     };
 }
   
@@ -702,6 +517,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     else {
       const obj = this.canvas.getActiveObject();
       this.canvas.remove(obj);
+      this.selectedOptions.angle = 0;
     }
     this.showCanvasText = event.target.checked;
     this.canvas.renderAll();
@@ -712,7 +528,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.modalOpenedFor = attribute;
     if(['stroke', 'shadow' , 'color' , 'textBackgroundColor'].indexOf(attribute) > -1){
       this.showColorPicker$ = true;
-      if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
+      if(['stroke', 'shadow' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
         this.selectedOptions[this.modalOpenedFor] = '';
         const obj = this.canvas.getActiveObject();
         obj.set(this.modalOpenedFor, '');
@@ -758,14 +574,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
   }
 
   setZoom(event) {    
-    // console.log('Zoom Value', event.target.value);
-    // const zoomLevel = event.target.value;
-    // if(zoomLevel > 1)
-    //   this.canvas.setZoom(this.canvas.getZoom() * zoomLevel);
-    // else
-    //   this.canvas.setZoom(1);
-    // this.canvas.renderAll();
-
     let status = '';
     const zoomLevel = event.target.value;
     if(zoomLevel > this.canvas.getZoom())
@@ -792,8 +600,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
       default: 
 	  }
   this.canvas.renderAll();
-}
-  
+  }
 
   get rangeVal() {
     if(this.modalOpenedFor == 'stroke')
