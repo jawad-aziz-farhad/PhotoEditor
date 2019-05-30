@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
 import 'fabric-customise-controls';
@@ -11,7 +11,6 @@ declare var $: any;
   styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit , AfterViewInit {
-
  
   @ViewChild('canvasArea') canvasArea: ElementRef;
   @ViewChild('canvas') _canvas: ElementRef;
@@ -191,7 +190,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
       editingBorderColor: '#00c6d2',
       borderScaleFactor: 2,
       padding: 15,
-      hasRotatingPoint: false
+      originX: 'center',
+      originY: 'center'
     });
 
     text.setControlsVisibility(HideControls);
@@ -296,14 +296,9 @@ export class EditorComponent implements OnInit , AfterViewInit {
         cursor: 'pointer'
       },
       tr: {
-        cursor: 'pointer',
-        action: (e, target) => {
-          const angle = target.angle == 0 ? target.angle + 45 : (target.angle == 360 ? 0 :  target.angle * 2 );
-          this.selectedOptions.angle = angle;
-          target.rotate(angle);
-          target.setCoords();
-          this.canvas.renderAll();
-        }
+        action: 'rotate',
+			  cursor: 'pointer'
+       
       },
       br: {
         action: 'scale',
@@ -311,7 +306,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
     }, () => {
       this.canvas.renderAll();
     });
-
+    
     this.canvas.item(0)['customiseCornerIcons']({
       settings: {
         borderColor: '#00c6d2',
@@ -437,8 +432,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
       else{
         const attribute = this.modalOpenedFor == 'stroke' ? 'strokeWidth' : 'shadowWidth';
         this.onAttributeChange(event.target.value , attribute);
-      }
-    
+      }    
     }
   }
 

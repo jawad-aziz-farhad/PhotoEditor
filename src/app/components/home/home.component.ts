@@ -1,6 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
+import 'fabric-customise-controls';
 
 declare var $: any;
 
@@ -11,7 +12,9 @@ declare var $: any;
 })
 export class HomeComponent implements OnInit , AfterViewInit {
 
+ 
   @ViewChild('canvasArea') canvasArea: ElementRef;
+  @ViewChild('canvas') _canvas: ElementRef;
   @ViewChild('optionsRow') optionsRow: ElementRef;
 
   canvas: any
@@ -31,6 +34,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
   showResizeArea: boolean;
   showColorPicker$: boolean;
   showFontPicker$: boolean;
+  showTextAlignPicker$: boolean;
   showTextBackgroundColorPicker$: boolean;
 
   showCanvasText: boolean;
@@ -54,8 +58,8 @@ export class HomeComponent implements OnInit , AfterViewInit {
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , fill: '#000', 
-                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : ''};
+    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', 
+                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : '' , angle: 0};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
@@ -68,15 +72,18 @@ export class HomeComponent implements OnInit , AfterViewInit {
 
     this.showColorPicker$ = false;
     this.showFontPicker$  = false;
+    this.showTextAlignPicker$ = false;
     this.showTextBackgroundColorPicker$ = false;
 
     this.isDropup = true;
 
     this.zoomLevel = 0;
 
-    //this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
+    //this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
 
-   this.setUpCanvas(this.selectedImage);
+    //this.setUpCanvas(this.selectedImage);
+
+    this.drawinOnCanvas();
   }  
 
   ngAfterViewInit(){
@@ -89,14 +96,11 @@ export class HomeComponent implements OnInit , AfterViewInit {
     this.canvas = new fabric.Canvas('canvas');    
     this.canvas.setWidth(this.canvasWidth);
     this.canvas.setHeight(this.canvas_Height);
-    
+
     fabric.Image.fromURL(image, img => {
 
-      //img.scaleToWidth(this.canvas.getWidth());
-      //img.scaleToHeight(this.canvas.getHeight());
-     
       img.set({
-        scaleX :this.canvas.getWidth() / img.width,   //new update
+        scaleX : this.canvas.getWidth() / img.width,   //new update
         scaleY: this.canvas.getHeight() / img.height,   //new update,
         originX: "center", 
         originY: "center",
@@ -104,8 +108,8 @@ export class HomeComponent implements OnInit , AfterViewInit {
         centeredScaling: true
       });
 
-      this.canvas.centerObject(img);
-      img.setCoords();
+      // img.scaleToWidth(this.canvas.getWidth() );
+      // img.scaleToHeight(this.canvas.getHeight() );
       
       if ( Math.max(img.width, img.height) > 2048) {
         let fscale = 2048 / Math.max(img.width, img.height);
@@ -113,7 +117,9 @@ export class HomeComponent implements OnInit , AfterViewInit {
         img.applyFilters();
       }
 
-    this.canvas.add(img);
+    img.setCoords();  
+    this.canvas.centerObject(img);
+    this.canvas.setBackgroundImage(img , this.canvas.renderAll.bind(this.canvas));
 
     this.setText();
 
@@ -131,27 +137,69 @@ export class HomeComponent implements OnInit , AfterViewInit {
           const delta = new fabric.Point(e.e.movementX, e.e.movementY);
           this.canvas.relativePan(delta);
         }
-      });      
+      });    
 
-      //this.mouseWheel();
+      this.canvas.on('object:moving', function (e) {
+        var obj = e.target;
+         // if object is too big ignore
+        if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+            return;
+        }        
+        obj.setCoords();        
+        // top-left  corner
+        if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+            obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+            obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+        }
+        // bot-right corner
+        if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+            obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+            obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+        }
+      });
+
       this.canvas.renderAll();
+
+      
     });
   }
 
   setText(){
+
+    var HideControls = {
+      'tl': true,
+      'tr': true,
+      'bl': false,
+      'br': true,
+      'ml': false,
+      'mt': false,
+      'mr': false,
+      'mb': false,
+      'mtr': false
+    };
+
     let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
+      angle: this.selectedOptions.angle,
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
-      stroke: this.selectedOptions.stroke,
+      textAlign: this.selectedOptions.textAlign,      
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
+      paintFirst: 'stroke',
+      stroke: this.selectedOptions.stroke,
       shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
+      strokeLineCap: 'round',
       opacity: this.selectedOptions.opacity,
       textBackgroundColor : this.selectedOptions.textBackgroundColor,
       borderColor: '#00c6d2',
       editingBorderColor: '#00c6d2',
-      cornerSize : 5
+      borderScaleFactor: 2,
+      padding: 15,
+      originX: 'center',
+      originY: 'center'
     });
+
+    text.setControlsVisibility(HideControls);
 
     this.setTextEvents(text); 
     this.canvas.add(text);
@@ -159,6 +207,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
     this.canvas.setActiveObject(text);
     this.canvas.bringToFront(text);
 
+    this.customizeControls();
   }
 
   setTextEvents(text){
@@ -234,57 +283,57 @@ export class HomeComponent implements OnInit , AfterViewInit {
       });
   }
 
-  drawWithFabricJS(selectedImage){
-    this.canvas = new fabric.Canvas('canvas');
-    this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
-    this.canvas.clear();
-    
-    fabric.Image.fromURL(selectedImage, (img) => {
+  customizeControls() {
 
-      img.scaleToWidth(this.canvas.getWidth());
-      img.scaleToHeight(this.canvas.getHeight());
-      
-      if ( Math.max(img.width, img.height) > 2048) {
-        let fscale = 2048 / Math.max(img.width, img.height);
-        img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
-        img.applyFilters();
-      }
+    const icons = [
+      'assets/_images/circle.svg',
+      'assets/_images/rotate.svg',
+      'assets/_images/expand.svg'
+    ];
 
-      this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
-        scaleX: this.canvas.getWidth() / img.width,
-        scaleY: this.canvas.getHeight() / img.height
-      });
-
-
-      let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter your text here', {
-        fontSize: this.selectedOptions.fontSize,
-        fontFamily: this.selectedOptions.fontFamily,
-        fill: "#C0C0C0",
-        stroke: this.selectedOptions.stroke,
-        strokeWidth: this.selectedOptions.strokeWidth,
-      });
-      this.canvas.add(text);
-      this.canvas.centerObject(text);
-      this.canvas.setActiveObject(text);
-      this.canvas.bringToFront(text);
-
-      text.on("editing:entered",  (e)  => {
-        var obj = this.canvas.getActiveObject();
-        if(obj.text === 'Enter your text here')
-        {
-          obj.selectAll();
-          obj.text = "";
-          obj.fill = this.selectedOptions.fill;
-          obj.hiddenTextarea.value = "";
-          obj.dirty = true;
-          obj.setCoords();
-          this.canvas.renderAll();
-        }
-        else{
-          this.overLayText = obj.text;
-        }
+    fabric.Canvas.prototype['customiseControls']({
+      tl: {
+        action: (e, target) => {
+          this.selectedOptions.angle = 0;
+          this.showCanvasText = false;
+          this.canvas.remove(target);
+        },
+        cursor: 'pointer'
+      },
+      tr: {
+        action: 'rotate',
+			  cursor: 'pointer'
+       
+      },
+      br: {
+        action: 'scale',
+      },    
+    }, () => {
+      this.canvas.renderAll();
     });
-
+    
+    this.canvas.item(0)['customiseCornerIcons']({
+      settings: {
+        borderColor: '#00c6d2',
+        editingBorderColor: '#00c6d2',
+        cornerBackgroundColor: 'white',
+        cornerSize: 30,
+        cornerShape: 'circle',
+        cornerPadding: 10
+      },
+      tl: {
+        icon: icons[0],
+        action: 'remove',
+        cursor: 'pointer'
+      },
+      tr: {
+        icon: icons[1],
+        
+      },    
+      br: {
+        icon: icons[2]
+      }   
+    }, () => {
       this.canvas.renderAll();
     });
   }
@@ -298,6 +347,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
   onAttributeChange(value , attribute){
     switch(attribute){
       case 'canvasSize':
+      this.selectedOptions.angle = 0;
       this.selectedOptions.canvasSize = value;
       this.setCanvasSize(value);
       break;
@@ -326,7 +376,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
       this.selectedOptions.fontWeight = value;
       this.canvas.getActiveObject().set("fontWeight", value);
       break;      
-      case 'fill':
+      case 'color':
       this.selectedOptions.fill = value;
       this.canvas.getActiveObject().set("fill", `${value}`);
       break;      
@@ -378,11 +428,10 @@ export class HomeComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-  
   handlePropertyChange(event){
-    if(['fontFamily'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
+    if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
-    else if(['stroke' , 'shadow' , 'fill' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1) {
+    else if(['stroke' , 'shadow' , 'color' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1) {
       if( typeof event.color != 'undefined')
         this.onAttributeChange(event.color.hex , this.modalOpenedFor);
       else{
@@ -395,8 +444,9 @@ export class HomeComponent implements OnInit , AfterViewInit {
 
   applyFilter(filter){
     this.selectedOptions.filter = filter;
-    const obj = this.canvas.item(0);
-    if (obj.filters.length > 1) 
+    const obj = this.canvas.backgroundImage;
+    if(!obj) return;
+    if (obj.filters && obj.filters.length > 1) 
       obj.filters.pop();
     
     switch(filter){
@@ -443,8 +493,8 @@ export class HomeComponent implements OnInit , AfterViewInit {
     }
 
     return {
-        w: imgW,
-        h: imgH
+      w: imgW,
+      h: imgH
     };
 }
   
@@ -467,23 +517,18 @@ export class HomeComponent implements OnInit , AfterViewInit {
     else {
       const obj = this.canvas.getActiveObject();
       this.canvas.remove(obj);
+      this.selectedOptions.angle = 0;
     }
     this.showCanvasText = event.target.checked;
     this.canvas.renderAll();
   }
 
-  showOptions(data){
-    let attribute = '';
-    if(data.attribute)
-      attribute = data.attribute; 
-    else
-      attribute = data.value;  
-
-    this.showColorPicker$ = this.showFontPicker$ = false;
+  showOptions(attribute){
+    this.showColorPicker$ = this.showFontPicker$ = this.showTextAlignPicker$ = false;
     this.modalOpenedFor = attribute;
-    if(['stroke', 'shadow' , 'fill' , 'textBackgroundColor'].indexOf(attribute) > -1){
+    if(['stroke', 'shadow' , 'color' , 'textBackgroundColor'].indexOf(attribute) > -1){
       this.showColorPicker$ = true;
-      if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
+      if(['stroke', 'shadow' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
         this.selectedOptions[this.modalOpenedFor] = '';
         const obj = this.canvas.getActiveObject();
         obj.set(this.modalOpenedFor, '');
@@ -495,7 +540,9 @@ export class HomeComponent implements OnInit , AfterViewInit {
     else if(attribute == 'fontFamily'){
       this.showFontPicker$ = true;
     }
-    
+    else if(attribute == 'textAlign'){
+      this.showTextAlignPicker$ = true;
+    }
     else if(attribute == 'textBackgroundColor')
       this.showTextBackgroundColorPicker$ = true;
 
@@ -527,14 +574,6 @@ export class HomeComponent implements OnInit , AfterViewInit {
   }
 
   setZoom(event) {    
-    // console.log('Zoom Value', event.target.value);
-    // const zoomLevel = event.target.value;
-    // if(zoomLevel > 1)
-    //   this.canvas.setZoom(this.canvas.getZoom() * zoomLevel);
-    // else
-    //   this.canvas.setZoom(1);
-    // this.canvas.renderAll();
-
     let status = '';
     const zoomLevel = event.target.value;
     if(zoomLevel > this.canvas.getZoom())
@@ -561,8 +600,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
       default: 
 	  }
   this.canvas.renderAll();
-}
-  
+  }
 
   get rangeVal() {
     if(this.modalOpenedFor == 'stroke')
@@ -646,4 +684,176 @@ export class HomeComponent implements OnInit , AfterViewInit {
       event.preventDefault();
     });
   }
+
+
+  /* ZOOMING */
+  extendingCore(){
+    fabric.util.object.extend(fabric.Canvas.prototype, {  
+      _scale: function(e, target, value) {
+        let scale = value,
+          needsOriginRestore = false;
+    
+        if ((target.originX !== 'center' || target.originY !== 'center') && target.centeredRotation) {
+          target.setOriginToCenter(target);
+          needsOriginRestore = true;
+        }
+    
+        target.animate({ scaleX: scale, scaleY: scale }, {
+          onChange: this.canvas.renderAll.bind(this.canvas),
+          easing: fabric.util.ease.easeOutQuad,
+          onComplete: function() {
+            if (needsOriginRestore) {
+              target.setCenterToOrigin(target);
+            }
+    
+            target.setCoords();
+            
+          },
+        })
+    
+        this.canvas.renderAll();
+      },
+    
+    });
+  }
+
+  drawinOnCanvas(){
+    var imageRatio = function createImageRatioSize(maxW, maxH, imgW, imgH) {
+      var ratio = imgH / imgW;
+      if (imgW >= maxW && ratio <= 1){
+          imgW = maxW;
+          imgH = imgW * ratio;
+      } else if(imgH >= maxH){
+          imgH = maxH;
+          imgW = imgH / ratio;
+      } else if (ratio !== 1) {
+          if (imgW > imgH) {
+              imgW = maxW;
+              imgH = imgW * ratio;
+          } else {
+              imgH = maxH;
+              imgW = imgH / ratio;
+          }
+      }
+  
+      return {
+          w: imgW,
+          h: imgH
+      };
+  }  
+  var $canvasContainer = $('.canvas-wrapper');
+  var containerW = $canvasContainer.width();
+  var containerH = $canvasContainer.height();
+  var leftStart = containerW;
+  this.canvas = new fabric.Canvas('zoom');
+
+  this.canvas.setWidth(containerW);
+  this.canvas.setHeight(containerH);
+
+  var maxW = containerW;
+  var maxH = containerH;
+  
+  var $img = $('.main-img > img');
+  var imgElement = $img[0];
+  var origH = $img.height();
+  var origW = $img.width();
+  var imageSize = imageRatio(maxW, maxH, origW, origH);
+  var imgW = imageSize.w;
+  var imgH = imageSize.h;
+  var initScaleH = imgH / origH;
+  var initScaleW = imgW / origW;
+  var originalZoomHandlerCenter;
+  
+  var sliderBar = new fabric.Rect({
+      fill: 'rgb(90, 90, 90)',
+      opacity: 0.7,
+      height: 4,
+      width: 294,
+      top: maxH - 50 + 3,
+      left: (leftStart / 2) - 150 + 3,
+      hasControls: false,
+      hasBorders: false,
+      hoverCursor: 'cursor',
+      lockMovementY: true,
+      lockMovementX: true
+  });
+  
+  var zoomHandlerTop = sliderBar.top - (15 - (sliderBar.height / 2));
+  var zoomHandler = new fabric.Circle({
+      fill: 'rgb(150, 150, 150)',
+      opacity: 0.7,
+      radius: 15,
+      top: zoomHandlerTop,
+      left: (leftStart / 2) - (sliderBar.width / 2) + 15,
+      hasControls: false,
+      hasBorders: false,
+      lockMovementY: true,
+      hoverCursor: 'pointer',
+      
+  });
+  
+  var imgInstance = new fabric.Image(imgElement, {
+      left: (leftStart / 2) - (imgW / 2),
+      top: 0,
+      hasControls: false,
+      centeredScaling: true,
+      lockUniScaling: true,
+      lockRotation: true,
+      hasBorders: false,
+      hoverCursor: 'cursor',
+      lockMovementY: true,
+      lockMovementX: true
+  });
+  
+  var incrementer = sliderBar.width / 100;
+  
+  zoomHandler.on('moving',  (e) => {
+      var top = zoomHandler.top;
+      var bottom = top + zoomHandler.height;
+      var left = zoomHandler.left;
+      var right = left + zoomHandler.width;
+  
+      var topBound = sliderBar.top;
+      var bottomBound = topBound + sliderBar.height;
+      var leftBound = sliderBar.left;
+      var rightBound = leftBound + sliderBar.width;
+      var zoomHandlerCenterX = zoomHandler.width / 2;
+  
+      var xBounds = Math.min(Math.max(left, leftBound - zoomHandlerCenterX), rightBound - zoomHandlerCenterX);
+      var yBounds = Math.min(Math.max(top, topBound), bottomBound - ((zoomHandler.height / 2) + (sliderBar.height / 2)));
+  
+  
+  });
+  
+  this.canvas.on("mouse:up", function(e) {
+      var left = zoomHandler.left;
+      var leftBound = sliderBar.left;
+      var rightBound = leftBound + sliderBar.width;
+      var zoomHandlerCenterX = zoomHandler.width / 2;
+  
+      var xBounds = Math.min(Math.max(left, leftBound - zoomHandlerCenterX), rightBound - zoomHandlerCenterX);
+  
+      // if (left >= xBounds && left <= xBounds && (e.target && !e.target._element)) {
+      //     if (imgInstance.width) {
+      //         var newLeft = left / 100;
+      //         var newScale = newLeft / incrementer;
+              
+      //         canvas._scale(e, imgInstance, newScale);
+              
+      //     }
+      // }
+  });
+
+  imgInstance.set({
+    scaleY: imgH / origH,
+    scaleX: imgW / origW
+  });
+  this.canvas.add(imgInstance, sliderBar, zoomHandler);
+  this.canvas.bringToFront(sliderBar);
+  this.canvas.bringToFront(zoomHandler);
+
+  this.canvas.renderAll();
+  this.extendingCore();
+  }
+  
 }

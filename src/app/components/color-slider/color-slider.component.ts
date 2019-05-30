@@ -9,6 +9,33 @@ export class ColorSliderComponent implements AfterViewInit , OnDestroy {
 
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
+  colors: Array<any> = [
+    '#FFFFFF',
+    '#000000',
+    '#e73836',
+    '#d91961',
+    '#8e24a9',
+    '#5f34b0',
+    '#3949ac',
+    '#3946ad',
+    '#1f88e6',
+    '#039ae7',
+    '#01acc4',
+    '#008979',
+    '#42a146',
+    '#7bb441',
+    '#bfca33',
+    '#fdd737',
+    '#ffb101',
+    '#fa8d00',
+    '#f6521c',
+    '#6f4c43',
+    '#777576',
+    '#566f7b',
+    '#d4d4d4',
+    '#acacac',
+    '#828282',
+    '#4c4c4c',];
 
   @Input() set canvasWidth(width){
     this._canvasWidth = width;
@@ -43,19 +70,24 @@ export class ColorSliderComponent implements AfterViewInit , OnDestroy {
     const height = this.canvas.nativeElement.height;
     
     const gradient = this.ctx.createLinearGradient(width, 0, 0, 0);
-    gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
-    gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
-    gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
-    gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
-    gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
-    gradient.addColorStop(0.78, 'rgba(255, 0, 255, 1)');
-    gradient.addColorStop(0.83, 'rgba(255, 0, 0, 1)');
-    gradient.addColorStop(0.90, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
-
+    
     // gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
     // gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
     // gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
+    // gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
+    // gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
+    // gradient.addColorStop(0.78, 'rgba(255, 0, 255, 1)');
+    // gradient.addColorStop(0.83, 'rgba(255, 0, 0, 1)');
+    // gradient.addColorStop(0.90, 'rgba(255, 255, 255, 1)');
+    // gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+    for(let i=1; i<this.colors.length;i++){
+      gradient.addColorStop(0.04 * i, this.colors[i]);
+    }
+
+    // gradient.addColorStop(0.4, 'rgba(255, 0, 0, 1)');
+    // gradient.addColorStop(0.8, 'rgba(255, 255, 0, 1)');
+    // gradient.addColorStop(0.3, 'rgba(0, 255, 0, 1)');
     // gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
     // gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
     // gradient.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
