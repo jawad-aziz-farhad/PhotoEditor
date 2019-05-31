@@ -28,8 +28,6 @@ export class HomeComponent implements OnInit , AfterViewInit {
   canvas_Width: number;
   canvas_Height: number;
 
-  showShapeArea: boolean;
-  showFilterArea: boolean;
   showTextArea: boolean;
   showResizeArea: boolean;
   showColorPicker$: boolean;
@@ -64,8 +62,6 @@ export class HomeComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
    
-    this.showShapeArea  = true;
-    this.showFilterArea = true;
     this.showTextArea   = true;
     this.showCanvasText = true;
     this.showResizeArea = true;
@@ -81,9 +77,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
 
     //this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
 
-    //this.setUpCanvas(this.selectedImage);
-
-    this.drawinOnCanvas();
+    this.setUpCanvas(this.selectedImage);
   }  
 
   ngAfterViewInit(){
@@ -442,38 +436,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
     }
   }
 
-  applyFilter(filter){
-    this.selectedOptions.filter = filter;
-    const obj = this.canvas.backgroundImage;
-    if(!obj) return;
-    if (obj.filters && obj.filters.length > 1) 
-      obj.filters.pop();
-    
-    switch(filter){
-      case 'gray':
-      obj.filters.push(new fabric.Image.filters.Grayscale());
-      break;
-      case 'sepia':
-      obj.filters.push(new fabric.Image.filters.Sepia());
-      break;
-      case 'brownie':
-      const _filter = new fabric.Image.filters.ColorMatrix({
-        matrix: [0.59970, 0.34553, -0.27082, 0, 0.186, -0.03770, 0.86095, 0.15059, 0, -0.1449, 0.24113, -0.07441, 0.44972, 0, -0.02965, 0, 0, 0, 1, 0]
-      });
-      obj.filters.push(_filter);
-      break;
-      case 'invert':
-      obj.filters.push(new fabric.Image.filters.Invert());
-      break;
-      
-      default:
-      break;
-    }
-
-    obj.applyFilters();
-    this.canvas.renderAll();
-  }
-
+ 
   createImageRatioSize(maxW, maxH, imgW, imgH) {
     var ratio = imgH / imgW;
     if (imgW >= maxW && ratio <= 1){
@@ -511,7 +474,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
     return this.modalOpenedFor ? this.data[this.modalOpenedFor] : [];
   }
 
-  onCanvasTextChange(event){
+  onTextVisibilityChange(event){
     if(event.target.checked)
       this.setText();
     else {
@@ -549,30 +512,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
    
   }
 
-  dataURLtoBlob(dataurl) {
-    let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-     bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-    while(n--){
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], {type:mime});
-  }
-
-  saveCanvasAsImage(){
-    let obj = this.canvas.getActiveObject();
-    if(obj.text == 'Click here to edit text'){
-      this.canvas.remove(obj);
-      this.canvas.renderAll();
-    }
-    const link = document.createElement("a");
-    const imgData = this.canvas.toDataURL({format: 'png', multiplier: 4});
-    const blob = this.dataURLtoBlob(imgData);
-    const objurl = URL.createObjectURL(blob);
-    link.download = new Date().getTime() + ".png";
-    link.href = objurl;
-    link.click();
-  }
-
+  
   setZoom(event) {    
     let status = '';
     const zoomLevel = event.target.value;
@@ -685,175 +625,5 @@ export class HomeComponent implements OnInit , AfterViewInit {
     });
   }
 
-
-  /* ZOOMING */
-  extendingCore(){
-    fabric.util.object.extend(fabric.Canvas.prototype, {  
-      _scale: function(e, target, value) {
-        let scale = value,
-          needsOriginRestore = false;
-    
-        if ((target.originX !== 'center' || target.originY !== 'center') && target.centeredRotation) {
-          target.setOriginToCenter(target);
-          needsOriginRestore = true;
-        }
-    
-        target.animate({ scaleX: scale, scaleY: scale }, {
-          onChange: this.canvas.renderAll.bind(this.canvas),
-          easing: fabric.util.ease.easeOutQuad,
-          onComplete: function() {
-            if (needsOriginRestore) {
-              target.setCenterToOrigin(target);
-            }
-    
-            target.setCoords();
-            
-          },
-        })
-    
-        this.canvas.renderAll();
-      },
-    
-    });
-  }
-
-  drawinOnCanvas(){
-    var imageRatio = function createImageRatioSize(maxW, maxH, imgW, imgH) {
-      var ratio = imgH / imgW;
-      if (imgW >= maxW && ratio <= 1){
-          imgW = maxW;
-          imgH = imgW * ratio;
-      } else if(imgH >= maxH){
-          imgH = maxH;
-          imgW = imgH / ratio;
-      } else if (ratio !== 1) {
-          if (imgW > imgH) {
-              imgW = maxW;
-              imgH = imgW * ratio;
-          } else {
-              imgH = maxH;
-              imgW = imgH / ratio;
-          }
-      }
-  
-      return {
-          w: imgW,
-          h: imgH
-      };
-  }  
-  var $canvasContainer = $('.canvas-wrapper');
-  var containerW = $canvasContainer.width();
-  var containerH = $canvasContainer.height();
-  var leftStart = containerW;
-  this.canvas = new fabric.Canvas('zoom');
-
-  this.canvas.setWidth(containerW);
-  this.canvas.setHeight(containerH);
-
-  var maxW = containerW;
-  var maxH = containerH;
-  
-  var $img = $('.main-img > img');
-  var imgElement = $img[0];
-  var origH = $img.height();
-  var origW = $img.width();
-  var imageSize = imageRatio(maxW, maxH, origW, origH);
-  var imgW = imageSize.w;
-  var imgH = imageSize.h;
-  var initScaleH = imgH / origH;
-  var initScaleW = imgW / origW;
-  var originalZoomHandlerCenter;
-  
-  var sliderBar = new fabric.Rect({
-      fill: 'rgb(90, 90, 90)',
-      opacity: 0.7,
-      height: 4,
-      width: 294,
-      top: maxH - 50 + 3,
-      left: (leftStart / 2) - 150 + 3,
-      hasControls: false,
-      hasBorders: false,
-      hoverCursor: 'cursor',
-      lockMovementY: true,
-      lockMovementX: true
-  });
-  
-  var zoomHandlerTop = sliderBar.top - (15 - (sliderBar.height / 2));
-  var zoomHandler = new fabric.Circle({
-      fill: 'rgb(150, 150, 150)',
-      opacity: 0.7,
-      radius: 15,
-      top: zoomHandlerTop,
-      left: (leftStart / 2) - (sliderBar.width / 2) + 15,
-      hasControls: false,
-      hasBorders: false,
-      lockMovementY: true,
-      hoverCursor: 'pointer',
-      
-  });
-  
-  var imgInstance = new fabric.Image(imgElement, {
-      left: (leftStart / 2) - (imgW / 2),
-      top: 0,
-      hasControls: false,
-      centeredScaling: true,
-      lockUniScaling: true,
-      lockRotation: true,
-      hasBorders: false,
-      hoverCursor: 'cursor',
-      lockMovementY: true,
-      lockMovementX: true
-  });
-  
-  var incrementer = sliderBar.width / 100;
-  
-  zoomHandler.on('moving',  (e) => {
-      var top = zoomHandler.top;
-      var bottom = top + zoomHandler.height;
-      var left = zoomHandler.left;
-      var right = left + zoomHandler.width;
-  
-      var topBound = sliderBar.top;
-      var bottomBound = topBound + sliderBar.height;
-      var leftBound = sliderBar.left;
-      var rightBound = leftBound + sliderBar.width;
-      var zoomHandlerCenterX = zoomHandler.width / 2;
-  
-      var xBounds = Math.min(Math.max(left, leftBound - zoomHandlerCenterX), rightBound - zoomHandlerCenterX);
-      var yBounds = Math.min(Math.max(top, topBound), bottomBound - ((zoomHandler.height / 2) + (sliderBar.height / 2)));
-  
-  
-  });
-  
-  this.canvas.on("mouse:up", function(e) {
-      var left = zoomHandler.left;
-      var leftBound = sliderBar.left;
-      var rightBound = leftBound + sliderBar.width;
-      var zoomHandlerCenterX = zoomHandler.width / 2;
-  
-      var xBounds = Math.min(Math.max(left, leftBound - zoomHandlerCenterX), rightBound - zoomHandlerCenterX);
-  
-      // if (left >= xBounds && left <= xBounds && (e.target && !e.target._element)) {
-      //     if (imgInstance.width) {
-      //         var newLeft = left / 100;
-      //         var newScale = newLeft / incrementer;
-              
-      //         canvas._scale(e, imgInstance, newScale);
-              
-      //     }
-      // }
-  });
-
-  imgInstance.set({
-    scaleY: imgH / origH,
-    scaleX: imgW / origW
-  });
-  this.canvas.add(imgInstance, sliderBar, zoomHandler);
-  this.canvas.bringToFront(sliderBar);
-  this.canvas.bringToFront(zoomHandler);
-
-  this.canvas.renderAll();
-  this.extendingCore();
-  }
-  
+  get canvas$(): any { return this.canvas;}
 }

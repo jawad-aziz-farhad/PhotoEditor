@@ -61,7 +61,7 @@
                       <div class="col-md-3" *ngFor="let canvasSize of data?.canvasSizes; let i=index;" (click)="onAttributeChange(  canvasSize.title.toLowerCase() , 'canvasSize')">
                         <div class="shape-section tall-view canvas-screen">
                           <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.canvasSize == (canvasSize.title | lowercase) }">
-                              <img [src]="canvasSize.src" alt="{{ canvasSize.title }}">
+                            <img [src]="canvasSize.src" alt="{{ canvasSize.title }}">
                           </div>
                           <span>{{ canvasSize.title }}</span>
                         </div>
@@ -128,7 +128,7 @@
                       <div class="row no-gutters mb-1" [hidden]="!showColorPicker$ && !showFontPicker$ && !showTextAlignPicker$">
                         <!-- For Color -->
                         <div class="col" #colorPickerCol *ngIf="showColorPicker$">
-                          <app-color-slider *ngIf="rowWidth" [canvasWidth]="rowWidth" (color)="handlePropertyChange($event)"></app-color-slider>
+                          <app-color-picker *ngIf="rowWidth" [canvasWidth]="rowWidth" (color)="handlePropertyChange($event)"></app-color-picker>
                         </div>
                         <!-- For Font -->
                         <div class="col" *ngIf="showFontPicker$">

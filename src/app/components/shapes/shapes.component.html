@@ -1,0 +1,25 @@
+<div class="card c-shapes">
+  <div class="card-header p-0" id="headingOne">
+      <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        Shape
+      </button>
+      <button type="button" class="btn btn-default btn-sm float-right" (click)="showShapeArea = !showShapeArea">
+        <i *ngIf="showShapeArea" class="fas fa-chevron-up"></i>
+        <i *ngIf="!showShapeArea" class="fas fa-chevron-down"></i>
+      </button>
+  </div>
+  <div id="collapseOne" [hidden]="!showShapeArea" class="collapse show" aria-labelledby="headingOne">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3" *ngFor="let canvasSize of data?.canvasSizes; let i=index;" (click)="onChange(  canvasSize.title.toLowerCase() , 'canvasSize')">
+          <div class="shape-section tall-view canvas-screen">
+            <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.canvasSize == (canvasSize.title | lowercase) }">
+              <img [src]="canvasSize.src" alt="{{ canvasSize.title }}">
+            </div>
+            <span>{{ canvasSize.title }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

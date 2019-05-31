@@ -28,213 +28,133 @@
     </div>
 
     <div class="canvas-controls">
-        <div class="canvas-actions">
-          <div class="row">
-            <div class="col-md-4">
-                <button class="btn btn-block btn-share btn-action">Share</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-block btn-done btn-action">Done</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-block btn-save btn-action" (click)="saveCanvasAsImage()">Save</button>
-            </div>
-          </div>
-        </div>
+      
+      <!-- Button Area -->
+      <app-buttons-area [canvas]="canvas$"></app-buttons-area>
 
-        <div class="canvas-shapes">
-            <div class="accordion" id="accordionExample">
-              <div class="card c-shapes">
-                <div class="card-header p-0" id="headingOne">
-                    <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                      Shape
-                    </button>
-                    <button type="button" class="btn btn-default btn-sm float-right" (click)="showShapeArea = !showShapeArea">
-                      <i *ngIf="showShapeArea" class="fas fa-chevron-up"></i>
-                      <i *ngIf="!showShapeArea" class="fas fa-chevron-down"></i>
-                    </button>
+      <div class="canvas-shapes">
+        <div class="accordion" id="accordionExample">
+
+          <!-- Canvas Size -->
+          <app-canvas-size [selectedOptions]="selectedOptions" (onSizeChange)="onAttributeChange( $event , 'canvasSize')"></app-canvas-size>
+          
+          <!-- FILTERS -->
+          <app-filters [canvas]="canvas$" [selectedImage]="selectedImage" [selectedOptions]="selectedOptions" [data]="data"></app-filters>
+
+          <!-- TEXT -->
+          <!-- <div class="card c-options">
+              <div class="card-header p-0" id="headingThree">
+                <div class="form-check float-left">
+                  <input type="checkbox" class="form-check-input" id="addText" (change)="onCanvasTextChange($event)" [checked]="showCanvasText">
+                  <label class="form-check-label" for="addText">Add Text</label>
+                </div>
+                <button type="button" class="btn btn-default btn-sm float-right" (click)="showTextArea = !showTextArea">
+                  <i *ngIf="showTextArea" class="fas fa-chevron-up"></i>
+                  <i *ngIf="!showTextArea" class="fas fa-chevron-down"></i>
+                </button>
+              </div>
+              <div id="collapseThree" [hidden]="!showTextArea" class="" aria-labelledby="headingThree">
+                <div class="card-body">
+
+                  <div class="row" *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow' || modalOpenedFor == 'opacity' ">
+                    <div class="col">
+                      <input *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow'" class="w-100" type='range' step='1' max='10' min='1' (input)='handlePropertyChange($event)' (change)='handlePropertyChange($event)' [value]="rangeVal">
+                      <input *ngIf="modalOpenedFor == 'opacity' " class="w-100" type='range' step='.001' max='1' min='0' (input)="onAttributeChange($event.target.value, 'opacity')" (change)="onAttributeChange($event.target.value, 'opacity')" [value]="rangeVal">
+                    </div>
                   </div>
-                <div id="collapseOne" [hidden]="!showShapeArea" class="collapse show" aria-labelledby="headingOne">
-                  <div class="card-body">
-                    <div class="row">
-
-                      <div class="col-md-3" *ngFor="let canvasSize of data?.canvasSizes; let i=index;" (click)="onAttributeChange(  canvasSize.title.toLowerCase() , 'canvasSize')">
-                        <div class="shape-section tall-view canvas-screen">
-                          <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.canvasSize == (canvasSize.title | lowercase) }">
-                              <img [src]="canvasSize.src" alt="{{ canvasSize.title }}">
+                  
+                  
+                  <div class="row no-gutters mb-1" [hidden]="!showColorPicker$ && !showFontPicker$ && !showTextAlignPicker$">
+                    
+                    <div class="col" #colorPickerCol *ngIf="showColorPicker$">
+                      <app-color-picker *ngIf="rowWidth" [canvasWidth]="rowWidth" (color)="handlePropertyChange($event)"></app-color-picker>
+                    </div>
+                    
+                    <div class="col" *ngIf="showFontPicker$">
+                      <div class="row">
+                        <div class="col">
+                          <div class="btn-group w-100" dropdown [dropup]="isDropup">
+                              <button id="button-dropup" dropdownToggle type="button" class="btn btn-light btn-lg btn-block text-left"
+                                      aria-controls="dropdown-dropup">
+                                {{ selectedOptions?.fontFamily }} <span class="caret pull-right"></span>
+                              </button>
+                              <ul id="dropdown-dropup" *dropdownMenu class="dropdown-menu w-100"
+                                  role="menu" aria-labelledby="button-dropup">
+                                <li role="menuitem" *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}" (mouseover)="onAttributeChange(font, 'mouseOver')" (mouseleave)="onAttributeChange(selectedOptions?.fontFamily , 'mouseLeave')" (click)="onAttributeChange(font , 'fontFamily')">
+                                  <a class="dropdown-item" href="#">{{ font }}</a>
+                                </li>                                   
+                              </ul>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                  
+                  <div class="row no-gutters" #optionsRow>
+                      <div class="col">
+                          <div class="shape-section typo">
+                              <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'fontFamily' }" (click)="showOptions('fontFamily')">
+                                  <img src="assets/_images/font.svg" alt="">
+                              </div>
+                              <span>Font</span>
                           </div>
-                          <span>{{ canvasSize.title }}</span>
+                      </div>
+                      <div class="col">
+                          <div class="shape-section typo">
+                              <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="showOptions('color')">
+                                  <img src="assets/_images/color.svg" alt="">
+                              </div>                                  
+                              <span>Color</span>
+                          </div>
+                      </div>
+                      <div class="col">
+                          <div class="shape-section typo">
+                              <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' || modalOpenedFor == 'stroke'}" (click)="showOptions('stroke')">
+                                <img src="assets/_images/stroke.svg" alt="">
+                              </div>
+                              <span>Stroke</span>
+                          </div>
+                      </div>
+
+                      <div class="col">
+                          <div class="shape-section typo">
+                              <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' || modalOpenedFor == 'shadow'}"  (click)="showOptions('shadow')">
+                                <img src="assets/_images/shadow.svg" alt="">
+                              </div>
+                              <span>Shadow</span>
+                          </div>
+                      </div>
+                      
+                      <div class="col">
+                          <div class="shape-section typo">
+                              <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'opacity' }" (click)="showOptions('opacity')">
+                                  <img src="assets/_images/opacity.svg" alt="">
+                              </div>
+                              <span>Opacity</span>
+                          </div>
+                      </div>
+
+                      <div class="col">
+                        <div class="shape-section typo">
+                            <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.textBackgroundColor != '' || modalOpenedFor == 'textBackgroundColor' }" (click)="showOptions('textBackgroundColor')">
+                                <img src="assets/_images/color.svg" alt="">
+                            </div>                                  
+                            <span>Bg Tint</span>
                         </div>
                       </div>
 
-                    </div>
+                  </div>
+
+                  
+                  
                 </div>
               </div>
-              
-              <!-- FILTERS -->
-              <div class="card c-effects">
-                  <div class="card-header p-0" id="headingTwo">
-                    <button class="btn collapsed float-left" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                      Filters
-                    </button>
-                    <button type="button" class="btn btn-default btn-sm float-right" (click)="showFilterArea = !showFilterArea">
-                      <i *ngIf="showFilterArea" class="fas fa-chevron-up"></i>
-                      <i *ngIf="!showFilterArea" class="fas fa-chevron-down"></i>
-                    </button>
-                  </div>
-                  <div id="collapseTwo" [hidden]="!showFilterArea" class="collapse show" aria-labelledby="headingTwo">
-                    <div class="card-body">
-                      <div class="row no-gutters">
 
-                        <div class="col" #filters *ngFor="let filter of data?.filters;let i=index;" (click)="applyFilter( filter.toLowerCase() )">
-                            <div class="shape-section filter">
-                                <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.filter == filter.toLowerCase() }">
-                                    <figure class="{{ filter.toLowerCase() }}">
-                                        <img [src]="selectedImage" id="filter_{{i}}">
-                                    </figure>
-                                </div>
-                                <span>{{ filter }}</span>
-                            </div>
-                        </div>
+          </div> -->
 
-                      </div>
-                    </div>
-                  </div>
-              </div>
-              
-              <!-- TEXT -->
-              <div class="card c-options">
-                  <div class="card-header p-0" id="headingThree">
-                    <div class="form-check float-left">
-                      <input type="checkbox" class="form-check-input" id="addText" (change)="onCanvasTextChange($event)" [checked]="showCanvasText">
-                      <label class="form-check-label" for="addText">Add Text</label>
-                    </div>
-                    <button type="button" class="btn btn-default btn-sm float-right" (click)="showTextArea = !showTextArea">
-                      <i *ngIf="showTextArea" class="fas fa-chevron-up"></i>
-                      <i *ngIf="!showTextArea" class="fas fa-chevron-down"></i>
-                    </button>
-                  </div>
-                  <div id="collapseThree" [hidden]="!showTextArea" class="" aria-labelledby="headingThree">
-                    <div class="card-body">
-
-                      <div class="row" *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow' || modalOpenedFor == 'opacity' ">
-                        <div class="col">
-                          <input *ngIf="modalOpenedFor == 'stroke' || modalOpenedFor == 'shadow'" class="w-100" type='range' step='1' max='10' min='1' (input)='handlePropertyChange($event)' (change)='handlePropertyChange($event)' [value]="rangeVal">
-                          <input *ngIf="modalOpenedFor == 'opacity' " class="w-100" type='range' step='.001' max='1' min='0' (input)="onAttributeChange($event.target.value, 'opacity')" (change)="onAttributeChange($event.target.value, 'opacity')" [value]="rangeVal">
-                        </div>
-                      </div>
-                      
-                      <!-- Color Picker , Font Picker , AlignmentPicker -->
-                      <div class="row no-gutters mb-1" [hidden]="!showColorPicker$ && !showFontPicker$ && !showTextAlignPicker$">
-                        <!-- For Color -->
-                        <div class="col" #colorPickerCol *ngIf="showColorPicker$">
-                          <app-color-slider *ngIf="rowWidth" [canvasWidth]="rowWidth" (color)="handlePropertyChange($event)"></app-color-slider>
-                        </div>
-                        <!-- For Font -->
-                        <div class="col" *ngIf="showFontPicker$">
-                          <div class="row">
-                            <div class="col">
-                              <div class="btn-group w-100" dropdown [dropup]="isDropup">
-                                  <button id="button-dropup" dropdownToggle type="button" class="btn btn-light btn-lg btn-block text-left"
-                                          aria-controls="dropdown-dropup">
-                                    {{ selectedOptions?.fontFamily }} <span class="caret pull-right"></span>
-                                  </button>
-                                  <ul id="dropdown-dropup" *dropdownMenu class="dropdown-menu w-100"
-                                      role="menu" aria-labelledby="button-dropup">
-                                    <li role="menuitem" *ngFor="let font of data?.fontFamily; let i=index;" value="{{ font }}" [ngStyle]="{'font-family': font}" (mouseover)="onAttributeChange(font, 'mouseOver')" (mouseleave)="onAttributeChange(selectedOptions?.fontFamily , 'mouseLeave')" (click)="onAttributeChange(font , 'fontFamily')">
-                                      <a class="dropdown-item" href="#">{{ font }}</a>
-                                    </li>                                   
-                                  </ul>
-                                </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                      </div>
-
-
-                      
-                      <div class="row no-gutters" #optionsRow>
-                          <div class="col">
-                              <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'fontFamily' }" (click)="showOptions('fontFamily')">
-                                      <img src="assets/_images/font.svg" alt="">
-                                  </div>
-                                  <span>Font</span>
-                              </div>
-                          </div>
-                          <div class="col">
-                              <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'color' }" (click)="showOptions('color')">
-                                      <img src="assets/_images/color.svg" alt="">
-                                  </div>                                  
-                                  <span>Color</span>
-                              </div>
-                          </div>
-                          <div class="col">
-                              <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.stroke != '' || modalOpenedFor == 'stroke'}" (click)="showOptions('stroke')">
-                                    <img src="assets/_images/stroke.svg" alt="">
-                                  </div>
-                                  <span>Stroke</span>
-                              </div>
-                          </div>
-
-                          <div class="col">
-                              <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.shadow != '' || modalOpenedFor == 'shadow'}"  (click)="showOptions('shadow')">
-                                    <img src="assets/_images/shadow.svg" alt="">
-                                  </div>
-                                  <span>Shadow</span>
-                              </div>
-                          </div>
-                          
-                          <div class="col">
-                              <div class="shape-section typo">
-                                  <div class="shape-img" [ngClass]="{'section-active': modalOpenedFor == 'opacity' }" (click)="showOptions('opacity')">
-                                      <img src="assets/_images/opacity.svg" alt="">
-                                  </div>
-                                  <span>Opacity</span>
-                              </div>
-                          </div>
-
-                          <div class="col">
-                            <div class="shape-section typo">
-                                <div class="shape-img" [ngClass]="{'section-active': selectedOptions?.textBackgroundColor != '' || modalOpenedFor == 'textBackgroundColor' }" (click)="showOptions('textBackgroundColor')">
-                                    <img src="assets/_images/color.svg" alt="">
-                                </div>                                  
-                                <span>Bg Tint</span>
-                            </div>
-                          </div>
-                      </div>
-                    </div>
-                  </div>
-
-              </div>
-
-
-              <div class="card c-options">
-                  <div class="card-header p-0" id="headingThree">
-                      <div class="form-check float-left">
-                        <input type="checkbox" class="form-check-input" id="addText" (change)="onCanvasTextChange($event)" [checked]="showCanvasText">
-                        <label class="form-check-label" for="addText">Add Text</label>
-                      </div>
-                      <button type="button" class="btn btn-default btn-sm float-right">
-                        <i *ngIf="showTextArea" class="fas fa-chevron-up"></i>
-                        <i *ngIf="!showTextArea" class="fas fa-chevron-down"></i>
-                      </button>
-                    </div>
-                    <div id="collapseThree" class="" aria-labelledby="headingThree">
-                      <div class="card-body">
-                        
-                      </div>
-                    </div>
-    
-
-              </div>
-              
-            </div>
-          </div>
+          <app-text-modifiers [canvas]="canvas$" [data]="data" [options]="selectedOptions" (onTextVisibilityChange)="onTextVisibilityChange($event)"></app-text-modifiers>
+        </div>
       </div>
   </div>
 </div>
