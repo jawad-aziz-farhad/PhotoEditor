@@ -97,8 +97,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
     fabric.Image.fromURL(image, img => {
 
       img.set({
-        scaleX : this.canvas.getWidth() / img.width,   //new update
-        scaleY: this.canvas.getHeight() / img.height,   //new update,
+       // scaleX : this.canvas.getWidth() / img.width,   //new update
+       // scaleY: this.canvas.getHeight() / img.height,   //new update,
         originX: "center", 
         originY: "center",
         selectable: false,
@@ -317,13 +317,10 @@ export class EditorComponent implements OnInit , AfterViewInit {
         cornerPadding: 10
       },
       tl: {
-        icon: icons[0],
-        action: 'remove',
-        cursor: 'pointer'
+        icon: icons[0]
       },
       tr: {
-        icon: icons[1],
-        
+        icon: icons[1]        
       },    
       br: {
         icon: icons[2]
