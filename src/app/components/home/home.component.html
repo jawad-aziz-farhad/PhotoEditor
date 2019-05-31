@@ -42,7 +42,8 @@
           <app-filters [canvas]="canvas$" [selectedImage]="selectedImage" [selectedOptions]="selectedOptions" [data]="data"></app-filters>
 
           <!-- TEXT -->
-          <!-- <div class="card c-options">
+          <!-- 
+            <div class="card c-options">
               <div class="card-header p-0" id="headingThree">
                 <div class="form-check float-left">
                   <input type="checkbox" class="form-check-input" id="addText" (change)="onCanvasTextChange($event)" [checked]="showCanvasText">
@@ -151,8 +152,7 @@
                 </div>
               </div>
 
-          </div> -->
-
+          </div> -->          
           <app-text-modifiers [canvas]="canvas$" [data]="data" [options]="selectedOptions" (onTextVisibilityChange)="onTextVisibilityChange($event)"></app-text-modifiers>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angula
 import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
 import 'fabric-customise-controls';
+import { TextModifiersComponent } from '../text-modifiers/text-modifiers.component';
 
 declare var $: any;
 
@@ -12,7 +13,8 @@ declare var $: any;
 })
 export class HomeComponent implements OnInit , AfterViewInit {
 
- 
+  @ViewChild(TextModifiersComponent) textModifer: TextModifiersComponent;
+
   @ViewChild('canvasArea') canvasArea: ElementRef;
   @ViewChild('canvas') _canvas: ElementRef;
   @ViewChild('optionsRow') optionsRow: ElementRef;
@@ -75,6 +77,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
 
     this.zoomLevel = 0;
 
+    this.textModifer = new TextModifiersComponent();
     //this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
 
     this.setUpCanvas(this.selectedImage);
@@ -475,6 +478,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
   }
 
   onTextVisibilityChange(event){
+    //console.log(event.target.checked);
     if(event.target.checked)
       this.setText();
     else {
@@ -626,4 +630,6 @@ export class HomeComponent implements OnInit , AfterViewInit {
   }
 
   get canvas$(): any { return this.canvas;}
+
+  get showCanvasText$(): boolean { return this.showCanvasText; }
 }

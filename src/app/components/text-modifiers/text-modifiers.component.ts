@@ -6,22 +6,25 @@ import { Data } from 'src/app/models/data';
   templateUrl: './text-modifiers.component.html',
   styleUrls: ['./text-modifiers.component.scss']
 })
-export class TextModifiersComponent implements OnInit  {
+export class TextModifiersComponent implements OnInit  , OnChanges {
 
-  options$: any;
-  
+  options$: any;  
   showColorPicker$ : boolean;
   showFontPicker$  : boolean;
   showCanvasText: boolean;
+  showTextArea: boolean;
   isDropup = true;
   selectedModifier: string;
   rowWidth: number;
+  _showCanvasText: boolean;
   _canvas: any;
 
   @ViewChild('optionsRow') optionsRow: ElementRef;
-
+  
   @Input() data: Data;
   
+  
+
   @Input('canvas') set canvas(canvas : any)  { this._canvas = canvas; }
   get canvas(){ return this._canvas; }
 
@@ -37,96 +40,87 @@ export class TextModifiersComponent implements OnInit  {
   ngOnInit() {
     this.showColorPicker$ = this.showFontPicker$ = false;
     this.showCanvasText = true;
+    this.showTextArea = true;
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
+  }
+
+  ngOnChanges(changes: SimpleChanges){
+    if(changes['showCanvasText']){
+      console.log('Changes', changes);
+      this._showCanvasText = changes['showCanvasText'].currentValue;
+    }
   }
 
   get modifiers(): Array<any> {
     return [{ title: 'Font' ,   icon : 'font.svg'  ,  value: 'fontFamily'} , { title: 'Color' , icon : 'color.svg' , value: 'fill' }, 
-            {title : 'Stroke' , icon : 'stroke.svg' , value: 'stroke'}, { title: 'Shadow', icon : 'shadow.svg' , value: 'shadow' }, 
-            {title: 'Bg Tint',  icon : 'color.svg' ,  value: 'textBackgroundColor' } 
+            { title: 'Stroke' , icon : 'stroke.svg' , value: 'stroke'}, { title: 'Shadow', icon : 'shadow.svg' , value: 'shadow' }, 
+            { title: 'Opacity', icon : 'opacity.svg' ,  value: 'opacity' } , { title: 'Bg Tint', icon : 'color.svg' ,  value: 'textBackgroundColor' } 
            ];
   }
 
   getClass(modifier): boolean {
     if(['stroke', 'shadow'].indexOf(modifier.value) > -1)
-      return this.options$[modifier.value] != '' || modifier.value == this.selectedModifier ;
+      return this.options[modifier.value] != '' || modifier.value == this.selectedModifier ;
     else
       return modifier.value == this.selectedModifier;
   }
 
-  on_Modify(modifier: any , attribute? : string){
-    console.log('Modifier', modifier);    
-    this.selectedModifier = modifier.value;
-    this.showColorPicker$ = this.showFontPicker$ = false;
-    if(this.selectedModifier == 'fontFamily')
-      this.showFontPicker$ = true;
-    else 
-      this.showColorPicker$ = true;
-    //this.onModify.emit({value: modifier.value , attribute: attribute});
-
-  }
 
   onChange(value , attribute){
     switch(attribute){
       case 'effect':
       this.options.effect = value;
       break;
+
       case 'mouseOver':
+      case 'mouseLeave':      
+      this.options.fontFamily = value;      
       this.canvas.getActiveObject().set('fontFamily', value);
       break;
-      case 'mouseLeave':      
+
       case 'fontFamily':
       this.options.fontFamily = value;      
-      this.canvas.getActiveObject().set("fontFamily", value);
+      this.canvas.getActiveObject().set('fontFamily', value);
       break;
+
       case 'fontStyle':
-      this.options.fontStyle = value;
-      break;      
       case 'fontSize':
-      this.options.fontSize =value;
-      this.canvas.getActiveObject().set("fontSize", value);
-      break;
       case 'fontWeight':
-      this.options.fontWeight = value;
-      this.canvas.getActiveObject().set("fontWeight", value);
-      break;      
       case 'fill':
-      this.options.fill = value;
-      this.canvas.getActiveObject().set("fill", `${value}`);
+      case 'opacity':
+      case 'textBackgroundColor':
+      this.options[attribute] = value;
+      this.canvas.getActiveObject().set(`${attribute}`, `${value}`);
       break;      
+      
+      case 'stroke':
+      this.options[attribute] = value;
+      this.canvas.getActiveObject().set('stroke', value);
+      this.canvas.getActiveObject().set('strokeWidth' , this.options.strokeWidth);
+      break;
+      
       case 'shadow':
       this.options.shadow = value;
       const shadowWidth = this.options.shadowWidth;
       const shadow = `${value}` + ' ' + shadowWidth +'px ' +  shadowWidth + 'px ' + shadowWidth + 'px';
       this.canvas.getActiveObject().set("shadow", shadow);
       break;      
-      case 'shadowWidth':
-      this.options.shadowWidth = value;
-      const _shadow = `${this.options.shadow}` +  ' ' + value+ 'px ' +  value + 'px ' + value + 'px';
-      this.canvas.getActiveObject().set("shadow", _shadow);
-      break;      
-      case 'strokeWidth':
-      this.options.strokeWidth= value;
-      this.canvas.getActiveObject().set("strokeWidth", value);
-      break;      
-      case 'stroke':
-      this.canvas.getActiveObject().set('stroke', value);
-      this.canvas.getActiveObject().set('strokeWidth' , this.options.strokeWidth);
-      this.options.stroke = value;
-      break;      
-      case 'opacity':
-      this.options.opacity =  value;
-      this.canvas.getActiveObject().selectAll();
-      this.canvas.getActiveObject().set('opacity', value);
-      break;      
-      case 'textBackgroundColor':
-      this.options.textBackgroundColor =  value;
-      this.canvas.getActiveObject().set('textBackgroundColor', value);
+
+      case 'width':
+      attribute = this.selectedModifier == 'stroke' ? 'strokeWidth' : 'shadowWidth';
+      this.options[attribute] = value;
+      if(attribute == 'shadowWidth'){
+        const _shadow = `${this.options.shadow}` +  ' ' + value+ 'px ' +  value + 'px ' + value + 'px';
+        value = _shadow;
+        attribute = 'shadow';
+      }
+      this.canvas.getActiveObject().set(attribute, value);
       break;
+      
       default:
       break;
     }
-    
+
     this.canvas.renderAll();
   }
 
@@ -134,7 +128,6 @@ export class TextModifiersComponent implements OnInit  {
     this.showColorPicker$ = this.showFontPicker$ = false;
     this.selectedModifier = attribute;
     if(['stroke', 'shadow' , 'color' , 'textBackgroundColor'].indexOf(attribute) > -1) {
-      console.log(1, attribute);
       this.showColorPicker$ = true;
       if(['stroke', 'shadow' , 'textBackgroundColor'].indexOf(this.selectedModifier) > -1 && this.options[this.selectedModifier] != ''){
         this.options[this.selectedModifier] = '';
@@ -145,16 +138,29 @@ export class TextModifiersComponent implements OnInit  {
         return;
       }
     }    
-    else if(attribute == 'fontFamily') {
+    else if(attribute == 'fontFamily') 
       this.showFontPicker$ = true;    
-    }
-    else {
+    else 
       this.showColorPicker$ = true;
-    }
     
   }
 
   _onTextVisibilityChange(event){
-    this.onTextVisibilityChange.emit(event);
+    this.showCanvasText = event.target.checked;
+    if(event.target.checked){
+      this.onTextVisibilityChange.emit(event);
+    }
+    else
+      this.onTextVisibilityChange.emit(event);
   }
+
+  get rangeVal() {
+    if(this.selectedModifier == 'stroke')
+      return this.options.strokeWidth;
+    else if(this.selectedModifier == 'shadow')
+      return this.options.shadowWidth;
+    else if(this.selectedModifier == 'opacity')
+      return this.options.opacity;
+  }
+
 }
