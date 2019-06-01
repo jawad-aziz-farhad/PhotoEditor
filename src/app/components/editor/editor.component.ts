@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, Aft
 import { Data } from 'src/app/models/data';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { fabric } from 'fabric';
+import 'fabric-customise-controls';
 
 declare var $: any;
 
@@ -41,16 +42,26 @@ export class EditorComponent implements OnInit , AfterViewInit {
 
   modalOpenedFor: string;
   canvasSizes: any = {small : { width: 500, height : 500 },
-                              tall  : { width: 450, height : 900 },
-                              wide  : { width: 900, height : 450 },
-                              large : { width: 900, height : 900 },
-                              };
+                      tall  : { width: 450, height : 900 },
+                      wide  : { width: 900, height : 450 },
+                      large : { width: 900, height : 900 },
+                      };
 
   color: string = "#000";                            
   rowWidth: any;
   zoomLevel: any;
+  HideControls = {
+    'tl': true,
+    'tr': true,
+    'bl': true,
+    'br': true,
+    'ml': false,
+    'mt': false,
+    'mr': false,
+    'mb': false,
+    'mtr': false
+  };
   
-
 
   constructor(private modalService: NgbModal) { }
 
@@ -80,7 +91,11 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
 
    //this.drawWithFabricJS(this.selectedImage);    
-   this.setUpCanvas(this.selectedImage);
+   
+   //this.setUpCanvas(this.selectedImage);
+   
+   
+   this.drawControls();
   }  
 
   ngAfterViewInit(){
@@ -137,13 +152,171 @@ export class EditorComponent implements OnInit , AfterViewInit {
           const delta = new fabric.Point(e.e.movementX, e.e.movementY);
           this.canvas.relativePan(delta);
         }
-      });      
+      });     
 
+      
       //this.mouseWheel();
       this.canvas.renderAll();
+
+      
     });
   }
 
+  drawControls() {
+    this.canvas = new fabric.Canvas("canvas");
+    this.canvas.setWidth(this.canvasWidth);
+    this.canvas.setHeight(this.canvas_Height);
+   
+var HideControls = {
+            'tl':true,
+            'tr':true,
+            'bl':true,
+            'br':true,
+            'ml':false,
+            'mt':false,
+            'mr':false,
+            'mb':false,
+            'mtr':false
+        };
+
+  var ctrlImages = [
+      "https://cdn1.iconfinder.com/data/icons/ui-color/512/Untitled-12-128.png",
+      "https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/sync-16.png",
+      "https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/write-compose-16.png",
+      "https://cdn3.iconfinder.com/data/icons/social-messaging-productivity-1/128/save-16.png"
+  ];
+
+fabric.Object.prototype.drawControls = function(ctx) {
+
+  ctx.save();
+//override _drawControl function to change the corner images    
+this._drawControl = function(control, ctx, methodName, left, top, flipiX, flipiY) {
+    
+              var sizeX = this.cornerSize / this.scaleX,
+                  sizeY = this.cornerSize / this.scaleY;
+
+              if (this.isControlVisible(control)) {
+               /* isVML ||*/ this.transparentCorners || ctx.clearRect(left, top, sizeX, sizeY);
+                
+             
+          var SelectedIconImage = new Image();
+          var lx='';
+          var ly='';
+          var n='';
+          
+          switch (control)
+            {
+            case 'tl':      
+              if (flipiY) { ly='b'; } else { ly = 't'; }
+              if (flipiX) { lx='r'; } else { lx = 'l'; }
+              break;
+            case 'tr':
+              if (flipiY) { ly='b'; } else { ly = 't'; }
+              if (flipiX) { lx='l'; } else { lx = 'r'; }
+              break;
+            case 'bl':
+              if (flipiY) { ly='t'; } else { ly = 'b'; }
+              if (flipiX) { lx='r'; } else { lx = 'l'; }
+              break;
+            case 'br':
+              if (flipiY) { ly='t'; } else { ly = 'b'; }
+              if (flipiX) { lx='l'; } else { lx = 'r'; }
+              break;
+            default:
+              ly=control.substr(0, 1);
+              lx=control.substr(1, 1);
+              break;
+            }
+            
+          control=ly+lx;
+              
+          switch (control)
+            {
+            case 'tl':
+              SelectedIconImage.src = ctrlImages[1];
+              break;
+            case 'tr':
+              if (flipiX && !flipiY) { n='2'; }
+              if (!flipiX && flipiY) { n='3'; }
+              if (flipiX && flipiY) { n='4'; }
+              SelectedIconImage.src = ctrlImages[0];
+              break;
+            case 'mt':
+             
+              break;
+            case 'bl':
+              if (flipiY) { n='2'; }
+             SelectedIconImage.src = ctrlImages[3];
+              break;
+            case 'br':
+              if (flipiX || flipiY) { n='2'; }
+              if (flipiX && flipiY) { n=''; }
+              SelectedIconImage.src = ctrlImages[2];
+              break;
+            case 'mb':
+             
+              break;
+            case 'ml':
+             
+              break;
+            case 'mr':
+             
+              break;
+            default:
+              ctx[methodName](left, top, sizeX, sizeY);
+              break;
+            }
+             
+            if (control == 'tl' || control == 'tr' || control == 'bl' || control == 'br'
+            || control == 'mt' || control == 'mb' || control == 'ml' || control == 'mr')
+            {
+              sizeX = 15;
+              sizeY = 15;
+              ctx.drawImage(SelectedIconImage, left, top, sizeX, sizeY);
+            }
+
+
+              try {
+                ctx.drawImage(SelectedIconImage, left, top, sizeX, sizeY); 
+
+              } catch (e) {
+                if (e.name != "NS_ERROR_NOT_AVAILABLE") {
+                  throw e;
+                }
+              }
+ 
+           
+        }
+  };//end
+  
+ //create a rect object  
+ var rect = new fabric.Rect({
+        left: 100,
+        top: 100,
+        fill:  "#FF0000",
+        stroke: "#000",
+        width: 100,
+        height: 100,
+        strokeWidth: 10, 
+        opacity: .8       
+    });
+this.canvas.add(rect);    
+rect.setControlsVisibility(HideControls);
+
+fabric.Image.fromURL('http://serio.piiym.net/CVBla/txtboard/thumb/1260285874089s.jpg', function (img) {
+    img.top = 60;
+    img.left = 250;
+    img.setControlsVisibility(HideControls);
+    this.canvas.add(img);
+});
+
+this.canvas.renderAll();
+  ctx.restore();
+
+  return this;
+}
+
+  }
   setText(){
     let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
       fontSize: this.selectedOptions.fontSize,
@@ -152,10 +325,12 @@ export class EditorComponent implements OnInit , AfterViewInit {
       textAlign: this.selectedOptions.textAlign,
       stroke: this.selectedOptions.stroke,
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
-      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0
+      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
+      
     });
 
-    this.setTextEvents(text); 
+    text.setControlsVisibility(this.HideControls);
+    //this.setTextEvents(text); 
     this.canvas.add(text);
     this.canvas.centerObject(text);
     this.canvas.setActiveObject(text);

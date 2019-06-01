@@ -6,7 +6,7 @@ import { EditorComponent } from './components/editor/editor.component';
 import { NewEditorComponent } from './components/new-editor/new-editor.component';
 
 const routes: Routes = [ 
-  { path: '', component: NewEditorComponent },
+  { path: '', component: HomeComponent },
   { path: 'home', component: HomeComponent },
   { path: 'test', component: TestComponent }];
 
