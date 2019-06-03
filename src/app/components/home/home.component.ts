@@ -11,9 +11,7 @@ declare var $: any;
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit , AfterViewInit {
-
-  @ViewChild(TextModifiersComponent) textModifer: TextModifiersComponent;
+export class HomeComponent implements OnInit {
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
   @ViewChild('canvas') _canvas: ElementRef;
@@ -77,15 +75,79 @@ export class HomeComponent implements OnInit , AfterViewInit {
 
     this.zoomLevel = 0;
 
-    this.textModifer = new TextModifiersComponent();
     //this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
 
-    this.setUpCanvas(this.selectedImage);
+    //this.setUpCanvas(this.selectedImage);
+
+    this.setCanvas();
   }  
 
-  ngAfterViewInit(){
-    console.log('Color Picker ', this.rowWidth);
+  setCanvas(){
+    this.canvas = new fabric.Canvas('canvas');    
+    this.canvas.setWidth(this.canvasWidth);
+    this.canvas.setHeight(this.canvas_Height);
+
+    let rect = new fabric.Rect({
+      width: this.canvasWidth,
+      height: this.canvas_Height,
+      borderColor: '#C0C0C0',
+      scaleX: this.canvasWidth,
+      scaleY: this.canvas_Height,
+      originX: 'center',
+      originY: 'center'
+    });
+
+    var HideControls = {
+      'tl': true,
+      'tr': true,
+      'bl': false,
+      'br': true,
+      'ml': false,
+      'mt': false,
+      'mr': false,
+      'mb': false,
+      'mtr': false
+    };
+
+    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
+      angle: this.selectedOptions.angle,
+      fontSize: this.selectedOptions.fontSize,
+      fontFamily: this.selectedOptions.fontFamily,
+      fill: "#C0C0C0",
+      textAlign: this.selectedOptions.textAlign,      
+      strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
+      paintFirst: 'stroke',
+      stroke: this.selectedOptions.stroke,
+      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
+      strokeLineCap: 'round',
+      opacity: this.selectedOptions.opacity,
+      textBackgroundColor : this.selectedOptions.textBackgroundColor,
+      borderColor: '#00c6d2',
+      editingBorderColor: '#00c6d2',
+      borderScaleFactor: 2,
+      padding: 15,
+      originX: 'center',
+      originY: 'center'
+    });
+
+    text.setControlsVisibility(HideControls);
+    var group = new fabric.Group([ rect, text ]);  
+
+    this.canvas.add(group);
+
+    this.canvas.centerObject( group.item(1) );
+    this.canvas.setActiveObject( group.item(1) );
+    this.canvas.bringToFront( group.item(1) );
+
+    fabric.util.loadImage(this.selectedImage, img => {            
+      rect.set('fill', new fabric.Pattern({
+        source: img,
+        repeat: 'no-repeat'
+      }));
+      this.canvas.renderAll();
+    });
   }
+
 
   setUpCanvas(image) {  
     
@@ -122,40 +184,40 @@ export class HomeComponent implements OnInit , AfterViewInit {
 
     this.canvas.setZoom(1);
 
-      let panning = false;
-      this.canvas.on('mouse:up', (e) => {
-        panning = false;
-      });      
-      this.canvas.on('mouse:down', (e) => {
-        panning = true;
-      });
-      this.canvas.on('mouse:move',  (e) => {
-        if (panning && e && e.e && this.canvas.getZoom() > 1) {
-          const delta = new fabric.Point(e.e.movementX, e.e.movementY);
-          this.canvas.relativePan(delta);
-        }
-      });    
+    let panning = false;
+    this.canvas.on('mouse:up', (e) => {
+      panning = false;
+    });      
+    this.canvas.on('mouse:down', (e) => {
+      panning = true;
+    });
+    this.canvas.on('mouse:move',  (e) => {
+      if (panning && e && e.e && this.canvas.getZoom() > 1) {
+        const delta = new fabric.Point(e.e.movementX, e.e.movementY);
+        this.canvas.relativePan(delta);
+      }
+    });    
 
-      this.canvas.on('object:moving', function (e) {
-        var obj = e.target;
-         // if object is too big ignore
-        if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
-            return;
-        }        
-        obj.setCoords();        
-        // top-left  corner
-        if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
-            obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
-            obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
-        }
-        // bot-right corner
-        if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
-            obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
-            obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
-        }
-      });
+    this.canvas.on('object:moving', function (e) {
+      var obj = e.target;
+        // if object is too big ignore
+      if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+          return;
+      }        
+      obj.setCoords();        
+      // top-left  corner
+      if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+          obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+          obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+      }
+      // bot-right corner
+      if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+          obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+          obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+      }
+    });
 
-      this.canvas.renderAll();
+    this.canvas.renderAll();
 
       
     });
@@ -292,7 +354,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
       tl: {
         action: (e, target) => {
           this.selectedOptions.angle = 0;
-          this.showCanvasText = false;
+          //this.showCanvasText = false;
           this.canvas.remove(target);
         },
         cursor: 'pointer'
@@ -462,7 +524,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
       w: imgW,
       h: imgH
     };
-}
+  }
   
   get images(): Array<any> {
     return ['assets/images/image-1.jpg', 'assets/images/image-2.jpg' , 'assets/images/image-3.jpg' , 'assets/images/image-4.jpg' , 'assets/images/image-5.jpg']
