@@ -24,9 +24,10 @@
           <canvas id="canvas" #canvas></canvas>       
         </div>
         <-- /. 2nd Column -->
-        <div #canvasArea class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid">
+        
+        <div #canvasArea class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid" >
           <canvas #canvas id="canvas" [hidden]="!showCanvas"></canvas> 
-          <!-- <img #divHandle id="imageSrc" (load)="setCroppie()" [src]="selectedImage" *ngIf="!showCanvas"> -->
+          <img #divHandle id="imageSrc" [src]="selectedImage" [hidden]="showCanvas">
         </div>
 
       </div>

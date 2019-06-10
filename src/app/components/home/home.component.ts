@@ -115,9 +115,8 @@ export class HomeComponent implements OnInit {
   }  
 
   setCroppie() {
-
-    this.defaultCroppieOptions.boundary.width = this.canvasArea.nativeElement.width;
-    this.defaultCroppieOptions.boundary.height = this.canvasArea.nativeElement.height;
+    //this.defaultCroppieOptions.boundary.width = this.canvasArea.nativeElement.width;
+    //this.defaultCroppieOptions.boundary.height = this.canvasArea.nativeElement.height;
     let options: CroppieOptions = this.croppieOptions ? this.croppieOptions : this.defaultCroppieOptions;
     let resultOptions : ResultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
     this.cropper = new Croppie(this.divHandle.nativeElement, options);
@@ -720,8 +719,9 @@ export class HomeComponent implements OnInit {
   }
 
   onResizeBtnClick(event){
-    console.log(event.action)
-    if(event.action === 'resize')
+    if(event.action === 'reposition')
       this.showCanvas = !this.showCanvas;
+    
+    console.log(this.showCanvas);
   }
 }
