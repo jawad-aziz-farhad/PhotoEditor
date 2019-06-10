@@ -97,8 +97,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
     fabric.Image.fromURL(image, img => {
 
       img.set({
-       // scaleX : this.canvas.getWidth() / img.width,   //new update
-       // scaleY: this.canvas.getHeight() / img.height,   //new update,
+        scaleX : this.canvas.getWidth() / img.width,   //new update
+        scaleY: this.canvas.getHeight() / img.height,   //new update,
         originX: "center", 
         originY: "center",
         selectable: false,

@@ -2,7 +2,7 @@ import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angula
 import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
 import 'fabric-customise-controls';
-import { TextModifiersComponent } from '../text-modifiers/text-modifiers.component';
+import Croppie, {CroppieOptions, ResultOptions} from "croppie/croppie";
 
 declare var $: any;
 
@@ -12,6 +12,37 @@ declare var $: any;
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+
+
+  @ViewChild('divHandle') divHandle; ElementRef;
+  croppieOptions: CroppieOptions;
+  resultOptions: ResultOptions;
+  initialZoom: number = 1;
+
+  // private defaultCroppieOptions: CroppieOptions = {
+  //   viewport: { width: 500, height: 500, type: 'square' , 
+  //   points: [77,469,280,739], 
+  //   showZoomer: false,
+  //   enableResize: true,
+  //   enableOrientation: true,},
+  //   boundary: { width: 500, height: 500 }
+  // };
+
+  private defaultCroppieOptions: CroppieOptions = {
+    viewport: { width: 500, height: 500, type: 'square' }, 
+    //points: [77,469,280,739], 
+    showZoomer: true,
+    enableResize: false,
+    enableOrientation: true,
+    boundary: { width: 500, height: 500 }
+  };
+  private defaultResultOptions: ResultOptions & { type: 'base64' } = {
+    type: 'base64'
+  };
+
+  private cropper: Croppie;
+
+
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
   @ViewChild('canvas') _canvas: ElementRef;
@@ -48,6 +79,7 @@ export class HomeComponent implements OnInit {
   rowWidth: any;
   zoomLevel: any;
   isDropup: boolean;
+  showCanvas: boolean;
   
   constructor() { }
 
@@ -65,6 +97,7 @@ export class HomeComponent implements OnInit {
     this.showTextArea   = true;
     this.showCanvasText = true;
     this.showResizeArea = true;
+    this.showCanvas     = true;
 
     this.showColorPicker$ = false;
     this.showFontPicker$  = false;
@@ -77,77 +110,25 @@ export class HomeComponent implements OnInit {
 
     //this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
 
-    //this.setUpCanvas(this.selectedImage);
+    this.setUpCanvas(this.selectedImage);
 
-    this.setCanvas();
   }  
 
-  setCanvas(){
-    this.canvas = new fabric.Canvas('canvas');    
-    this.canvas.setWidth(this.canvasWidth);
-    this.canvas.setHeight(this.canvas_Height);
+  setCroppie() {
 
-    let rect = new fabric.Rect({
-      width: this.canvasWidth,
-      height: this.canvas_Height,
-      borderColor: '#C0C0C0',
-      scaleX: this.canvasWidth,
-      scaleY: this.canvas_Height,
-      originX: 'center',
-      originY: 'center'
+    this.defaultCroppieOptions.boundary.width = this.canvasArea.nativeElement.width;
+    this.defaultCroppieOptions.boundary.height = this.canvasArea.nativeElement.height;
+    let options: CroppieOptions = this.croppieOptions ? this.croppieOptions : this.defaultCroppieOptions;
+    let resultOptions : ResultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
+    this.cropper = new Croppie(this.divHandle.nativeElement, options);
+    console.log('Cropping', this.cropper);
+    this.cropper.bind( { url: this.selectedImage }).then( response => {
+      console.log('Response', response)
     });
-
-    var HideControls = {
-      'tl': true,
-      'tr': true,
-      'bl': false,
-      'br': true,
-      'ml': false,
-      'mt': false,
-      'mr': false,
-      'mb': false,
-      'mtr': false
-    };
-
-    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
-      angle: this.selectedOptions.angle,
-      fontSize: this.selectedOptions.fontSize,
-      fontFamily: this.selectedOptions.fontFamily,
-      fill: "#C0C0C0",
-      textAlign: this.selectedOptions.textAlign,      
-      strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
-      paintFirst: 'stroke',
-      stroke: this.selectedOptions.stroke,
-      shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
-      strokeLineCap: 'round',
-      opacity: this.selectedOptions.opacity,
-      textBackgroundColor : this.selectedOptions.textBackgroundColor,
-      borderColor: '#00c6d2',
-      editingBorderColor: '#00c6d2',
-      borderScaleFactor: 2,
-      padding: 15,
-      originX: 'center',
-      originY: 'center'
-    });
-
-    text.setControlsVisibility(HideControls);
-    var group = new fabric.Group([ rect, text ]);  
-
-    this.canvas.add(group);
-
-    this.canvas.centerObject( group.item(1) );
-    this.canvas.setActiveObject( group.item(1) );
-    this.canvas.bringToFront( group.item(1) );
-
-    fabric.util.loadImage(this.selectedImage, img => {            
-      rect.set('fill', new fabric.Pattern({
-        source: img,
-        repeat: 'no-repeat'
-      }));
-      this.canvas.renderAll();
+    this.cropper.result('canvas').then(result => {
+      console.log('Result', result);
     });
   }
-
 
   setUpCanvas(image) {  
     
@@ -184,42 +165,40 @@ export class HomeComponent implements OnInit {
 
     this.canvas.setZoom(1);
 
-    let panning = false;
-    this.canvas.on('mouse:up', (e) => {
-      panning = false;
-    });      
-    this.canvas.on('mouse:down', (e) => {
-      panning = true;
-    });
-    this.canvas.on('mouse:move',  (e) => {
-      if (panning && e && e.e && this.canvas.getZoom() > 1) {
-        const delta = new fabric.Point(e.e.movementX, e.e.movementY);
-        this.canvas.relativePan(delta);
-      }
-    });    
+      let panning = false;
+      this.canvas.on('mouse:up', (e) => {
+        panning = false;
+      });      
+      this.canvas.on('mouse:down', (e) => {
+        panning = true;
+      });
+      this.canvas.on('mouse:move',  (e) => {
+        if (panning && e && e.e && this.canvas.getZoom() > 1) {
+          const delta = new fabric.Point(e.e.movementX, e.e.movementY);
+          this.canvas.relativePan(delta);
+        }
+      });    
 
-    this.canvas.on('object:moving', function (e) {
-      var obj = e.target;
-        // if object is too big ignore
-      if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
-          return;
-      }        
-      obj.setCoords();        
-      // top-left  corner
-      if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
-          obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
-          obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
-      }
-      // bot-right corner
-      if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
-          obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
-          obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
-      }
-    });
+      this.canvas.on('object:moving', function (e) {
+        var obj = e.target;
+         // if object is too big ignore
+        if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+            return;
+        }        
+        obj.setCoords();        
+        // top-left  corner
+        if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+            obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+            obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+        }
+        // bot-right corner
+        if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+            obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+            obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+        }
+      });
 
-    this.canvas.renderAll();
-
-      
+      this.canvas.renderAll();
     });
   }
 
@@ -354,7 +333,7 @@ export class HomeComponent implements OnInit {
       tl: {
         action: (e, target) => {
           this.selectedOptions.angle = 0;
-          //this.showCanvasText = false;
+          this.showCanvasText = false;
           this.canvas.remove(target);
         },
         cursor: 'pointer'
@@ -381,13 +360,10 @@ export class HomeComponent implements OnInit {
         cornerPadding: 10
       },
       tl: {
-        icon: icons[0],
-        action: 'remove',
-        cursor: 'pointer'
+        icon: icons[0]
       },
       tr: {
-        icon: icons[1],
-        
+        icon: icons[1]        
       },    
       br: {
         icon: icons[2]
@@ -496,12 +472,42 @@ export class HomeComponent implements OnInit {
       else{
         const attribute = this.modalOpenedFor == 'stroke' ? 'strokeWidth' : 'shadowWidth';
         this.onAttributeChange(event.target.value , attribute);
-      }
-    
+      }    
     }
   }
 
- 
+  applyFilter(filter){
+    this.selectedOptions.filter = filter;
+    const obj = this.canvas.backgroundImage;
+    if(!obj) return;
+    if (obj.filters && obj.filters.length > 1) 
+      obj.filters.pop();
+    
+    switch(filter){
+      case 'gray':
+      obj.filters.push(new fabric.Image.filters.Grayscale());
+      break;
+      case 'sepia':
+      obj.filters.push(new fabric.Image.filters.Sepia());
+      break;
+      case 'brownie':
+      const _filter = new fabric.Image.filters.ColorMatrix({
+        matrix: [0.59970, 0.34553, -0.27082, 0, 0.186, -0.03770, 0.86095, 0.15059, 0, -0.1449, 0.24113, -0.07441, 0.44972, 0, -0.02965, 0, 0, 0, 1, 0]
+      });
+      obj.filters.push(_filter);
+      break;
+      case 'invert':
+      obj.filters.push(new fabric.Image.filters.Invert());
+      break;
+      
+      default:
+      break;
+    }
+
+    obj.applyFilters();
+    this.canvas.renderAll();
+  }
+
   createImageRatioSize(maxW, maxH, imgW, imgH) {
     var ratio = imgH / imgW;
     if (imgW >= maxW && ratio <= 1){
@@ -524,7 +530,7 @@ export class HomeComponent implements OnInit {
       w: imgW,
       h: imgH
     };
-  }
+}
   
   get images(): Array<any> {
     return ['assets/images/image-1.jpg', 'assets/images/image-2.jpg' , 'assets/images/image-3.jpg' , 'assets/images/image-4.jpg' , 'assets/images/image-5.jpg']
@@ -539,8 +545,7 @@ export class HomeComponent implements OnInit {
     return this.modalOpenedFor ? this.data[this.modalOpenedFor] : [];
   }
 
-  onTextVisibilityChange(event){
-    //console.log(event.target.checked);
+  onCanvasTextChange(event){
     if(event.target.checked)
       this.setText();
     else {
@@ -578,7 +583,30 @@ export class HomeComponent implements OnInit {
    
   }
 
-  
+  dataURLtoBlob(dataurl) {
+    let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+     bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+  }
+
+  saveCanvasAsImage(){
+    let obj = this.canvas.getActiveObject();
+    if(obj.text == 'Click here to edit text'){
+      this.canvas.remove(obj);
+      this.canvas.renderAll();
+    }
+    const link = document.createElement("a");
+    const imgData = this.canvas.toDataURL({format: 'png', multiplier: 4});
+    const blob = this.dataURLtoBlob(imgData);
+    const objurl = URL.createObjectURL(blob);
+    link.download = new Date().getTime() + ".png";
+    link.href = objurl;
+    link.click();
+  }
+
   setZoom(event) {    
     let status = '';
     const zoomLevel = event.target.value;
@@ -691,7 +719,9 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  get canvas$(): any { return this.canvas;}
-
-  get showCanvasText$(): boolean { return this.showCanvasText; }
+  onResizeBtnClick(event){
+    console.log(event.action)
+    if(event.action === 'resize')
+      this.showCanvas = !this.showCanvas;
+  }
 }

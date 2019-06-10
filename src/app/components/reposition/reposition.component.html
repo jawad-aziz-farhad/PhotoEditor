@@ -1,4 +1,10 @@
-<div>
-  <input type="range" steps="0.01" min="1" max="2" id="image_zoom"/>
-</div>
-
+<div class="canvas-actions">
+    <div class="row">
+      <div class="col">
+          <button class="btn btn-block btn-reposition btn-action" (click)="_onClick('reposition')">Reposition</button>
+      </div>
+      <div class="col">
+        <button class="btn btn-block btn-rotate btn-action" (click)="_onClick('rotate')">Rotate</button>
+      </div>
+    </div>
+  </div>

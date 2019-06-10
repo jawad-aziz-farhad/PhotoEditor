@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-reposition',
@@ -7,9 +7,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class RepositionComponent implements OnInit {
 
+  @Output() onClick: EventEmitter<any> = new EventEmitter();
+
   constructor() { }
 
   ngOnInit() {
+  }
+
+  _onClick(action){
+    this.onClick.emit({action: action});
   }
 
 }

@@ -299,6 +299,14 @@ body {
 	background-image: url("assets/_images/tick.svg");
 }
 
+.btn-rotate:before {
+	background-image: url('assets/_images/rotate.svg');
+}
+
+.btn-reposition:before {
+	background-image: url('assets/_images/tick.svg')
+}
+
 .gray {
 	-webkit-filter: grayscale(50%);
   /* Safari 6.0 - 9.0 */
