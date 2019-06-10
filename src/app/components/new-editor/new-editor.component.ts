@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { fabric } from 'fabric';
 
 declare var $: any;
@@ -49,7 +48,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   color: string = "#000";                            
   rowWidth: any;
   zoomLevel: any;
-  constructor(private modalService: NgbModal) { }
+  constructor() { }
 
   ngOnInit() {
     this.selectedImage = 'assets/images/image-1.jpg';
@@ -384,31 +383,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-  open(content, option) {
-    this.modalOpenedFor = option;
-    if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
-      this.selectedOptions[this.modalOpenedFor] = '';
-      const obj = this.canvas.getActiveObject();
-      obj.set(this.modalOpenedFor, '');
-      this.canvas.renderAll();
-      return;
-    }
-    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
-  }
-
-  getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-      return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-      return 'by clicking on a backdrop';
-    } else {
-      return  `with: ${reason}`;
-    }
-  }
+  
 
   handlePropertyChange(event){
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 

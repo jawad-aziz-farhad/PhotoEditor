@@ -1,57 +1,57 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, Output, HostListener, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, HostListener } from '@angular/core';
 
 @Component({
-  selector: 'app-color-slider',
-  templateUrl: './color-slider.component.html',
-  styleUrls: ['./color-slider.component.sass']
+  selector: 'app-color-picker',
+  templateUrl: './color-picker.component.html',
+  styleUrls: ['./color-picker.component.scss']
 })
-export class ColorSliderComponent implements AfterViewInit {
+export class ColorPickerComponent implements OnInit {
+
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
 
-  @Input() set canvasWidth(width){
-    this._canvasWidth = width;
-  };
+  colors: Array<any> = ['#FFFFFF', '#000000', '#e73836','#d91961','#8e24a9','#5f34b0','#3949ac','#3946ad','#1f88e6',
+                        '#039ae7', '#01acc4', '#008979','#42a146','#7bb441','#bfca33','#fdd737','#ffb101','#fa8d00',
+                        '#f6521c', '#6f4c43', '#777576','#566f7b','#d4d4d4','#acacac','#828282','#4c4c4c'];
+
+  @Input() set canvasWidth(width){this._canvasWidth = width; };
+  get canvasWidth(){ return this._canvasWidth; }
 
   @Output()
   color: EventEmitter<any> = new EventEmitter();
 
   _canvasWidth : number;
-  private ctx: CanvasRenderingContext2D;
-  private mousedown: boolean = false;
-  private selectedHeight: number;
+
+  ctx: CanvasRenderingContext2D;
+  mousedown: boolean = false;
+  selectedHeight: number;
+  
+  constructor() { }
+
+  ngOnInit() {
+  }
 
   ngAfterViewInit() {
     this.draw();
   }
 
+  @HostListener('mouseup', ['$event'])
+  onMouseUp(evt: MouseEvent) {
+    this.mousedown = false;
+  }
+  
   draw() {
     if (!this.ctx) {
       this.ctx = this.canvas.nativeElement.getContext('2d');
     }
+    
     const width = this.canvas.nativeElement.width;
     const height = this.canvas.nativeElement.height;
-
-    this.ctx.clearRect(0, 0, width, height);
-
+    
     const gradient = this.ctx.createLinearGradient(width, 0, 0, 0);
-    gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
-    gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
-    gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
-    gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
-    gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
-    gradient.addColorStop(0.78, 'rgba(255, 0, 255, 1)');
-    gradient.addColorStop(0.83, 'rgba(255, 0, 0, 1)');
-    gradient.addColorStop(0.90, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
-
-    // gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
-    // gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
-    // gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
-    // gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
-    // gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
-    // gradient.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
-    // gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
+    for(let i=1; i<this.colors.length;i++){
+      gradient.addColorStop(0.04 * i, this.colors[i]);
+    }
 
     this.ctx.beginPath();
     this.ctx.rect(0, 0, width, height);
@@ -68,11 +68,6 @@ export class ColorSliderComponent implements AfterViewInit {
       this.ctx.stroke();
       this.ctx.closePath();
     }
-  }
-
-  @HostListener('window:mouseup', ['$event'])
-  onMouseUp(evt: MouseEvent) {
-    this.mousedown = false;
   }
 
   onMouseDown(evt: MouseEvent) {

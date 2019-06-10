@@ -5,6 +5,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ComponentsModule } from './components/component.module';
 import { DirectivesModule } from './directives/directives.module';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+
 
 @NgModule({
   declarations: [
@@ -15,7 +17,8 @@ import { DirectivesModule } from './directives/directives.module';
     AppRoutingModule ,
 
     ComponentsModule,
-    DirectivesModule
+    DirectivesModule,
+    BsDropdownModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]

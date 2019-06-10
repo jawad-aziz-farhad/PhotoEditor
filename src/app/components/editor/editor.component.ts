@@ -1,6 +1,5 @@
-import { Component, OnInit, ViewChild, ElementRef, ViewChildren , QueryList, AfterViewInit} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
 import { Data } from 'src/app/models/data';
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { fabric } from 'fabric';
 import 'fabric-customise-controls';
 
@@ -9,13 +8,13 @@ declare var $: any;
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.sass']
+  styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit , AfterViewInit {
-
+ 
   @ViewChild('canvasArea') canvasArea: ElementRef;
+  @ViewChild('canvas') _canvas: ElementRef;
   @ViewChild('optionsRow') optionsRow: ElementRef;
-  @ViewChildren('filters') filters : QueryList<any>;
 
   canvas: any
   data: any;
@@ -28,8 +27,6 @@ export class EditorComponent implements OnInit , AfterViewInit {
   canvas_Width: number;
   canvas_Height: number;
 
-  private closeResult: string;
-
   showShapeArea: boolean;
   showFilterArea: boolean;
   showTextArea: boolean;
@@ -37,6 +34,7 @@ export class EditorComponent implements OnInit , AfterViewInit {
   showColorPicker$: boolean;
   showFontPicker$: boolean;
   showTextAlignPicker$: boolean;
+  showTextBackgroundColorPicker$: boolean;
 
   showCanvasText: boolean;
 
@@ -50,27 +48,17 @@ export class EditorComponent implements OnInit , AfterViewInit {
   color: string = "#000";                            
   rowWidth: any;
   zoomLevel: any;
-  HideControls = {
-    'tl': true,
-    'tr': true,
-    'bl': true,
-    'br': true,
-    'ml': false,
-    'mt': false,
-    'mr': false,
-    'mb': false,
-    'mtr': false
-  };
+  isDropup: boolean;
   
-
-  constructor(private modalService: NgbModal) { }
+  constructor() { }
 
   ngOnInit() {
     this.selectedImage = 'assets/images/image-1.jpg';
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
-    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3};
+    this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', 
+                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : '' , angle: 0};
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
@@ -84,25 +72,20 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.showColorPicker$ = false;
     this.showFontPicker$  = false;
     this.showTextAlignPicker$ = false;
+    this.showTextBackgroundColorPicker$ = false;
 
+    this.isDropup = true;
 
     this.zoomLevel = 0;
 
-    this.rowWidth = this.optionsRow.nativeElement.offsetWidth;
+    this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
 
-   //this.drawWithFabricJS(this.selectedImage);    
-   
-   //this.setUpCanvas(this.selectedImage);
-   
-   
-   this.drawControls();
+    this.setUpCanvas(this.selectedImage);
   }  
 
   ngAfterViewInit(){
     console.log('Color Picker ', this.rowWidth);
   }
-
-
 
   setUpCanvas(image) {  
     
@@ -110,14 +93,11 @@ export class EditorComponent implements OnInit , AfterViewInit {
     this.canvas = new fabric.Canvas('canvas');    
     this.canvas.setWidth(this.canvasWidth);
     this.canvas.setHeight(this.canvas_Height);
-    
+
     fabric.Image.fromURL(image, img => {
 
-      //img.scaleToWidth(this.canvas.getWidth());
-      //img.scaleToHeight(this.canvas.getHeight());
-     
       img.set({
-        scaleX :this.canvas.getWidth() / img.width,   //new update
+        scaleX : this.canvas.getWidth() / img.width,   //new update
         scaleY: this.canvas.getHeight() / img.height,   //new update,
         originX: "center", 
         originY: "center",
@@ -125,8 +105,8 @@ export class EditorComponent implements OnInit , AfterViewInit {
         centeredScaling: true
       });
 
-      this.canvas.centerObject(img);
-      img.setCoords();
+      // img.scaleToWidth(this.canvas.getWidth() );
+      // img.scaleToHeight(this.canvas.getHeight() );
       
       if ( Math.max(img.width, img.height) > 2048) {
         let fscale = 2048 / Math.max(img.width, img.height);
@@ -134,7 +114,9 @@ export class EditorComponent implements OnInit , AfterViewInit {
         img.applyFilters();
       }
 
-    this.canvas.add(img);
+    img.setCoords();  
+    this.canvas.centerObject(img);
+    this.canvas.setBackgroundImage(img , this.canvas.renderAll.bind(this.canvas));
 
     this.setText();
 
@@ -152,10 +134,27 @@ export class EditorComponent implements OnInit , AfterViewInit {
           const delta = new fabric.Point(e.e.movementX, e.e.movementY);
           this.canvas.relativePan(delta);
         }
-      });     
+      });    
 
-      
-      //this.mouseWheel();
+      this.canvas.on('object:moving', function (e) {
+        var obj = e.target;
+         // if object is too big ignore
+        if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+            return;
+        }        
+        obj.setCoords();        
+        // top-left  corner
+        if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+            obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+            obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+        }
+        // bot-right corner
+        if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+            obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+            obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+        }
+      });
+
       this.canvas.renderAll();
 
       
@@ -318,23 +317,49 @@ this.canvas.renderAll();
 
   }
   setText(){
+
+    var HideControls = {
+      'tl': true,
+      'tr': true,
+      'bl': false,
+      'br': true,
+      'ml': false,
+      'mt': false,
+      'mr': false,
+      'mb': false,
+      'mtr': false
+    };
+
     let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
+      angle: this.selectedOptions.angle,
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
-      textAlign: this.selectedOptions.textAlign,
-      stroke: this.selectedOptions.stroke,
+      textAlign: this.selectedOptions.textAlign,      
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
+      paintFirst: 'stroke',
+      stroke: this.selectedOptions.stroke,
       shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
-      
+      strokeLineCap: 'round',
+      opacity: this.selectedOptions.opacity,
+      textBackgroundColor : this.selectedOptions.textBackgroundColor,
+      borderColor: '#00c6d2',
+      editingBorderColor: '#00c6d2',
+      borderScaleFactor: 2,
+      padding: 15,
+      originX: 'center',
+      originY: 'center'
     });
 
-    text.setControlsVisibility(this.HideControls);
-    //this.setTextEvents(text); 
+    text.setControlsVisibility(HideControls);
+
+    this.setTextEvents(text); 
     this.canvas.add(text);
     this.canvas.centerObject(text);
     this.canvas.setActiveObject(text);
     this.canvas.bringToFront(text);
+
+    this.customizeControls();
   }
 
   setTextEvents(text){
@@ -410,59 +435,54 @@ this.canvas.renderAll();
       });
   }
 
-  drawWithFabricJS(selectedImage){
-    this.canvas = new fabric.Canvas('canvas');
-    this.canvas.setDimensions({width:this.canvasWidth, height:this.canvas_Height});
-    this.canvas.clear();
-    
-    fabric.Image.fromURL(selectedImage, (img) => {
+  customizeControls() {
 
-      img.scaleToWidth(this.canvas.getWidth());
-      img.scaleToHeight(this.canvas.getHeight());
-      
-      if ( Math.max(img.width, img.height) > 2048) {
-        console.log('Greater than 2048.');
-        let fscale = 2048 / Math.max(img.width, img.height);
-        img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
-        img.applyFilters();
-      }
+    const icons = [
+      'assets/_images/circle.svg',
+      'assets/_images/rotate.svg',
+      'assets/_images/expand.svg'
+    ];
 
-      this.canvas.setBackgroundImage(img, this.canvas.renderAll.bind(this.canvas), {
-        scaleX: this.canvas.getWidth() / img.width,
-        scaleY: this.canvas.getHeight() / img.height
-      });
-
-
-      let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter your text here', {
-        fontSize: this.selectedOptions.fontSize,
-        fontFamily: this.selectedOptions.fontFamily,
-        fill: "#C0C0C0",
-        textAlign: this.selectedOptions.textAlign,
-        stroke: this.selectedOptions.stroke,
-        strokeWidth: this.selectedOptions.strokeWidth,
-      });
-      this.canvas.add(text);
-      this.canvas.centerObject(text);
-      this.canvas.setActiveObject(text);
-      this.canvas.bringToFront(text);
-
-      text.on("editing:entered",  (e)  => {
-        var obj = this.canvas.getActiveObject();
-        if(obj.text === 'Enter your text here')
-        {
-          obj.selectAll();
-          obj.text = "";
-          obj.fill = this.selectedOptions.fill;
-          obj.hiddenTextarea.value = "";
-          obj.dirty = true;
-          obj.setCoords();
-          this.canvas.renderAll();
-        }
-        else{
-          this.overLayText = obj.text;
-        }
+    fabric.Canvas.prototype['customiseControls']({
+      tl: {
+        action: (e, target) => {
+          this.selectedOptions.angle = 0;
+          this.showCanvasText = false;
+          this.canvas.remove(target);
+        },
+        cursor: 'pointer'
+      },
+      tr: {
+        action: 'rotate',
+			  cursor: 'pointer'
+       
+      },
+      br: {
+        action: 'scale',
+      },    
+    }, () => {
+      this.canvas.renderAll();
     });
-
+    
+    this.canvas.item(0)['customiseCornerIcons']({
+      settings: {
+        borderColor: '#00c6d2',
+        editingBorderColor: '#00c6d2',
+        cornerBackgroundColor: 'white',
+        cornerSize: 30,
+        cornerShape: 'circle',
+        cornerPadding: 10
+      },
+      tl: {
+        icon: icons[0]
+      },
+      tr: {
+        icon: icons[1]        
+      },    
+      br: {
+        icon: icons[2]
+      }   
+    }, () => {
       this.canvas.renderAll();
     });
   }
@@ -476,70 +496,67 @@ this.canvas.renderAll();
   onAttributeChange(value , attribute){
     switch(attribute){
       case 'canvasSize':
+      this.selectedOptions.angle = 0;
       this.selectedOptions.canvasSize = value;
       this.setCanvasSize(value);
       break;
-
       case 'imageChange':
       this.selectedImage = value;
-      break;
-      
+      break;      
       case 'effect':
       this.selectedOptions.effect = value;
       break;
-      
+      case 'mouseOver':
+      this.canvas.getActiveObject().set('fontFamily', value);
+      break;
+      case 'mouseLeave':      
       case 'fontFamily':
       this.selectedOptions.fontFamily = value;      
       this.canvas.getActiveObject().set("fontFamily", value);
       break;
-      
       case 'fontStyle':
       this.selectedOptions.fontStyle = value;
-      break;
-      
+      break;      
       case 'fontSize':
       this.selectedOptions.fontSize =value;
       this.canvas.getActiveObject().set("fontSize", value);
       break;
-      
       case 'fontWeight':
       this.selectedOptions.fontWeight = value;
       this.canvas.getActiveObject().set("fontWeight", value);
-      break;
-      
+      break;      
       case 'color':
       this.selectedOptions.fill = value;
       this.canvas.getActiveObject().set("fill", `${value}`);
-      break;
-      
+      break;      
       case 'shadow':
       this.selectedOptions.shadow = value;
       const shadowWidth = this.selectedOptions.shadowWidth;
       const shadow = `${value}` + ' ' + shadowWidth +'px ' +  shadowWidth + 'px ' + shadowWidth + 'px';
       this.canvas.getActiveObject().set("shadow", shadow);
-      break;
-      
+      break;      
       case 'shadowWidth':
       this.selectedOptions.shadowWidth = value;
       const _shadow = `${this.selectedOptions.shadow}` +  ' ' + value+ 'px ' +  value + 'px ' + value + 'px';
       this.canvas.getActiveObject().set("shadow", _shadow);
-      break;
-      
+      break;      
       case 'strokeWidth':
       this.selectedOptions.strokeWidth= value;
       this.canvas.getActiveObject().set("strokeWidth", value);
-      break;
-      
+      break;      
       case 'stroke':
       this.canvas.getActiveObject().set('stroke', value);
       this.canvas.getActiveObject().set('strokeWidth' , this.selectedOptions.strokeWidth);
       this.selectedOptions.stroke = value;
-      break;
-      
-      case 'textAlign':
-      this.selectedOptions.textAlign =  `${value}`;
-      this.canvas.getActiveObject().set('textAlign', value);
-      this.canvas.getActiveObject().setCoords(); 
+      break;      
+      case 'opacity':
+      this.selectedOptions.opacity =  value;
+      this.canvas.getActiveObject().selectAll();
+      this.canvas.getActiveObject().set('opacity', value);
+      break;      
+      case 'textBackgroundColor':
+      this.selectedOptions.textBackgroundColor =  value;
+      this.canvas.getActiveObject().set('textBackgroundColor', value);
       break;
       default:
       break;
@@ -560,50 +577,24 @@ this.canvas.renderAll();
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-  open(content, option) {
-    this.modalOpenedFor = option;
-    if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
-      this.selectedOptions[this.modalOpenedFor] = '';
-      const obj = this.canvas.getActiveObject();
-      obj.set(this.modalOpenedFor, '');
-      this.canvas.renderAll();
-      return;
-    }
-    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
-  }
-
-  getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-      return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-      return 'by clicking on a backdrop';
-    } else {
-      return  `with: ${reason}`;
-    }
-  }
-
   handlePropertyChange(event){
     if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
       this.onAttributeChange(event.target.value , this.modalOpenedFor);
-    else if(['stroke' , 'shadow' , 'color'].indexOf(this.modalOpenedFor) > -1) {
+    else if(['stroke' , 'shadow' , 'color' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1) {
       if( typeof event.color != 'undefined')
         this.onAttributeChange(event.color.hex , this.modalOpenedFor);
       else{
         const attribute = this.modalOpenedFor == 'stroke' ? 'strokeWidth' : 'shadowWidth';
         this.onAttributeChange(event.target.value , attribute);
-      }
-    
+      }    
     }
   }
 
   applyFilter(filter){
     this.selectedOptions.filter = filter;
-    const obj = this.canvas.item(0);
-    if (obj.filters.length > 1) 
+    const obj = this.canvas.backgroundImage;
+    if(!obj) return;
+    if (obj.filters && obj.filters.length > 1) 
       obj.filters.pop();
     
     switch(filter){
@@ -650,8 +641,8 @@ this.canvas.renderAll();
     }
 
     return {
-        w: imgW,
-        h: imgH
+      w: imgW,
+      h: imgH
     };
 }
   
@@ -674,6 +665,7 @@ this.canvas.renderAll();
     else {
       const obj = this.canvas.getActiveObject();
       this.canvas.remove(obj);
+      this.selectedOptions.angle = 0;
     }
     this.showCanvasText = event.target.checked;
     this.canvas.renderAll();
@@ -682,9 +674,9 @@ this.canvas.renderAll();
   showOptions(attribute){
     this.showColorPicker$ = this.showFontPicker$ = this.showTextAlignPicker$ = false;
     this.modalOpenedFor = attribute;
-    if(['stroke', 'shadow' , 'color'].indexOf(attribute) > -1){
+    if(['stroke', 'shadow' , 'color' , 'textBackgroundColor'].indexOf(attribute) > -1){
       this.showColorPicker$ = true;
-      if(['stroke', 'shadow'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
+      if(['stroke', 'shadow' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1 && this.selectedOptions[this.modalOpenedFor] != ''){
         this.selectedOptions[this.modalOpenedFor] = '';
         const obj = this.canvas.getActiveObject();
         obj.set(this.modalOpenedFor, '');
@@ -699,6 +691,8 @@ this.canvas.renderAll();
     else if(attribute == 'textAlign'){
       this.showTextAlignPicker$ = true;
     }
+    else if(attribute == 'textBackgroundColor')
+      this.showTextBackgroundColorPicker$ = true;
 
    
   }
@@ -727,15 +721,7 @@ this.canvas.renderAll();
     link.click();
   }
 
-  setZoom(event){
-    // console.log('Zoom Value', event.target.value);
-    // const zoomLevel = event.target.value;
-    // if(zoomLevel > 1)
-    //   this.canvas.setZoom(this.canvas.getZoom() * zoomLevel);
-    // else
-    //   this.canvas.setZoom(1);
-    // this.canvas.renderAll();
-
+  setZoom(event) {    
     let status = '';
     const zoomLevel = event.target.value;
     if(zoomLevel > this.canvas.getZoom())
@@ -762,14 +748,15 @@ this.canvas.renderAll();
       default: 
 	  }
   this.canvas.renderAll();
-}
-  
+  }
 
   get rangeVal() {
     if(this.modalOpenedFor == 'stroke')
       return this.selectedOptions.strokeWidth;
     else if(this.modalOpenedFor == 'shadow')
       return this.selectedOptions.shadowWidth;
+    else if(this.modalOpenedFor == 'opacity')
+      return this.selectedOptions.opacity;
   }
 
   mouseWheel(){
@@ -843,8 +830,6 @@ this.canvas.renderAll();
    
       event.stopPropagation();
       event.preventDefault();
-  });
+    });
   }
-  
-
 }

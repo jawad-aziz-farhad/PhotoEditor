@@ -1,110 +1,66 @@
+
+
+
+
 <app-navbar></app-navbar>
 
-<div class="container">
-  <div class="row m-2">
+<div class="canvas-wrapper">
 
-    <!-- 1st Column -->
-    <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
-      <div class="row" *ngFor="let image of images;let i=index;" (click)="selectedImage = image;">
-        <div class="col">
-          <img class="img-fluid" [src]="image"/>
-          <img #img (load)="afterLoading()" [src]="selectedImage" style="display: none;"/>
-        </div>
-      </div>
-    </div>
-    <!-- /. 1st Column -->
-
-    <!-- 2nd Column -->
-    <div class="col-sm  col-md-6 col-lg-6 col-xl-6 text-center">
-      <canvas #visualization class="img-fluid"></canvas>      
-    </div>
-    <!-- /. 2nd Column -->
-
-    <!-- 3rd Column -->
-    <div class="col-sm col-md-3 col-lg-3 col-xl-3 text-center">
-      
-      <!-- Sizes -->
-      <div class="row">
-        <div class="col-sm">
-          <button class="btn btn-light" *ngFor="let size of data?.sizes;" (click)="onAttributeChange( {target: {value : size.toLowerCase() } }  , 'canvas_size')">{{ size }}</button>
-        </div>
-      </div>
-      <!-- /. Sizes -->
-
-      <!-- Filters -->
-      <div class="row">
-        <div class="col-sm">
-          <select class="w-100" (change)="onAttributeChange($event , 'effect')">
-            <option *ngFor="let effect of data?.effects;" [value]="effect">{{ effect }}</option>
-          </select>
-        </div>
-      </div>
-      <!-- /. Filters -->
-
-      <!-- Text -->
-      <div class="row">
-        <div class="col-sm">
-          <div class="row">
-            <!-- Fonts -->
-            <div class="col-sm">Fonts</div>
-            <div class="col-sm">
-              <select (change)="onAttributeChange($event , 'font_family')">
-                <option *ngFor="let font of data?.fonts;" [value]="font">{{ font }}</option>
-              </select>
+    <div class="canvas-drawer">
+      <div class="row m-2 row-height">
+        <!-- 1st Column -->
+        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center">
+          <div class="row" *ngFor="let image of images;let i=index;" (click)="onAttributeChange(image , 'imageChange')">
+            <div class="col left">
+              <img class="img-fluid" [src]="image"/>
+              <img #img [src]="selectedImage" style="display: none;"/>
             </div>
-            <!-- /. Fonts -->
-
-            <div class="w-100"></div>
-
-             <!-- Font Size-->
-             <div class="col-sm">Font Size</div>
-             <div class="col-sm">
-                <select (change)="onAttributeChange($event , 'font_size')">
-                  <option *ngFor="let font_size of data?.font_sizes;" [value]="font_size">{{ font_size }}</option>
-                </select>
-             </div>
-             <!-- /. Font Size -->
-
-             <div class="w-100"></div>
-
-             <!-- Font Style-->
-             <div class="col-sm">Font Style</div>
-             <div class="col-sm">
-                <select (change)="onAttributeChange($event , 'font_style')">
-                  <option *ngFor="let font_style of data?.font_styles;" [value]="font_style">{{ font_style }}</option>
-                </select>
-             </div>
-             <!-- /. Font Style -->
-
-             <div class="w-100"></div>
-
-             <!-- Font Weight-->
-             <div class="col-sm">Font Weight</div>
-             <div class="col-sm">
-                <select (change)="onAttributeChange($event , 'font_weight')">
-                  <option *ngFor="let font_weight of data?.font_weights;" [value]="font_weight">{{ font_weight }}</option>
-                </select>
-             </div>
-             <!-- /. Font Weight -->
-
-             <div class="w-100"></div>
-
-             
-             <div class="col-sm mt-3">
-               <input type="text" [value]="overLayText" (input)="drawText($event.target.value)"  placeholder="Enter some text"/>
-             </div>
-
-
-             
           </div>
         </div>
-      </div>
-      <!-- /. Text -->
+        <!-- /. 1st Column -->
+    
+        <!-- 2nd Column --
+        <div #canvasArea id="canvas_area" class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid" >
+          <canvas id="canvas" #canvas></canvas>       
+        </div>
+        <-- /. 2nd Column -->
+        
+        <div #canvasArea class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid" [hidden]="!showCanvas">
+          <canvas #canvas id="canvas"></canvas> 
+        </div>
 
+        <div #croppieContainer class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid" [hidden]="showCanvas">
+          <img #divHandle id="imageSrc" (load)="setCroppie()" [src]="selectedImage">
+        </div>
+
+      </div>
     </div>
-    <!-- /. 3rd Column -->
+
+    <div class="canvas-controls">
+      
+      <!-- Button Area -->
+      <app-buttons-area [canvas]="canvas$"></app-buttons-area>
+
+      <div class="canvas-shapes">
+        <div class="accordion" id="accordionExample">
+
+          <!-- Canvas Size -->
+          <app-canvas-size [selectedOptions]="selectedOptions" (onSizeChange)="onAttributeChange( $event , 'canvasSize')"></app-canvas-size>
+          
+          <!-- REPOSITION -->
+          <app-reposition (onClick)="onResizeBtnClick($event)"></app-reposition>
+
+          <!-- FILTERS -->
+          <app-filters [canvas]="canvas$" [selectedImage]="selectedImage" [selectedOptions]="selectedOptions" [data]="data"></app-filters>
+
+          <!-- TEXT -->
+          <app-text-modifiers [canvas]="canvas$" [data]="data" [options]="selectedOptions" (onTextVisibilityChange)="onTextVisibilityChange($event)"></app-text-modifiers>
+          
+          
+        </div>
+      </div>
   </div>
-  <!-- /.Main Row -->
 </div>
-<!-- /. Container -->
+
+
 
