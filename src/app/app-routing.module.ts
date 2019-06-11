@@ -2,9 +2,10 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
 import { EditorComponent } from './components/editor/editor.component';
+import { NewEditorComponent } from './components/new-editor/new-editor.component';
 
 const routes: Routes = [ 
-  { path: '', component: HomeComponent },
+  { path: '', component: NewEditorComponent },
   { path: 'home', component: HomeComponent }];
 
 @NgModule({

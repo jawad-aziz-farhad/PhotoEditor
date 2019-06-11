@@ -4,14 +4,12 @@ import { fabric } from 'fabric';
 import 'fabric-customise-controls';
 import Croppie, {CroppieOptions, ResultOptions} from "croppie/croppie";
 
-declare var $: any;
-
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  selector: 'app-new-editor',
+  templateUrl: './new-editor.component.html',
+  styleUrls: ['./new-editor.component.scss']
 })
-export class HomeComponent implements OnInit , AfterViewInit {
+export class NewEditorComponent implements OnInit , AfterViewInit {
 
   @ViewChild('croppieContainer') croppieContainer: ElementRef;
   @ViewChild('divHandle') divHandle; ElementRef;
@@ -25,10 +23,8 @@ export class HomeComponent implements OnInit , AfterViewInit {
     size: 'viewport',
     format: 'png'
   };
-
-
+  
   private cropper: Croppie;
-  base64Img: string;
 
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
@@ -102,9 +98,8 @@ export class HomeComponent implements OnInit , AfterViewInit {
   }  
 
   ngAfterViewInit(){
-    console.log(this.canvasArea.nativeElement.offsetWidth);
     this.croppieOptions  = {
-      viewport: { width: 500, height: 500, type: 'square' }, 
+      viewport: { width: this.canvasSizes[this.selectedOptions.canvasSize].width, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
       //points: [77,469,280,739], 
       showZoomer: true,
       enableResize: false,
@@ -114,11 +109,24 @@ export class HomeComponent implements OnInit , AfterViewInit {
   }
 
   setCroppie() {
-    let options: CroppieOptions = this.croppieOptions ? this.croppieOptions : this.defaultCroppieOptions;
-    if(!this.cropper)
-    this.cropper = new Croppie(this.croppieContainer.nativeElement, options);
+    let options: CroppieOptions = {
+      viewport: { width: this.canvasSizes[this.selectedOptions.canvasSize].width, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
+      showZoomer: true,
+      enableResize: false,
+      enableOrientation: true,
+      boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
+    };;
+    if(!this.cropper){
+      options = this.croppieOptions ? this.croppieOptions : this.defaultCroppieOptions
+      this.cropper = new Croppie(this.croppieContainer.nativeElement, options);
+      this.cropper.zoom = 0;
+    }
+    else {
+      this.cropper.zoom = this.cropper.get().zoom;
+    }
+
     this.cropper.bind( { url: this.selectedImage }).then( response => {
-      this.cropper.setZoom(0);
+      this.cropper.setZoom(this.cropper.zoom);
     });   
     
   }
@@ -572,8 +580,6 @@ export class HomeComponent implements OnInit , AfterViewInit {
     }
     else if(attribute == 'textBackgroundColor')
       this.showTextBackgroundColorPicker$ = true;
-
-   
   }
 
   dataURLtoBlob(dataurl) {
@@ -638,92 +644,24 @@ export class HomeComponent implements OnInit , AfterViewInit {
       return this.selectedOptions.opacity;
   }
 
-  mouseWheel(){
-    $("body").mousewheel(function (event, delta) {
-      var zoomScale = 1.3;
-      var mousePageX = event.pageX;
-      var mousePageY = event.pageY;
-   
-      var offset = $("#myCanvas").offset();
-      var canvasX = offset.left;
-      var canvasY = offset.top;
-   
-      // Ignore if mouse is not on canvas
-      if (mousePageX < canvasX || mousePageY < canvasY || mousePageX > (canvasX + this.canvas.getWidth())
-                  || mousePageY > (canvasY + this.canvas.getHeight())) {
-          return;
-      }
-   
-      // Ignore if mouse is not on background
-      var mouseOffsetX = event.offsetX;
-      var mouseOffsetY = event.offsetY;
-   
-      if (mouseOffsetX < this.canvas.left || mouseOffsetX > this.canvas.left + this.canvas.currentWidth
-                  || mouseOffsetY < this.canvas.top || mouseOffsetY > this.canvas.top + this.canvas.currentHeight) {
-          return;
-      }
-   
-      var scaleFactor = 1.1;
-      var change = (delta > 0) ? scaleFactor : (1 / scaleFactor);
-   
-      // Limit zooming out
-      var newZoomScale = zoomScale * change;
-      if (newZoomScale < 1) {
-          return;
-      }
-      zoomScale = newZoomScale;
-   
-      var backgroundWidthOrig = (this.canvas.width * this.canvas.scaleX);
-      var backgroundHeightOrig = (this.canvas.height * this.canvas.scaleY);
-   
-      // Scale objects
-      var objects = this.canvas.getObjects();
-      for (var i in objects) {
-          var obj = objects[i];
-   
-          if (obj.zoomScale != undefined) {
-              obj.scaleX = obj.zoomScale * zoomScale;
-              obj.scaleY = obj.zoomScale * zoomScale;
-          }
-   
-          obj.left = obj.left * change;
-          obj.top = obj.top * change;
-          obj.setCoords();
-      }
-   
-      var backgroundWidthNew = (this.canvas.width * this.canvas.scaleX);
-      var backgroundHeightNew = (this.canvas.height * this.canvas.scaleY);
-   
-      var backgroundWidthDelta = backgroundWidthNew - backgroundWidthOrig;
-      var backgroundHeightDelta = backgroundHeightNew - backgroundHeightOrig;
-   
-      // Shift objects
-      for (var i in objects) {
-          var obj = objects[i];
-          obj.left -= (backgroundWidthDelta / 2);
-          obj.top -= (backgroundHeightDelta / 2);
-          obj.setCoords();
-      }
-   
-      this.canvas.renderAll();
-   
-      event.stopPropagation();
-      event.preventDefault();
-    });
-  }
-
+ 
   onResizeBtnClick(event){
     if(event.action === 'reposition'){
       this.showCanvas = !this.showCanvas;
       if(!this.showCanvas)
        this.setCroppie();
     }
-    else{
+    else if(event.action === 'done'){
+      console.log(this.cropper.get());
       let resultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
       this.cropper.result(resultOptions).then(result => {
-        console.log('Result', result);
-        this.base64Img = result;
+        this.showCanvas = true;
+        this.setUpCanvas(result);
       });
+    }
+    else{
+      
     }
   }
 }
+

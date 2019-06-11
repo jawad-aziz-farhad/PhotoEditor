@@ -14,9 +14,10 @@ import { FiltersComponent } from './filters/filters.component';
 import { CanvasSizeComponent } from './canvas-size/canvas-size.component';
 import { ButtonsAreaComponent } from './buttons-area/buttons-area.component';
 import { ColorPickerComponent } from './color-picker/color-picker.component';
+import { NewEditorComponent } from './new-editor/new-editor.component';
 
 @NgModule({
-    declarations: [NavbarComponent, HomeComponent , EditorComponent,  RepositionComponent, TextModifiersComponent, ShapesComponent, FiltersComponent, CanvasSizeComponent, ButtonsAreaComponent, ColorPickerComponent
+    declarations: [NavbarComponent, HomeComponent , EditorComponent,  RepositionComponent, TextModifiersComponent, ShapesComponent, FiltersComponent, CanvasSizeComponent, ButtonsAreaComponent, ColorPickerComponent, NewEditorComponent
     ],
     imports: [
       BrowserModule,
