@@ -21,11 +21,11 @@
       <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 border mid">
           
         <div class="row mb-2">
-          <div class="col">
-            <button class="btn btn-block btn-action" (click)="onResizeBtnClick({ action: 'rotate' })">Rotate</button>
+          <div class="col pl-0 text-left">
+            <button class="btn btn-action btn-rotate" (click)="onResizeBtnClick({ action: 'rotate' })">Rotate</button>
           </div>
-          <div class="col">
-            <button class="btn btn-block btn-action" (click)="onResizeBtnClick({ action : showCanvas ? 'reposition' : 'done' })">{{ showCanvas ? 'Reposition' : 'Done' }}</button>
+          <div class="col pr-0 text-right">
+            <button class="btn btn-action btn-repos" (click)="onResizeBtnClick({ action : showCanvas ? 'reposition' : 'done' })">{{ showCanvas ? 'Reposition' : 'Done' }}</button>
           </div>
         </div>
 
