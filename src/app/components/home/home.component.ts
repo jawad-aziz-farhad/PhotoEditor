@@ -11,7 +11,7 @@ declare var $: any;
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit , AfterViewInit {
 
   @ViewChild('croppieContainer') croppieContainer: ElementRef;
   @ViewChild('divHandle') divHandle; ElementRef;
@@ -28,14 +28,7 @@ export class HomeComponent implements OnInit {
   //   boundary: { width: 500, height: 500 }
   // };
 
-  private defaultCroppieOptions: CroppieOptions = {
-    viewport: { width: 500, height: 500, type: 'square' }, 
-    //points: [77,469,280,739], 
-    showZoomer: true,
-    enableResize: false,
-    enableOrientation: true,
-    boundary: { width: 500, height: 500 }
-  };
+  private defaultCroppieOptions: CroppieOptions;
   private defaultResultOptions: ResultOptions & { type: 'base64' } = {
     type: 'base64',
     size: 'viewport',
@@ -117,13 +110,25 @@ export class HomeComponent implements OnInit {
 
   }  
 
+  ngAfterViewInit(){
+    console.log(this.canvasArea.nativeElement.offsetWidth);
+    this.croppieOptions  = {
+      viewport: { width: 500, height: 500, type: 'square' }, 
+      //points: [77,469,280,739], 
+      showZoomer: true,
+      enableResize: false,
+      enableOrientation: true,
+      boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
+    };
+  }
+
   setCroppie() {
-    this.defaultCroppieOptions.boundary.width = this.croppieContainer.nativeElement.width;
-    this.defaultCroppieOptions.boundary.height = this.croppieContainer.nativeElement.height - 200;
     let options: CroppieOptions = this.croppieOptions ? this.croppieOptions : this.defaultCroppieOptions;
     if(!this.cropper)
     this.cropper = new Croppie(this.croppieContainer.nativeElement, options);
-    this.cropper.bind( { url: this.selectedImage }).then( response => {});    
+    this.cropper.bind( { url: this.selectedImage }).then( response => {
+      this.cropper.setZoom(0);
+    });    
     
   }
 
