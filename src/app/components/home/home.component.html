@@ -25,13 +25,33 @@
         </div>
         <-- /. 2nd Column -->
         
-        <div #canvasArea class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid" [hidden]="!showCanvas">
-          <canvas #canvas id="canvas"></canvas> 
+        <div #canvasArea class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid"  [hidden]="!showCanvas">
+          <canvas #canvas id="canvas"></canvas>   
         </div>
 
-        <div #croppieContainer class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid" [hidden]="showCanvas">
-          <img #divHandle id="imageSrc" (load)="setCroppie()" [src]="selectedImage">
+        <div #croppieContainer class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid"  [hidden]="showCanvas">
         </div>
+
+        <!-- <div class="col-sm-12 col-md-9 col-lg-9 col-xl-9 border mid">
+          <div class="row">
+            <div class="col">
+              <button class="btn btn-block btn-rotate btn-action" (click)="onResizeBtnClick({ action: 'rotate' })">Rotate</button>
+            </div>
+            <div class="col">
+              <button class="btn btn-block btn-reposition btn-action" (click)="onResizeBtnClick({ action : 'reposition' })">Reposition</button>
+            </div>
+          </div>
+
+          <div #canvasArea class="row" [hidden]="!showCanvas">
+            <canvas #canvas id="canvas"></canvas>   
+          </div>
+
+          <div class="row" [hidden]="showCanvas">
+            <div #croppieContainer class="col"></div>
+          </div>
+
+          
+        </div> -->
 
       </div>
     </div>

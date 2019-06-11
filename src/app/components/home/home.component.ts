@@ -37,7 +37,9 @@ export class HomeComponent implements OnInit {
     boundary: { width: 500, height: 500 }
   };
   private defaultResultOptions: ResultOptions & { type: 'base64' } = {
-    type: 'base64'
+    type: 'base64',
+    size: 'viewport',
+    format: 'png'
   };
 
 
@@ -117,23 +119,12 @@ export class HomeComponent implements OnInit {
 
   setCroppie() {
     this.defaultCroppieOptions.boundary.width = this.croppieContainer.nativeElement.width;
-    this.defaultCroppieOptions.boundary.height = this.croppieContainer.nativeElement.height - 100;
+    this.defaultCroppieOptions.boundary.height = this.croppieContainer.nativeElement.height - 200;
     let options: CroppieOptions = this.croppieOptions ? this.croppieOptions : this.defaultCroppieOptions;
-    //let resultOptions : ResultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
-    this.cropper = new Croppie(this.divHandle.nativeElement, options);
-    console.log('Cropping', this.cropper);
-    /*
-    this.cropper.bind( { url: this.selectedImage }).then( response => {
-      this.cropper.result({
-        type: 'base64',
-        size: 'viewport',
-        format: 'png'
-      }).then(result => {
-        console.log('Result', result);
-        this.base64Img = result;
-      });
-    });    
-    */
+    if(!this.cropper)
+    this.cropper = new Croppie(this.croppieContainer.nativeElement, options);
+    this.cropper.bind( { url: this.selectedImage }).then( response => {});    
+    
   }
 
   setUpCanvas(image) {  
@@ -728,11 +719,15 @@ export class HomeComponent implements OnInit {
   onResizeBtnClick(event){
     if(event.action === 'reposition'){
       this.showCanvas = !this.showCanvas;
-      if(this.showCanvas)
-      this.cropper.bind( { url: this.selectedImage }).then( response => {});
-      //this.setUpCanvas(this.base64Img);
+      if(!this.showCanvas)
+       this.setCroppie();
     }
-    
-    console.log(this.showCanvas);
+    else{
+      let resultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
+      this.cropper.result(resultOptions).then(result => {
+        console.log('Result', result);
+        this.base64Img = result;
+      });
+    }
   }
 }
