@@ -154,7 +154,14 @@ body {
 	cursor: pointer;
 }
 
-.btn-repos{
+.btn-repos {
+	background: #ddd;
+	border-radius: 0 0 0 5px;
+	padding-left: 50px !important;
+	min-width: 150px;
+}
+
+.btn-repos-done {
 	background: #ddd;
 	border-radius: 0 0 0 5px;
 	padding-left: 50px !important;
@@ -168,9 +175,12 @@ body {
 	min-width: 150px;
 }
 
-/*.btn-repos::before{
-	background:url("crop.svg")
-}*/
+.btn-repos::before{
+	background : url('assets/_images/crop.svg');
+}
+.btn-repos-done::before {
+	background: url('assets/_images/tick.svg');
+}
 
 .shape-section img {
 	max-width: 32px;
@@ -323,10 +333,6 @@ body {
 	background-image: url('assets/_images/rotate.svg');
 }
 
-.btn-reposition:before {
-	background-image: url('assets/_images/tick.svg')
-}
-
 .gray {
 	-webkit-filter: grayscale(50%);
   /* Safari 6.0 - 9.0 */
@@ -372,7 +378,7 @@ body {
 	height: 100%;
 	overflow-y: scroll;
 }
-
+/*
 ::-webkit-scrollbar {
 	width: 0px;
 	background: transparent;
@@ -381,6 +387,7 @@ body {
 * {
 	-ms-overflow-style: none !important;
 }
+*/
 
 .croppie-container .cr-viewport {
 	border: 2px solid #2196F3 !important;

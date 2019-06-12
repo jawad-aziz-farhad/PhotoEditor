@@ -62,7 +62,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   rowWidth: any;
   zoomLevel: any;
   isDropup: boolean;
-  showCanvas: boolean;
+  showCanvas: boolean = true;
   
   constructor() { }
 
@@ -123,12 +123,11 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     }
     else {
       this.cropper.zoom = this.cropper.get().zoom;
+      
     }
-
     this.cropper.bind( { url: this.selectedImage }).then( response => {
       this.cropper.setZoom(this.cropper.zoom);
-    });   
-    
+    });
   }
 
   setUpCanvas(image) {  
@@ -184,21 +183,20 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         var obj = e.target;
          // if object is too big ignore
         if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
-            return;
+          return;
         }        
         obj.setCoords();        
         // top-left  corner
         if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
-            obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
-            obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+          obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+          obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
         }
         // bot-right corner
         if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
-            obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
-            obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+          obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+          obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
         }
       });
-
       this.canvas.renderAll();
     });
   }
@@ -389,6 +387,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       break;
       case 'imageChange':
       this.selectedImage = value;
+      if(this.cropper)
+      this.cropper.destroy();
       break;      
       case 'effect':
       this.selectedOptions.effect = value;
@@ -653,15 +653,55 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     }
     else if(event.action === 'done'){
       console.log(this.cropper.get());
+      this.cropper.options.points = this.cropper.get().points;
       let resultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
       this.cropper.result(resultOptions).then(result => {
         this.showCanvas = true;
         this.setUpCanvas(result);
       });
     }
-    else{
-      
+    else if(event.action === 'rotate'){
+      this.cropper.rotate(90);
     }
+  }
+
+  testing(){
+      var fitImageOn = function(canvas, imageObj) {
+      var imageAspectRatio = imageObj.width / imageObj.height;
+      var canvasAspectRatio = canvas.width / canvas.height;
+      var renderableHeight, renderableWidth, xStart, yStart;
+    
+      // If image's aspect ratio is less than canvas's we fit on height
+      // and place the image centrally along width
+      if(imageAspectRatio < canvasAspectRatio) {
+        renderableHeight = canvas.height;
+        renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
+        xStart = (canvas.width - renderableWidth) / 2;
+        yStart = 0;
+      }
+    
+      // If image's aspect ratio is greater than canvas's we fit on width
+      // and place the image centrally along height
+      else if(imageAspectRatio > canvasAspectRatio) {
+        renderableWidth = canvas.width
+        renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
+        xStart = 0;
+        yStart = (canvas.height - renderableHeight) / 2;
+      }
+    
+      // Happy path - keep aspect ratio
+      else {
+        renderableHeight = canvas.height;
+        renderableWidth = canvas.width;
+        xStart = 0;
+        yStart = 0;
+      }
+    };    
+    let image = new Image();
+    image.src = this.selectedImage;
+    image.onload = () => {
+      this.setUpCanvas(image);
+    };    
   }
 }
 
