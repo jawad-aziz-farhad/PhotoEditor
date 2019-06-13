@@ -67,7 +67,8 @@ export class HomeComponent implements OnInit , AfterViewInit {
   zoomLevel: any;
   isDropup: boolean;
   showCanvas: boolean;
-  
+  canvas$: any;
+
   constructor() { }
 
   ngOnInit() {
@@ -192,6 +193,7 @@ export class HomeComponent implements OnInit , AfterViewInit {
       });
 
       this.canvas.renderAll();
+      this.canvas$ = this.canvas;
     });
   }
 

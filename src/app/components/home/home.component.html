@@ -68,7 +68,7 @@
           <app-filters [canvas]="canvas$" [selectedImage]="selectedImage" [selectedOptions]="selectedOptions" [data]="data"></app-filters>
 
           <!-- TEXT -->
-          <app-text-modifiers [canvas]="canvas$" [data]="data" [options]="selectedOptions" (onTextVisibilityChange)="onTextVisibilityChange($event)"></app-text-modifiers>
+          <app-text-modifiers [canvas]="canvas$" [data]="data" [options]="selectedOptions" (onTextVisibilityChange)="onCanvasTextChange($event)"></app-text-modifiers>
           
           
         </div>
