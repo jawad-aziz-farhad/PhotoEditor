@@ -53,14 +53,15 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
   modalOpenedFor: string;
   canvasSizes: any = {small : { width: 500, height : 500 },
-                              tall  : { width: 450, height : 900 },
-                              wide  : { width: 900, height : 450 },
-                              large : { width: 900, height : 900 },
-                              };
+                      tall  : { width: 450, height : 900 },
+                      wide  : { width: 900, height : 450 },
+                      large : { width: 900, height : 900 },
+                    };
 
   color: string = "#000";                            
   rowWidth: any;
   zoomLevel: any;
+  canvas$: any;
   isDropup: boolean;
   showCanvas: boolean = true;
   
@@ -90,43 +91,36 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.isDropup = true;
 
     this.zoomLevel = 0;
-
-    //this.rowWidth = this.optionsRow.nativeElement.offsetWidth;    
-
     this.setUpCanvas(this.selectedImage);
 
   }  
 
   ngAfterViewInit(){
-    this.croppieOptions  = {
-      viewport: { width: this.canvasSizes[this.selectedOptions.canvasSize].width, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
-      //points: [77,469,280,739], 
-      showZoomer: true,
-      enableResize: false,
-      enableOrientation: true,
-      boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
-    };
   }
 
   setCroppie() {
-    let options: CroppieOptions = {
-      viewport: { width: this.canvasSizes[this.selectedOptions.canvasSize].width, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
-      showZoomer: true,
-      enableResize: false,
-      enableOrientation: true,
-      boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
-    };;
+    
     if(!this.cropper){
-      options = this.croppieOptions ? this.croppieOptions : this.defaultCroppieOptions
-      this.cropper = new Croppie(this.croppieContainer.nativeElement, options);
+      this.croppieOptions = {
+        viewport: { width: this.canvasSizes[this.selectedOptions.canvasSize].width, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
+        points: [],
+        showZoomer: true,
+        enableResize: false,
+        enableOrientation: true,
+        boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
+      };
+      this.cropper = new Croppie(this.croppieContainer.nativeElement, this.croppieOptions);
       this.cropper.zoom = 0;
     }
-    else {
+    else 
       this.cropper.zoom = this.cropper.get().zoom;
-      
-    }
-    this.cropper.bind( { url: this.selectedImage }).then( response => {
-      this.cropper.setZoom(this.cropper.zoom);
+    
+    this.cropper.bind( {
+       url: this.selectedImage , 
+       points: this.cropper.options.points ,
+       //orientation: this.cropper.data.orientation,
+       zoom: this.cropper.zoom
+      }).then( response => {
     });
   }
 
@@ -163,41 +157,41 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
     this.setText();
 
-    this.canvas.setZoom(1);
+    
+    let panning = false;
+    this.canvas.on('mouse:up', (e) => {
+      panning = false;
+    });      
+    this.canvas.on('mouse:down', (e) => {
+      panning = true;
+    });
+    this.canvas.on('mouse:move',  (e) => {
+      if (panning && e && e.e && this.canvas.getZoom() > 1) {
+        const delta = new fabric.Point(e.e.movementX, e.e.movementY);
+        this.canvas.relativePan(delta);
+      }
+    });    
 
-      let panning = false;
-      this.canvas.on('mouse:up', (e) => {
-        panning = false;
-      });      
-      this.canvas.on('mouse:down', (e) => {
-        panning = true;
-      });
-      this.canvas.on('mouse:move',  (e) => {
-        if (panning && e && e.e && this.canvas.getZoom() > 1) {
-          const delta = new fabric.Point(e.e.movementX, e.e.movementY);
-          this.canvas.relativePan(delta);
-        }
-      });    
-
-      this.canvas.on('object:moving', function (e) {
-        var obj = e.target;
-         // if object is too big ignore
-        if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
-          return;
-        }        
-        obj.setCoords();        
-        // top-left  corner
-        if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
-          obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
-          obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
-        }
-        // bot-right corner
-        if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
-          obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
-          obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
-        }
-      });
+    this.canvas.on('object:moving', function (e) {
+      var obj = e.target;
+        // if object is too big ignore
+      if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+        return;
+      }        
+      obj.setCoords();        
+      // top-left  corner
+      if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+        obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+        obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+      }
+      // bot-right corner
+      if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+        obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+        obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+      }
+    });
       this.canvas.renderAll();
+      this.canvas$ = this.canvas;
     });
   }
 
@@ -372,12 +366,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     });
   }
 
-  changeColor(color){
-    this.selectedOptions.color = `${color}`;
-    this.canvas.getActiveObject().set("fill", `${color}`);
-    this.canvas.renderAll();
-  }
-  
   onAttributeChange(value , attribute){
     switch(attribute){
       case 'canvasSize':
@@ -464,51 +452,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.canvas_Height= this.canvasSizes[size].height;
   }
 
-  handlePropertyChange(event){
-    if(['fontFamily', 'textAlign'].indexOf(this.modalOpenedFor) > -1 && event.target.checked) 
-      this.onAttributeChange(event.target.value , this.modalOpenedFor);
-    else if(['stroke' , 'shadow' , 'color' , 'textBackgroundColor'].indexOf(this.modalOpenedFor) > -1) {
-      if( typeof event.color != 'undefined')
-        this.onAttributeChange(event.color.hex , this.modalOpenedFor);
-      else{
-        const attribute = this.modalOpenedFor == 'stroke' ? 'strokeWidth' : 'shadowWidth';
-        this.onAttributeChange(event.target.value , attribute);
-      }    
-    }
-  }
-
-  applyFilter(filter){
-    this.selectedOptions.filter = filter;
-    const obj = this.canvas.backgroundImage;
-    if(!obj) return;
-    if (obj.filters && obj.filters.length > 1) 
-      obj.filters.pop();
-    
-    switch(filter){
-      case 'gray':
-      obj.filters.push(new fabric.Image.filters.Grayscale());
-      break;
-      case 'sepia':
-      obj.filters.push(new fabric.Image.filters.Sepia());
-      break;
-      case 'brownie':
-      const _filter = new fabric.Image.filters.ColorMatrix({
-        matrix: [0.59970, 0.34553, -0.27082, 0, 0.186, -0.03770, 0.86095, 0.15059, 0, -0.1449, 0.24113, -0.07441, 0.44972, 0, -0.02965, 0, 0, 0, 1, 0]
-      });
-      obj.filters.push(_filter);
-      break;
-      case 'invert':
-      obj.filters.push(new fabric.Image.filters.Invert());
-      break;
-      
-      default:
-      break;
-    }
-
-    obj.applyFilters();
-    this.canvas.renderAll();
-  }
-
   createImageRatioSize(maxW, maxH, imgW, imgH) {
     var ratio = imgH / imgW;
     if (imgW >= maxW && ratio <= 1){
@@ -531,7 +474,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       w: imgW,
       h: imgH
     };
-}
+  }
   
   get images(): Array<any> {
     return ['assets/images/image-1.jpg', 'assets/images/image-2.jpg' , 'assets/images/image-3.jpg' , 'assets/images/image-4.jpg' , 'assets/images/image-5.jpg']
@@ -606,35 +549,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     link.click();
   }
 
-  setZoom(event) {    
-    let status = '';
-    const zoomLevel = event.target.value;
-    if(zoomLevel > this.canvas.getZoom())
-      status = 'in';
-    else
-      status = 'out';
-
-    var SCALE_FACTOR = 1.2;
-
-    switch(status) {
-      case 'in':
-      var zoomLevelFactor = this.canvas.getZoom() * SCALE_FACTOR;
-      if(zoomLevelFactor<32)
-      this.canvas.zoomToPoint(new fabric.Point(this.canvas.width / 2, this.canvas.height / 2), this.canvas.getZoom() * SCALE_FACTOR);
-      break;
-      case 'out':
-      var zoomLevelFactor = this.canvas.getZoom() * SCALE_FACTOR;
-      if(this.canvas.getZoom()> 1)
-        this.canvas.zoomToPoint(new fabric.Point(this.canvas.width / 2, this.canvas.height / 2), this.canvas.getZoom() / SCALE_FACTOR);
-      break;
-      case 'reset':
-      this.canvas.zoomToPoint(new fabric.Point(this.canvas.width / 2, this.canvas.height / 2), 1);
-      break;
-      default: 
-	  }
-  this.canvas.renderAll();
-  }
-
   get rangeVal() {
     if(this.modalOpenedFor == 'stroke')
       return this.selectedOptions.strokeWidth;
@@ -644,7 +558,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       return this.selectedOptions.opacity;
   }
 
- 
   onResizeBtnClick(event){
     if(event.action === 'reposition'){
       this.showCanvas = !this.showCanvas;
@@ -654,9 +567,14 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     else if(event.action === 'done'){
       console.log(this.cropper.get());
       this.cropper.options.points = this.cropper.get().points;
+      this.cropper.data.orientation = this.cropper.get().orientation;
+      console.log('Cropper ', this.cropper);
       let resultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
       this.cropper.result(resultOptions).then(result => {
         this.showCanvas = true;
+        this.canvas.clear();
+        this.canvas.dispose();
+        this.selectedOptions.filter = 'none';
         this.setUpCanvas(result);
       });
     }
@@ -665,43 +583,5 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     }
   }
 
-  testing(){
-      var fitImageOn = function(canvas, imageObj) {
-      var imageAspectRatio = imageObj.width / imageObj.height;
-      var canvasAspectRatio = canvas.width / canvas.height;
-      var renderableHeight, renderableWidth, xStart, yStart;
-    
-      // If image's aspect ratio is less than canvas's we fit on height
-      // and place the image centrally along width
-      if(imageAspectRatio < canvasAspectRatio) {
-        renderableHeight = canvas.height;
-        renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
-        xStart = (canvas.width - renderableWidth) / 2;
-        yStart = 0;
-      }
-    
-      // If image's aspect ratio is greater than canvas's we fit on width
-      // and place the image centrally along height
-      else if(imageAspectRatio > canvasAspectRatio) {
-        renderableWidth = canvas.width
-        renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
-        xStart = 0;
-        yStart = (canvas.height - renderableHeight) / 2;
-      }
-    
-      // Happy path - keep aspect ratio
-      else {
-        renderableHeight = canvas.height;
-        renderableWidth = canvas.width;
-        xStart = 0;
-        yStart = 0;
-      }
-    };    
-    let image = new Image();
-    image.src = this.selectedImage;
-    image.onload = () => {
-      this.setUpCanvas(image);
-    };    
-  }
 }
 

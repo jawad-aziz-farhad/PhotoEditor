@@ -161,13 +161,6 @@ body {
 	min-width: 150px;
 }
 
-.btn-repos-done {
-	background: #ddd;
-	border-radius: 0 0 0 5px;
-	padding-left: 50px !important;
-	min-width: 150px;
-}
-
 .btn-rotate{
 	background: #ddd;
 	border-radius: 0 0 5px 0;
@@ -177,9 +170,6 @@ body {
 
 .btn-repos::before{
 	background : url('assets/_images/crop.svg');
-}
-.btn-repos-done::before {
-	background: url('assets/_images/tick.svg');
 }
 
 .shape-section img {

@@ -7,7 +7,7 @@
     <div class="row row-height justify-content-center">
 
       <!-- 1st Column -->
-      <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center" *ngIf="showCanvas">
+      <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2 text-center" *ngIf="showCanvas">
         <div class="row" *ngFor="let image of images;let i=index;" (click)="onAttributeChange(image , 'imageChange')">
           <div class="col left">
             <img class="img-fluid" [src]="image"/>
@@ -25,7 +25,7 @@
             <button class="btn btn-action btn-rotate" (click)="onResizeBtnClick({ action: 'rotate' })">Rotate</button>
           </div>
           <div class="col pr-0 text-right" >
-            <button class="btn btn-action"  [ngClass]="{'btn-repos': showCanvas, 'btn-repose-done': !showCanvas}" (click)="onResizeBtnClick({ action : showCanvas ? 'reposition' : 'done' })">{{ showCanvas ? 'Reposition' : 'Done' }}</button>
+            <button class="btn btn-action btn-repos" (click)="onResizeBtnClick({ action : showCanvas ? 'reposition' : 'done' })">{{ showCanvas ? 'Reposition' : 'Done' }}</button>
           </div>
         </div>
 
@@ -42,7 +42,7 @@
       <!-- /. 2nd Column -->
 
       <!-- 3rd Column -->
-      <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3 text-center"  *ngIf="showCanvas" [ngClass]="{'overlay': !showCanvas  }">
+      <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4 text-center"  *ngIf="showCanvas" [ngClass]="{'overlay': !showCanvas  }">
         <div class="canvas-controls">      
           <!-- Button Area -->
           <app-buttons-area [canvas]="canvas$"></app-buttons-area>          
@@ -55,7 +55,7 @@
               <app-filters [canvas]="canvas$" [selectedImage]="selectedImage" [selectedOptions]="selectedOptions" [data]="data"></app-filters>
     
               <!-- TEXT -->
-              <app-text-modifiers [canvas]="canvas$" [data]="data" [options]="selectedOptions" (onTextVisibilityChange)="onTextVisibilityChange($event)"></app-text-modifiers>
+              <app-text-modifiers [canvas]="canvas$" [data]="data" [options]="selectedOptions" (onTextVisibilityChange)="onCanvasTextChange($event)"></app-text-modifiers>
             </div>
           </div>
         </div>
