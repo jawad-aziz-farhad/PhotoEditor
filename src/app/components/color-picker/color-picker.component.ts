@@ -10,10 +10,33 @@ export class ColorPickerComponent implements OnInit {
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
 
-  colors: Array<any> = ['#FFFFFF', '#000000', '#e73836','#d91961','#8e24a9','#5f34b0','#3949ac','#3946ad','#1f88e6',
-                        '#039ae7', '#01acc4', '#008979','#42a146','#7bb441','#bfca33','#fdd737','#ffb101','#fa8d00',
-                        '#f6521c', '#6f4c43', '#777576','#566f7b','#d4d4d4','#acacac','#828282','#4c4c4c'];
-
+  colors: Array<any> = [
+    '#FFFFFF',
+    '#000000',
+    '#e73836',
+    '#d91961',
+    '#8e24a9',
+    '#5f34b0',
+    '#3949ac',
+    '#3946ad',
+    '#1f88e6',
+    '#039ae7',
+    '#01acc4',
+    '#008979',
+    '#42a146',
+    '#7bb441',
+    '#bfca33',
+    '#fdd737',
+    '#ffb101',
+    '#fa8d00',
+    '#f6521c',
+    '#6f4c43',
+    '#777576',
+    '#566f7b',
+    '#d4d4d4',
+    '#acacac',
+    '#828282',
+    '#4c4c4c'];                      
   @Input() set canvasWidth(width){this._canvasWidth = width; };
   get canvasWidth(){ return this._canvasWidth; }
 

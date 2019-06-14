@@ -1,7 +1,7 @@
 <div class="card c-options">
     <div class="card-header p-0" id="headingThree">
         <div class="form-check float-left">
-            <input type="checkbox" class="form-check-input" id="addText" (change)="_onTextVisibilityChange($event)" [checked]="showCanvasText">
+            <input type="checkbox" class="form-check-input" id="addText" (change)="_onTextVisibilityChange($event)" [checked]="options.showText">
             <label class="form-check-label" for="addText">Add Text</label>
             </div>
             <button type="button" class="btn btn-default btn-sm float-right" (click)="showCanvasText = !showCanvasText">

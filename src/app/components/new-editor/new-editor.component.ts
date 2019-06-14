@@ -3,6 +3,7 @@ import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
 import 'fabric-customise-controls';
 import Croppie, {CroppieOptions, ResultOptions} from "croppie/croppie";
+import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 
 @Component({
   selector: 'app-new-editor',
@@ -73,7 +74,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.toggle = false;
     this.overLayText = '';
     this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', 
-                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : '' , angle: 0};
+                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : '' , angle: 0 ,
+                              showText: true };
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
     this.modalOpenedFor = '';   
@@ -186,10 +188,12 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       }
       // bot-right corner
       if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
-        obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+        obj.top  = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
         obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
       }
     });
+
+    
       this.canvas.renderAll();
       this.canvas$ = this.canvas;
     });
@@ -202,14 +206,14 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       'tr': true,
       'bl': false,
       'br': true,
-      'ml': false,
+      'ml': true,
       'mt': false,
-      'mr': false,
+      'mr': true,
       'mb': false,
       'mtr': false
     };
 
-    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Click here to edit text', {
+    let text = new fabric.Textbox(this.overLayText ? this.overLayText : 'Enter text here', {
       angle: this.selectedOptions.angle,
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
@@ -227,7 +231,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       borderScaleFactor: 2,
       padding: 15,
       originX: 'center',
-      originY: 'center'
+      originY: 'center',
+      width: this.canvasSizes[this.selectedOptions.canvasSize].width / 2 + 10
     });
 
     text.setControlsVisibility(HideControls);
@@ -249,13 +254,13 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       // Text now empty, show placeholder:
       if(obj.text === '')
       {
-        obj.text = 'Click here to edit text';
+        obj.text = 'Enter text here';
         obj.set('opacity', 0.3);
         obj.set('showplaceholder', true); // Set flag on IText object
         obj.setCoords();
         this.canvas.renderAll();
       }
-      else if(obj.text === 'Click here to edit text'){
+      else if(obj.text === 'Enter text here'){
         obj.selectAll();
         obj.text = "";
         obj.selectable = true;
@@ -265,13 +270,12 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         obj.setCoords();
         this.canvas.renderAll();
       }
-
       
       // Placeholder currently active:
       else if(obj.get('showplaceholder') === true)
         {
         // The text in the IText should now be the placeholder plus the character that  was pressed, so text and placeholder should be different, so remove the placeholder (unless the pressed key was backspace in which case do nothing):
-        if(obj.text !== 'Click here to edit text')
+        if(obj.text !== 'Enter text here')
           {           
           // New char should be at position 0, so remove placeholder from rest of text:
           obj.text = obj.text.substr(0,1);
@@ -290,7 +294,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       
       // If the placeholder is active, move the cursor to position 0 so we
       // can trim the string correctly when typing starts:
-      if(obj.text === 'Click here to edit text')
+      if(obj.text === 'Enter text here')
         {
           // Move cursor to beginning of line:
           obj.selectAll();
@@ -319,7 +323,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     const icons = [
       'assets/_images/circle.svg',
       'assets/_images/rotate.svg',
-      'assets/_images/expand.svg'
+      'assets/_images/expand.svg',
+      'assets/_images/one-squares.svg'
     ];
 
     fabric.Canvas.prototype['customiseControls']({
@@ -327,6 +332,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         action: (e, target) => {
           this.selectedOptions.angle = 0;
           this.showCanvasText = false;
+          this.selectedOptions.showText = false;
           this.canvas.remove(target);
         },
         cursor: 'pointer'
@@ -338,7 +344,13 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       },
       br: {
         action: 'scale',
-      },    
+      }, 
+      ml : {
+        action : 'scale'
+      },
+      mr : {
+        action : 'scale'
+      }   
     }, () => {
       this.canvas.renderAll();
     });
@@ -346,21 +358,56 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.canvas.item(0)['customiseCornerIcons']({
       settings: {
         borderColor: '#00c6d2',
-        editingBorderColor: '#00c6d2',
-        cornerBackgroundColor: 'white',
-        cornerSize: 30,
-        cornerShape: 'circle',
-        cornerPadding: 10
+        editingBorderColor: '#00c6d2'        
       },
       tl: {
-        icon: icons[0]
+        icon: icons[0],
+        settings : {
+          cornerBackgroundColor: 'white',
+          cornerSize: 30,
+          cornerShape: 'circle',
+          cornerPadding: 10
+        }
       },
       tr: {
-        icon: icons[1]        
+        icon: icons[1],
+        settings : {
+          cornerBackgroundColor: 'white',
+          cornerSize: 30,
+          cornerShape: 'circle',
+          cornerPadding: 10
+        }        
       },    
       br: {
-        icon: icons[2]
-      }   
+        icon: icons[2],
+        settings : {
+          cornerBackgroundColor: 'white',
+          cornerSize: 30,
+          cornerShape: 'circle',
+          cornerPadding: 10
+        }
+      },
+      ml: {
+        icon: icons[3],
+        settings: {
+          cornerColor: '#000',
+          cornerShape: 'rect',
+          cornerBackgroundColor: 'transparent',
+          cornerPadding: 5,
+          cornerSize: 30
+        },
+      } ,
+      mr : {
+        icon: icons[3],
+        settings: {
+          cornerColor: 'blue',
+          cornerShape: 'rect',
+          cornerBackgroundColor: 'transparent',
+          cornerPadding: 5,
+          // since 0.3.4
+          cornerSize: 30
+        },
+      }  
     }, () => {
       this.canvas.renderAll();
     });
@@ -490,12 +537,15 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   }
 
   onCanvasTextChange(event){
-    if(event.target.checked)
+    if(event.target.checked){
+      this.selectedOptions.showText = true;
       this.setText();
+    }
     else {
-      const obj = this.canvas.getActiveObject();
+      const obj = this.canvas.item(0);
       this.canvas.remove(obj);
       this.selectedOptions.angle = 0;
+      this.selectedOptions.showText = false;
     }
     this.showCanvasText = event.target.checked;
     this.canvas.renderAll();
@@ -536,7 +586,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
   saveCanvasAsImage(){
     let obj = this.canvas.getActiveObject();
-    if(obj.text == 'Click here to edit text'){
+    if(obj.text == 'Enter text here'){
       this.canvas.remove(obj);
       this.canvas.renderAll();
     }

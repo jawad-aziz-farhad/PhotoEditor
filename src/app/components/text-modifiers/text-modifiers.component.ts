@@ -22,8 +22,6 @@ export class TextModifiersComponent implements OnInit  , OnChanges {
   @ViewChild('optionsRow') optionsRow: ElementRef;
   
   @Input() data: Data;
-  
-  
 
   @Input('canvas') set canvas(canvas : any)  { this._canvas = canvas; }
   get canvas(){ return this._canvas; }
