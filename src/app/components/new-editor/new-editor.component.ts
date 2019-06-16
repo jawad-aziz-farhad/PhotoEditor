@@ -29,6 +29,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
+  @ViewChild('canvasRow') canvasRow: ElementRef;
   @ViewChild('canvas') _canvas: ElementRef;
   @ViewChild('optionsRow') optionsRow: ElementRef;
 
@@ -109,7 +110,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         showZoomer: true,
         enableResize: false,
         enableOrientation: true,
-        boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
+        boundary: { width: this.canvasRow.nativeElement.offsetWidth, height: this.canvasRow.nativeElement.offsetHeight - 75 }
       };
       this.cropper = new Croppie(this.croppieContainer.nativeElement, this.croppieOptions);
       this.cropper.zoom = 0;
@@ -416,14 +417,18 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   onAttributeChange(value , attribute){
     switch(attribute){
       case 'canvasSize':
+      if(this.cropper){
+        this.cropper.destroy();
+      }
       this.selectedOptions.angle = 0;
       this.selectedOptions.canvasSize = value;
       this.setCanvasSize(value);
       break;
       case 'imageChange':
       this.selectedImage = value;
-      if(this.cropper)
-      this.cropper.destroy();
+      if(this.cropper){
+        this.cropper.destroy();
+      }
       break;      
       case 'effect':
       this.selectedOptions.effect = value;

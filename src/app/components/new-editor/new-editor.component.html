@@ -3,8 +3,29 @@
 <div class="canvas-wrapper">
 
   <div class="canvas-drawer">
+    
+    <div class="row justify-content-center"  [hidden]="showCanvas">
+      <div class="col" [ngClass]="{'border': showCanvas}">
+          
+        <div class="row mb-2 p-4">
+          <div class="col pl-0 text-left">
+            <button class="btn btn-action btn-rotate" (click)="onResizeBtnClick({ action: 'rotate' })">Rotate</button>
+          </div>
+          <div class="col pr-0 text-right" >
+            <button class="btn btn-action btn-repos" (click)="onResizeBtnClick({ action : showCanvas ? 'reposition' : 'done' })">{{ showCanvas ? 'Reposition' : 'Done' }}</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="w-100"></div>
+
       
-    <div class="row row-height justify-content-center">
+      <div #croppieContainer class="col"></div>
+      
+    </div>
+
+    <div #canvasRow class="row row-height justify-content-center"  [hidden]="!showCanvas">
 
       <!-- 1st Column -->
       <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2 text-center" *ngIf="showCanvas">
@@ -34,7 +55,7 @@
             <canvas #canvas id="canvas"></canvas>   
           </div>
 
-          <div #croppieContainer class="col" [hidden]="showCanvas"></div>
+          <!-- <div #croppieContainer class="col" [hidden]="showCanvas"></div> -->
 
         </div>
           
