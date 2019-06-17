@@ -75,7 +75,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.toggle = false;
     this.overLayText = '';
     this.selectedOptions =  { filter: 'none', fontStyle: 'normal', fontSize: 32 , fontFamily: 'Helvetica' , fontWeight: 'normal' , textAlign: 'center' , fill: '#000', 
-                              stroke : '', strokeWidth : 3, canvasSize : 'small' , shadow: '' , shadowWidth: 3 , opacity : 1 , textBackgroundColor : '' , angle: 0 ,
+                              stroke : '#000', strokeWidth : 1, canvasSize : 'small' , shadow: '#000' , shadowWidth: 1 , opacity : 1 , textBackgroundColor : '' , angle: 0 ,
                               showText: true };
     this.canvas_Width = this.canvasSizes.small.width;
     this.canvas_Height= this.canvasSizes.small.height;
@@ -101,16 +101,20 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   ngAfterViewInit(){
   }
 
+  get viewPortWidth(){
+    const viewPortWidth = this.canvasSizes[this.selectedOptions.canvasSize].width
+    return ( this.canvasWidth >  viewPortWidth) ?  viewPortWidth  : this.canvasWidth;
+  }
   setCroppie() {
     
     if(!this.cropper){
       this.croppieOptions = {
-        viewport: { width: this.canvasSizes[this.selectedOptions.canvasSize].width, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
+        viewport: { width: this.viewPortWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
         points: [],
         showZoomer: true,
         enableResize: false,
         enableOrientation: true,
-        boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
+        boundary: { width: this.canvasWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height }
       };
       this.cropper = new Croppie(this.croppieContainer.nativeElement, this.croppieOptions);
       this.cropper.zoom = 0;
