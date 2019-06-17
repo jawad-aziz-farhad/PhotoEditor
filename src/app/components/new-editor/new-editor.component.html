@@ -4,7 +4,7 @@
 
   <div class="canvas-drawer">
     
-    <div class="row justify-content-center"  [hidden]="showCanvas">
+    <!-- <div class="row justify-content-center"  [hidden]="showCanvas">
       <div class="col" [ngClass]="{'border': showCanvas}">
           
         <div class="row mb-2 p-4">
@@ -23,9 +23,9 @@
       
       <div #croppieContainer class="col"></div>
       
-    </div>
+    </div> -->
 
-    <div #canvasRow class="row row-height justify-content-center"  [hidden]="!showCanvas">
+    <div #canvasRow class="row row-height justify-content-center">
 
       <!-- 1st Column -->
       <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2 text-center" *ngIf="showCanvas">
@@ -42,7 +42,7 @@
       <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 mid" [ngClass]="{'border': showCanvas}">
           
         <div class="row mb-2">
-          <div class="col pl-0 text-left" *ngIf="!showCanvas">
+          <div class="col pl-0 text-left">
             <button class="btn btn-action btn-rotate" (click)="onResizeBtnClick({ action: 'rotate' })">Rotate</button>
           </div>
           <div class="col pr-0 text-right" >
@@ -51,11 +51,12 @@
         </div>
 
         <div #canvasArea class="row justify-content-center">
+
           <div class="col" [hidden]="!showCanvas">
             <canvas #canvas id="canvas"></canvas>   
           </div>
 
-          <!-- <div #croppieContainer class="col" [hidden]="showCanvas"></div> -->
+          <div #croppieContainer class="col" [hidden]="showCanvas"></div>
 
         </div>
           

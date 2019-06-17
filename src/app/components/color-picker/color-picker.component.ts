@@ -55,7 +55,8 @@ export class ColorPickerComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    this.draw();
+    //this.draw();
+    this.onMouseDown();
   }
 
   @HostListener('mouseup', ['$event'])
@@ -66,9 +67,8 @@ export class ColorPickerComponent implements OnInit {
   draw() {
     if (!this.ctx) {
       this.ctx = this.canvas.nativeElement.getContext('2d');
-    }
-    
-    const width = this.canvas.nativeElement.width;
+    }    
+    const width  = this.canvas.nativeElement.width;
     const height = this.canvas.nativeElement.height;
     
     const gradient = this.ctx.createLinearGradient(width, 0, 0, 0);
@@ -93,11 +93,19 @@ export class ColorPickerComponent implements OnInit {
     }
   }
 
-  onMouseDown(evt: MouseEvent) {
-    this.mousedown = true;
-    this.selectedHeight = evt.offsetX;
-    this.draw();
-    this.emitColor(evt.offsetX, evt.offsetY);
+  onMouseDown(evt?: MouseEvent) {    
+    if(evt){
+      this.mousedown = true;
+      this.selectedHeight = evt.offsetX;
+      this.draw();
+      this.emitColor(evt.offsetX, evt.offsetY);
+    }
+    else{
+      this.selectedHeight = this._canvasWidth - 6;
+      this.draw();
+      this.emitColor(this.selectedHeight, 30 - 7);
+    }
+    
   }
 
   onMouseMove(evt: MouseEvent) {

@@ -110,7 +110,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         showZoomer: true,
         enableResize: false,
         enableOrientation: true,
-        boundary: { width: this.canvasRow.nativeElement.offsetWidth, height: this.canvasRow.nativeElement.offsetHeight - 75 }
+        boundary: { width: this.canvasArea.nativeElement.offsetWidth, height: this.canvasArea.nativeElement.offsetHeight - 75 }
       };
       this.cropper = new Croppie(this.croppieContainer.nativeElement, this.croppieOptions);
       this.cropper.zoom = 0;
@@ -129,6 +129,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
   setUpCanvas(image) {  
     
+    
     this.zoomLevel = 0;
     this.canvas = new fabric.Canvas('canvas');    
     this.canvas.setWidth(this.canvasWidth);
@@ -137,8 +138,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     fabric.Image.fromURL(image, img => {
 
       img.set({
-        scaleX : this.canvas.getWidth() / img.width,   //new update
-        scaleY: this.canvas.getHeight() / img.height,   //new update,
+        //scaleX : this.canvas.getWidth() / img.width,   //new update
+        //scaleY: this.canvas.getHeight() / img.height,   //new update,
         originX: "center", 
         originY: "center",
         selectable: false,
@@ -160,31 +161,31 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
 
     this.setText();
 
-    
-    let panning = false;
-    this.canvas.on('mouse:up', (e) => {
-      panning = false;
-    });      
-    this.canvas.on('mouse:down', (e) => {
-      panning = true;
-    });
-    this.canvas.on('mouse:move',  (e) => {
-      if (panning && e && e.e && this.canvas.getZoom() > 1) {
-        const delta = new fabric.Point(e.e.movementX, e.e.movementY);
-        this.canvas.relativePan(delta);
-      }
-    });    
+    const text = this.canvas.item(0);
+    text.on('mouseover',function(){
+      console.log('over')
+      text.set('selectable' , true);
+      this.canvas.renderAll();
+     })
+     text.on('mouseout',function(){
+      console.log('out')
+      text.set({
+       selectable: false
+      })
+      this.canvas.renderAll();
+     })
 
     this.canvas.on('object:moving', function (e) {
-      var obj = e.target;
-        // if object is too big ignore
+      let obj = e.target;      
+
+      // if object is too big ignore
       if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
         return;
       }        
       obj.setCoords();        
       // top-left  corner
       if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
-        obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+        obj.top  = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
         obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
       }
       // bot-right corner
@@ -192,6 +193,10 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         obj.top  = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
         obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
       }
+    });
+
+    this.canvas.on('object:selected', function(e){
+      console.log('Object selected');      
     });
 
     
@@ -214,13 +219,13 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       'mtr': false
     };
 
-    let text = new fabric.Textbox(this.overLayText ? this.overLayText : 'Enter text here', {
+    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter text here', {
       angle: this.selectedOptions.angle,
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
       fill: "#C0C0C0",
       textAlign: this.selectedOptions.textAlign,      
-      strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 0 ,
+      strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 10 ,
       paintFirst: 'stroke',
       stroke: this.selectedOptions.stroke,
       shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
@@ -233,7 +238,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       padding: 15,
       originX: 'center',
       originY: 'center',
-      width: this.canvasSizes[this.selectedOptions.canvasSize].width / 2 + 10
+      width: this.canvasSizes[this.selectedOptions.canvasSize].width / 2 + 10,
+     
     });
 
     text.setControlsVisibility(HideControls);
@@ -419,6 +425,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       case 'canvasSize':
       if(this.cropper){
         this.cropper.destroy();
+        this.cropper = null;
       }
       this.selectedOptions.angle = 0;
       this.selectedOptions.canvasSize = value;
@@ -428,6 +435,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       this.selectedImage = value;
       if(this.cropper){
         this.cropper.destroy();
+        this.cropper = null;
       }
       break;      
       case 'effect':
