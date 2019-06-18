@@ -672,11 +672,12 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       let resultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
       this.cropper.result(resultOptions).then(result => {
         this.showCanvas = true;
+        this.clearCroppie();
         this.canvas.clear();
         this.canvas.dispose();
         this.selectedOptions.filter = 'none';
         this.setUpCanvas(result);
-
+        
       });
     }
     else if(event.action === 'rotate'){
@@ -685,8 +686,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   }
 
   clearCroppie(){
-    this.canvas.clear();
-    this.canvas.dispose();
+    this.cropper.destroy();
+    this.cropper = null;
   }
 
 }
