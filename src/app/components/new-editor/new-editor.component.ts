@@ -27,7 +27,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     format: 'png'
   };
 
-
+  
+  @ViewChild('canvasContainer') canvasContainer: ElementRef;
   @ViewChild('canvasArea') canvasArea: ElementRef;
   @ViewChild('canvasRow') canvasRow: ElementRef;
   @ViewChild('canvas') _canvas: ElementRef;
@@ -124,11 +125,11 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     }
     else 
       this.cropper.zoom = this.cropper.get().zoom;
-    
+    console.log(this.cropper.data.orientation);
     this.cropper.bind( {
        url: this.selectedImage , 
        points: this.cropper.options.points ,
-       //orientation: this.cropper.data.orientation,
+       orientation: this.cropper.data.orientation,
        zoom: this.cropper.zoom
       }).then( response => {
     });
@@ -138,12 +139,13 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.croppieOptions = {
       viewport: { width: this.viewPortWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
       points: [],
-      showZoomer: true,
+      showZoomer: this.showCanvas ? false : true,
       enableResize: false,
-      enableOrientation: true,
+      enableOrientation: this.showCanvas ? false : true,
       boundary: { width: this.canvasWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height }
     };
-    return new Croppie(this.canvasArea.nativeElement, this.croppieOptions);
+    const element = this.showCanvas ? this.canvasArea.nativeElement : this.croppieContainer.nativeElement;
+    return new Croppie(element, this.croppieOptions);
      
   }
 
@@ -161,8 +163,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
           this.cropper.result(resultOptions).then(result => {    
             observer.next(result);
             observer.complete();
-            this.cropper.destroy();
-            this.cropper = null;
+            this.clearCroppie();
           });
       });
     });
@@ -665,14 +666,13 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
        this.setCroppie();
     }
     else if(event.action === 'done'){
-      console.log(this.cropper.get());
       this.cropper.options.points = this.cropper.get().points;
       this.cropper.data.orientation = this.cropper.get().orientation;
       console.log('Cropper ', this.cropper);
       let resultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
       this.cropper.result(resultOptions).then(result => {
         this.showCanvas = true;
-        this.clearCroppie();
+        //this.clearCroppie();
         this.canvas.clear();
         this.canvas.dispose();
         this.selectedOptions.filter = 'none';

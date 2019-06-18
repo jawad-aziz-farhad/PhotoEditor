@@ -42,17 +42,17 @@
       <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 mid" [ngClass]="{'border': showCanvas}">
           
         <div class="row mb-2">
-          <div class="col pl-0 text-left">
+          <div class="col pl-0 text-left" *ngIf="!showCanvas">
             <button class="btn btn-action btn-rotate" (click)="onResizeBtnClick({ action: 'rotate' })">Rotate</button>
           </div>
-          <div class="col pr-0 text-right" >
+          <div class="col pr-0 text-right">
             <button class="btn btn-action btn-repos" (click)="onResizeBtnClick({ action : showCanvas ? 'reposition' : 'done' })">{{ showCanvas ? 'Reposition' : 'Done' }}</button>
           </div>
         </div>
 
         <div #canvasArea class="row justify-content-center">
 
-          <div class="col" [hidden]="!showCanvas">
+          <div #canvasContainer class="col" [hidden]="!showCanvas">
             <canvas #canvas id="canvas"></canvas>   
           </div>
 
