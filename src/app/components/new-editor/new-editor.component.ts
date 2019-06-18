@@ -4,6 +4,7 @@ import { fabric } from 'fabric';
 import 'fabric-customise-controls';
 import Croppie, {CroppieOptions, ResultOptions} from "croppie/croppie";
 import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-new-editor',
@@ -17,6 +18,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   croppieOptions: CroppieOptions;
   resultOptions: ResultOptions;
   initialZoom: number = 1;
+  cropper: Croppie;
 
   private defaultCroppieOptions: CroppieOptions;
   private defaultResultOptions: ResultOptions & { type: 'base64' } = {
@@ -24,8 +26,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     size: 'viewport',
     format: 'png'
   };
-  
-  private cropper: Croppie;
 
 
   @ViewChild('canvasArea') canvasArea: ElementRef;
@@ -70,7 +70,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
   constructor() { }
 
   ngOnInit() {
-    this.selectedImage = 'assets/images/image-1.jpg';
+    this.selectedImage = 'assets/images/image-3.jpg';
     this.data = new Data();
     this.toggle = false;
     this.overLayText = '';
@@ -94,8 +94,10 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.isDropup = true;
 
     this.zoomLevel = 0;
-    this.setUpCanvas(this.selectedImage);
-
+   
+   // this.setUpCanvas(this.selectedImage);
+   
+    this.loadImage();
   }  
 
   ngAfterViewInit(){
@@ -105,18 +107,19 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     const viewPortWidth = this.canvasSizes[this.selectedOptions.canvasSize].width
     return ( this.canvasWidth >  viewPortWidth) ?  viewPortWidth  : this.canvasWidth;
   }
+
+  loadImage(){
+    let image = new Image();
+    image.src = this.selectedImage;
+    image.onload = () => {
+      this.cropImage().subscribe(result => this.setUpCanvas(result));
+    };
+  }
+
   setCroppie() {
     
     if(!this.cropper){
-      this.croppieOptions = {
-        viewport: { width: this.viewPortWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
-        points: [],
-        showZoomer: true,
-        enableResize: false,
-        enableOrientation: true,
-        boundary: { width: this.canvasWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height }
-      };
-      this.cropper = new Croppie(this.croppieContainer.nativeElement, this.croppieOptions);
+      this.cropper = this.croppie;
       this.cropper.zoom = 0;
     }
     else 
@@ -131,10 +134,44 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     });
   }
 
-  setUpCanvas(image) {  
-    
-    
-    this.zoomLevel = 0;
+  get croppie(): Croppie {   
+    this.croppieOptions = {
+      viewport: { width: this.viewPortWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height, type: 'square' }, 
+      points: [],
+      showZoomer: true,
+      enableResize: false,
+      enableOrientation: true,
+      boundary: { width: this.canvasWidth, height: this.canvasSizes[this.selectedOptions.canvasSize].height }
+    };
+    return new Croppie(this.canvasArea.nativeElement, this.croppieOptions);
+     
+  }
+
+  cropImage() : Observable<any> { 
+    let observer = new Observable(observer => {
+      if(!this.cropper)
+      this.cropper = this.croppie; 
+      this.cropper.zoom = 0;
+      this.cropper.bind( {
+        url: this.selectedImage , 
+        orientation: 1,
+        zoom: this.cropper.zoom
+        }).then( response => {
+          let resultOptions = this.resultOptions ? this.resultOptions : this.defaultResultOptions;
+          this.cropper.result(resultOptions).then(result => {    
+            observer.next(result);
+            observer.complete();
+            this.cropper.destroy();
+            this.cropper = null;
+          });
+      });
+    });
+
+    return observer;
+  }
+
+  setUpCanvas(image) {      
+
     this.canvas = new fabric.Canvas('canvas');    
     this.canvas.setWidth(this.canvasWidth);
     this.canvas.setHeight(this.canvas_Height);
@@ -142,17 +179,12 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     fabric.Image.fromURL(image, img => {
 
       img.set({
-        //scaleX : this.canvas.getWidth() / img.width,   //new update
-        //scaleY: this.canvas.getHeight() / img.height,   //new update,
         originX: "center", 
         originY: "center",
         selectable: false,
         centeredScaling: true
       });
 
-      // img.scaleToWidth(this.canvas.getWidth() );
-      // img.scaleToHeight(this.canvas.getHeight() );
-      
       if ( Math.max(img.width, img.height) > 2048) {
         let fscale = 2048 / Math.max(img.width, img.height);
         img.filters.push(new fabric.Image.filters.Resize({scaleX: fscale, scaleY: fscale}));
@@ -223,7 +255,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       'mtr': false
     };
 
-    let text = new fabric.IText(this.overLayText ? this.overLayText : 'Enter text here', {
+    let text = new fabric.Textbox(this.overLayText ? this.overLayText : 'Enter text here', {
       angle: this.selectedOptions.angle,
       fontSize: this.selectedOptions.fontSize,
       fontFamily: this.selectedOptions.fontFamily,
@@ -505,7 +537,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       this.canvas.clear();
       this.canvas.dispose();
       this.selectedOptions.filter = 'none';
-      this.setUpCanvas(this.selectedImage);
+      //this.setUpCanvas(this.selectedImage);
+      this.loadImage();
     }
     else
       this.canvas.renderAll();
@@ -643,11 +676,17 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         this.canvas.dispose();
         this.selectedOptions.filter = 'none';
         this.setUpCanvas(result);
+
       });
     }
     else if(event.action === 'rotate'){
       this.cropper.rotate(90);
     }
+  }
+
+  clearCroppie(){
+    this.canvas.clear();
+    this.canvas.dispose();
   }
 
 }
