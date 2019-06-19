@@ -52,6 +52,7 @@ export class ColorPickerComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+    this.canvas.nativeElement.width = 50 * 26 ;
   }
 
   ngAfterViewInit() {
@@ -144,11 +145,9 @@ export class ColorPickerComponent implements OnInit {
   drawOnCanvas() {
     this.ctx = this.canvas.nativeElement.getContext('2d');
     const squares = [];
-    let points = { width : 50, height : this.canvas.nativeElement.height , x : 0 , y: 10}
+    let points = { width : 30, height : this.canvas.nativeElement.height , x : 0 , y: 10}
     for(let k=0; k<this.colors.length;k++) {
-      console.log('Points ', points)
       squares.push(this.drawStuff( points.width, points.height, this.colors[k], points.x, points.y));
-      
       points.x = points.x + points.width;      
     }
     for (let i=0; i<squares.length; i++){
