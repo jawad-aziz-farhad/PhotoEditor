@@ -96,13 +96,51 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.isDropup = true;
 
     this.zoomLevel = 0;
-   
+    
    // this.setUpCanvas(this.selectedImage);
    
-    this.loadImage();
+    //this.loadImage();
+
+    this.testCanvas();
   }  
 
   ngAfterViewInit(){
+  }
+
+
+  testCanvas(){
+    this.canvas = new fabric.Canvas('canvas');   
+    this.canvas.setWidth(this.canvasWidth);
+    this.canvas.setHeight(this.canvas_Height);
+
+    let circle = new fabric.Circle({ 
+      left: 150,
+      top: 150,
+      radius: 50,
+      originX: 'center',
+      originY: 'center',
+      selectable: false
+
+    });
+
+    circle.on('mouseover',() =>{
+      console.log('over')
+      circle.set({
+       selectable: true
+      })
+      this.canvas.renderAll();
+     });
+
+     circle.on('mouseout',() => {
+      console.log('out')
+       circle.set({
+       selectable: false
+      });
+      this.canvas.renderAll();
+    });
+
+      this.canvas.add(circle);
+    
   }
 
   get viewPortWidth(){
@@ -198,21 +236,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     this.canvas.setBackgroundImage(img , this.canvas.renderAll.bind(this.canvas));
 
     this.setText();
-
-    const text = this.canvas.item(0);
-    text.on('mouseover',function(){
-      console.log('over')
-      text.set('selectable' , true);
-      this.canvas.renderAll();
-     })
-     text.on('mouseout',function(){
-      console.log('out')
-      text.set({
-       selectable: false
-      })
-      this.canvas.renderAll();
-     })
-
     this.canvas.on('object:moving', function (e) {
       let obj = e.target;      
 
@@ -232,12 +255,12 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
       }
     });
-
     
-      this.canvas.renderAll();
-      this.canvas$ = this.canvas;
+   
+     this.canvas.renderAll();
+     this.canvas$ = this.canvas;
 
-      guideLines.initAligningGuidelines(this.canvas);
+     guideLines.initAligningGuidelines(this.canvas);
     });
   }
 
@@ -279,7 +302,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     
     text.setControlsVisibility(HideControls);
 
-    this.setTextEvents(text); 
+   // this.setTextEvents(text); 
     this.canvas.add(text);
     this.canvas.centerObject(text);
     this.canvas.setActiveObject(text);
@@ -359,11 +382,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         }
       });
 
-      this.canvas.on('mouse:down', (e) => {
-        console.log("Mouse Down", e);
-        if(e.target)
-          e.target.setCoords();
-      });
+      
   }
 
   customizeControls() {
