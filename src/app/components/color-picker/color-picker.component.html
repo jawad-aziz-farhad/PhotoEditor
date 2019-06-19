@@ -1,2 +1,6 @@
-<canvas #canvas class="color-slider" width="{{ canvasWidth }}" height="30" (mousedown)="onMouseDown($event)" (mousemove)="onMouseMove($event)">
-</canvas>
+<!-- <canvas #canvas class="color-slider" width="{{ canvasWidth }}" height="30" (mousedown)="onMouseDown($event)" (mousemove)="onMouseMove($event)">
+</canvas> -->
+<div id="Div1" [ngStyle]="{'overflow-x' : 'scroll'}">
+    <canvas #canvas class="color-slider" width="{{ canvasWidth }}" height="30" (mousedown)="_onMouseDown($event)">
+    </canvas>
+</div>

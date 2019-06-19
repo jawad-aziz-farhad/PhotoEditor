@@ -56,7 +56,10 @@ export class ColorPickerComponent implements OnInit {
 
   ngAfterViewInit() {
     //this.draw();
-    this.onMouseDown();
+
+    //this.onMouseDown();
+
+    this._onMouseDown();
   }
 
   @HostListener('mouseup', ['$event'])
@@ -134,5 +137,47 @@ export class ColorPickerComponent implements OnInit {
      ("0" + parseInt(rgba[1],10).toString(16)).slice(-2) +
      ("0" + parseInt(rgba[2],10).toString(16)).slice(-2) +
      ("0" + parseInt(rgba[3],10).toString(16)).slice(-2) : '';
+  }
+
+
+
+  drawOnCanvas() {
+    this.ctx = this.canvas.nativeElement.getContext('2d');
+    const squares = [];
+    let points = { width : 50, height : this.canvas.nativeElement.height , x : 0 , y: 10}
+    for(let k=0; k<this.colors.length;k++) {
+      console.log('Points ', points)
+      squares.push(this.drawStuff( points.width, points.height, this.colors[k], points.x, points.y));
+      
+      points.x = points.x + points.width;      
+    }
+    for (let i=0; i<squares.length; i++){
+      this.ctx.fillStyle = squares[i].color;
+      this.ctx.fillRect(squares[i].left,squares[i].top,squares[i].width,squares[i].height);
+    }
+  } 
+  drawStuff(width, height, color, x, y) {
+    let shape : any; 
+    shape = {};
+    shape.left = x;
+    shape.top = y;
+    shape.width = width;
+    shape.height = height;
+    shape.color = color;
+    return shape;
+  }
+
+  _onMouseDown(evt?: MouseEvent){
+    if(evt){
+      this.mousedown = true;
+      this.selectedHeight = evt.offsetX;
+      this.drawOnCanvas();
+      this.emitColor(evt.offsetX, evt.offsetY);
+    }
+    else{
+      this.selectedHeight = this._canvasWidth - 6;
+      this.drawOnCanvas();
+      this.emitColor(this.selectedHeight, 30 - 7);
+    }
   }
 }
