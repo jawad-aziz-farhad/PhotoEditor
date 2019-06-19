@@ -233,10 +233,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       }
     });
 
-    this.canvas.on('object:selected', function(e){
-      console.log('Object selected');      
-    });
-
     
       this.canvas.renderAll();
       this.canvas$ = this.canvas;
@@ -258,7 +254,6 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       'mb': false,
       'mtr': false
     };
-
     let text = new fabric.Textbox(this.overLayText ? this.overLayText : 'Enter text here', {
       angle: this.selectedOptions.angle,
       fontSize: this.selectedOptions.fontSize,
@@ -267,9 +262,9 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       textAlign: this.selectedOptions.textAlign,      
       strokeWidth: this.selectedOptions.stroke ? this.selectedOptions.strokeWidth : 10 ,
       paintFirst: 'stroke',
+      strokeLineCap: 'round',
       stroke: this.selectedOptions.stroke,
       shadow : this.selectedOptions.shadow ? this.selectedOptions.shadowWidth : 0,
-      strokeLineCap: 'round',
       opacity: this.selectedOptions.opacity,
       textBackgroundColor : this.selectedOptions.textBackgroundColor,
       borderColor: '#00c6d2',
@@ -281,7 +276,7 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
       width: this.canvasSizes[this.selectedOptions.canvasSize].width / 2 + 10,
      
     });
-
+    
     text.setControlsVisibility(HideControls);
 
     this.setTextEvents(text); 
@@ -363,6 +358,12 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
           this.canvas.renderAll();
         }
       });
+
+      this.canvas.on('mouse:down', (e) => {
+        console.log("Mouse Down", e);
+        if(e.target)
+          e.target.setCoords();
+      });
   }
 
   customizeControls() {
@@ -393,10 +394,10 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
         action: 'scale',
       }, 
       ml : {
-        action : 'scale'
+        action : 'scaleX'
       },
       mr : {
-        action : 'scale'
+        action : 'scaleX'
       }   
     }, () => {
       this.canvas.renderAll();

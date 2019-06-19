@@ -52,7 +52,7 @@ export class ColorPickerComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.canvas.nativeElement.width = 50 * 26 ;
+    this.canvas.nativeElement.width = 30 * this.colors.length ;
   }
 
   ngAfterViewInit() {
@@ -174,7 +174,7 @@ export class ColorPickerComponent implements OnInit {
     else{
       this.selectedHeight = this._canvasWidth - 6;
       this.drawOnCanvas();
-      this.emitColor(this.selectedHeight, 30 - 7);
+      //this.emitColor(this.selectedHeight, 30 - 7);
     }
   }
 }

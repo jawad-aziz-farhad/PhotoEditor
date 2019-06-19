@@ -16,8 +16,8 @@
 
                 <div class="row" *ngIf="selectedModifier == 'stroke' || selectedModifier == 'shadow' || selectedModifier == 'opacity' || selectedModifier == 'textBackgroundColor' ">
                     <div class="col">
-                        <input *ngIf="selectedModifier == 'stroke' || selectedModifier == 'shadow'" class="w-100" type='range' step='1' max='10' min='1' (input)='onChange($event.target.value, "width")' (change)='onChange($event.target.value, "width")' [value]="rangeVal">
-                        <input *ngIf="selectedModifier == 'opacity' || selectedModifier == 'textBackgroundColor'" class="w-100" type='range' step='.001' max='1' min='0' (input)="onChange($event.target.value, selectedModifier)" (change)="onChange($event.target.value, selectedModifier)" [value]="rangeVal">
+                        <input *ngIf="selectedModifier == 'stroke' || selectedModifier == 'shadow'" class="w-100" type='range' step='.001' max='10' min='1' (input)='onChange($event.target.value, "width")' (change)='onChange($event.target.value, "width")' [value]="rangeVal">
+                        <input *ngIf="selectedModifier == 'opacity' || selectedModifier == 'textBackgroundColor'" class="w-100" type='range' step='.001' max='1' min='0' (input)="onChange($event.target.value, 'opacity')" (change)="onChange($event.target.value, 'opacity')" [value]="rangeVal">
                     </div>
                 </div>
                     

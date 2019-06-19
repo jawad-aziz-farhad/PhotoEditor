@@ -114,15 +114,12 @@ export class TextModifiersComponent implements OnInit  , OnChanges {
       }
       else {
         this.canvas.item(0).set('stroke',  `${this.options.stroke}`);
-        this.canvas.item(0).set('strokeWidth' , value);
-      }
-      
+        this.canvas.item(0).set('strokeWidth' , parseInt(value));
+      }      
       break;
-      
       default:
       break;
     }
-
     this.canvas.renderAll();
   }
 
@@ -163,7 +160,7 @@ export class TextModifiersComponent implements OnInit  , OnChanges {
       return this.options.strokeWidth;
     else if(this.selectedModifier == 'shadow')
       return this.options.shadowWidth;
-    else if(this.selectedModifier == 'opacity')
+    else if(this.selectedModifier == 'opacity' || this.selectedModifier == 'textBackgroundColor')
       return this.options.opacity;
   }
 
