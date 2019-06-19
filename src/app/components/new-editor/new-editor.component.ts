@@ -3,8 +3,9 @@ import { Data } from 'src/app/models/data';
 import { fabric } from 'fabric';
 import 'fabric-customise-controls';
 import Croppie, {CroppieOptions, ResultOptions} from "croppie/croppie";
-import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 import { Observable } from 'rxjs';
+
+declare var guideLines: any;
 
 @Component({
   selector: 'app-new-editor',
@@ -239,6 +240,8 @@ export class NewEditorComponent implements OnInit , AfterViewInit {
     
       this.canvas.renderAll();
       this.canvas$ = this.canvas;
+
+      guideLines.initAligningGuidelines(this.canvas);
     });
   }
 

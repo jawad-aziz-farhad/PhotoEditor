@@ -140,8 +140,6 @@ export class ColorPickerComponent implements OnInit {
      ("0" + parseInt(rgba[3],10).toString(16)).slice(-2) : '';
   }
 
-
-
   drawOnCanvas() {
     this.ctx = this.canvas.nativeElement.getContext('2d');
     const squares = [];

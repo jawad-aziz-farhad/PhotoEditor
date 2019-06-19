@@ -31,7 +31,9 @@
               "./node_modules/croppie/croppie.css",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "./src/app/libraries/style_guides.js"
+            ]
           },
           "configurations": {
             "production": {
