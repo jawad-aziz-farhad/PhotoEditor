@@ -25,7 +25,7 @@
     "croppie": "^2.6.4",
     "fabric": "^3.0.0",
     "fabric-customise-controls": "^2.0.2-beta",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "ngx-bootstrap": "^4.2.0",
     "rxjs": "~6.5.2",
     "rxjs-compat": "^6.5.2",
